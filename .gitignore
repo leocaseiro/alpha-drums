@@ -23,7 +23,8 @@ coverage/
 
 # logs and temp
 *.log
-yarn.lock
+
 npm-debug.log
 pids
 *.sw*
+

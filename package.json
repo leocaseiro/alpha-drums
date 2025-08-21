@@ -2,7 +2,12 @@
   "name": "alpha-drums",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  },
   "scripts": {
+    "preinstall": "node check-npm.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -16,11 +21,11 @@
     "serwist:dev": "serwist preview",
     "export": "next export",
     "release": "semantic-release",
-    "bump:patch": "npm version patch && npm run changelog",
-    "bump:minor": "npm version minor && npm run changelog",
-    "bump:major": "npm version major && npm run changelog",
+    "bump:patch": "yarn version --patch && yarn changelog",
+    "bump:minor": "yarn version --minor && yarn changelog",
+    "bump:major": "yarn version --major && yarn changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "deploy": "npm run build && npm run export && npm run serwist && gh-pages -d out"
+    "deploy": "yarn build && yarn export && yarn serwist && gh-pages -d out"
   },
   "dependencies": {
     "next": "15.3.4",
@@ -53,5 +58,6 @@
     "@serwist/next": "^9.0.3",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

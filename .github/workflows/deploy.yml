@@ -16,8 +16,6 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn build
-      - name: Export static site
-        run: yarn export
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

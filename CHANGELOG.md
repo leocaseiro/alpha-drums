@@ -1,3 +1,14 @@
+## [1.1.0](https://github.com/leocaseiro/alpha-drums/compare/v1.0.0...v1.1.0) (2025-08-21)
+
+### Features
+
+* restore full semantic-release config for feature branch workflow ([1d31fa2](https://github.com/leocaseiro/alpha-drums/commit/1d31fa2355964aefbd60a5e453894f619a854f0b))
+
+### Bug Fixes
+
+* **assets:** add basePath support for public assets on GitHub Pages ([723f73d](https://github.com/leocaseiro/alpha-drums/commit/723f73dc47b0647c352dee6a9523fefadc91f5ec))
+* **semantic-release:** simplify configuration to avoid git conflicts ([eed44fe](https://github.com/leocaseiro/alpha-drums/commit/eed44fe8d13f5fbeff0c9e8a6fb0c93fb3b388cc))
+
 ## 1.0.0 (2025-08-21)
 
 ### Features

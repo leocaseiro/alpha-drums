@@ -9,7 +9,12 @@
     ["@semantic-release/release-notes-generator", {
       "preset": "conventionalcommits"
     }],
-    ["@semantic-release/github"]
+    ["@semantic-release/changelog"],
+    ["@semantic-release/github"],
+    ["@semantic-release/git", {
+      "assets": ["CHANGELOG.md", "package.json", "yarn.lock"],
+      "message": "chore(release): ${nextRelease.version} [skip ci]"
+    }]
   ],
-  "verifyConditions": ["@semantic-release/github"]
+  "verifyConditions": ["@semantic-release/github", "@semantic-release/changelog", "@semantic-release/git"]
 }

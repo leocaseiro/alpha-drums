@@ -1,9 +1,9 @@
 {
   "name": "alpha-drums",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "private": true,
   "engines": {
-    "node": ">=20.8.1",
+    "node": ">=20.19.0",
     "yarn": ">=1.22.0"
   },
   "scripts": {
@@ -13,13 +13,13 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "test": "echo 'No tests yet' && exit 0",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "serwist": "serwist inject-manifest",
     "serwist:dev": "serwist preview",
-
     "release": "semantic-release",
     "bump:patch": "yarn version --patch && yarn changelog",
     "bump:minor": "yarn version --minor && yarn changelog",
@@ -33,11 +33,16 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.55.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.4",
     "@semantic-release/npm": "^12.0.2",
+    "@serwist/cli": "^9.0.3",
+    "@serwist/next": "^9.0.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -52,10 +57,11 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-unicorn": "^60.0.0",
     "gh-pages": "^6.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "playwright": "^1.55.0",
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
-    "@serwist/cli": "^9.0.3",
-    "@serwist/next": "^9.0.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

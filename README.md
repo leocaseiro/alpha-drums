@@ -15,6 +15,7 @@ npm run dev
 - `npm run typecheck` — type checks TypeScript
 - `npm run format`/`format:fix` — Prettier
 - `npm run serwist` — generate service worker (PWA)
+- `npm run serwist:dev` — preview service worker
 - `npm run export` — export static site
 - `npm run deploy` — build, export, generate sw, deploy to GH Pages
 - `npm run changelog` — update CHANGELOG.md from PRs
@@ -22,7 +23,8 @@ npm run dev
 - `npm run release` — run semantic-release for CI/CD
 
 ## Testing
-- `npm run test` — currently placeholder
+- `npm run test:e2e` — run Playwright tests
+- `npm run test:e2e:ui` — run Playwright tests with UI
 
 ## CI/CD
 - See workflows in `.github/workflows/`

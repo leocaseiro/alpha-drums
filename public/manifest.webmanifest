@@ -1,7 +1,7 @@
 {
   "name": "Alpha Drums",
-  "short_name": "Drums",
-  "description": "Web Drums App",
+  "short_name": "Alpha Drums",
+  "description": "A simple and powerful web-based drum machine.",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -11,6 +11,11 @@
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
     }
   ],

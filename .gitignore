@@ -16,6 +16,9 @@ build/
 # coverage reports
 coverage/
 
+# Playwright
+test-results/
+
 # IDE/editor configs
 .idea/
 *.local
@@ -27,4 +30,3 @@ coverage/
 npm-debug.log
 pids
 *.sw*
-

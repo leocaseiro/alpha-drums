@@ -33,7 +33,7 @@ npm run dev
 - Manifest: `/public/manifest.webmanifest`
 
 ## Deploying on GitHub Pages
-- The CI deploys automatically on main branch
+- Pushing to the `main` branch automatically triggers a deployment to the `gh-pages` branch via GitHub Actions.
 - Or run `npm run deploy` (needs `gh-pages` CLI, `out` folder)
 
 ## Enable on GitHub Pages

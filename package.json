@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "serwist": "serwist generate",
+    "serwist": "@serwist/cli generate",
     "serwist:dev": "serwist preview",
     "export": "next export",
     "release": "semantic-release",
@@ -49,8 +49,8 @@
     "gh-pages": "^6.0.0",
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
-    "serwist": "^1.0.34",
-    "serwist-next": "^1.0.34",
+    "@serwist/cli": "^9.0.3",
+    "@serwist/next": "^9.0.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -23,7 +23,8 @@ npm run dev
 - `npm run release` — run semantic-release for CI/CD
 
 ## Testing
-- `npm run test` — not yet implemented
+- `npm run test:e2e` — run Playwright tests
+- `npm run test:e2e:ui` — run Playwright tests with UI
 
 ## CI/CD
 - See workflows in `.github/workflows/`

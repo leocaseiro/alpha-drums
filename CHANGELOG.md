@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/leocaseiro/alpha-drums/compare/v1.1.0...v1.2.0) (2025-08-21)
+
+### Features
+
+* add auto-merge workflow options ([232ca43](https://github.com/leocaseiro/alpha-drums/commit/232ca4371396e3df83bd14710a45d280e9e9bc1b))
+
 ## [1.1.0](https://github.com/leocaseiro/alpha-drums/compare/v1.0.0...v1.1.0) (2025-08-21)
 
 ### Features

@@ -37,9 +37,9 @@ npm run dev
 - Or run `npm run deploy` (needs `gh-pages` CLI, `out` folder)
 
 ## Enable on GitHub Pages
-1. Push to `main` branch
-2. In repo settings, Pages, set branch to `gh-pages` and folder `/` or `/out`
-3. Ensure `gh-pages` npm user is authorized if using token
+1. In repo settings, go to Pages
+2. Set Source to "GitHub Actions"
+3. Push to `main` branch to trigger deployment
 
 ---
 

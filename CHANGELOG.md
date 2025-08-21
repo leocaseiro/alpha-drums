@@ -1,3 +1,17 @@
+## 1.3.0 (2025-08-21)
+
+* chore(ts) remove playrwight from yarn build ([aab35c8](https://github.com/leocaseiro/alpha-drums/commit/aab35c8))
+* Merge pull request #5 from leocaseiro/feat/devloop-improvements ([2c57812](https://github.com/leocaseiro/alpha-drums/commit/2c57812)), closes [#5](https://github.com/leocaseiro/alpha-drums/issues/5)
+* update nvm to 20.19, and fix playrwright tests ([ede0233](https://github.com/leocaseiro/alpha-drums/commit/ede0233))
+* chore(gh-actions): make sure we use node 20.19 for all actions ([cceef58](https://github.com/leocaseiro/alpha-drums/commit/cceef58))
+* chore(tooling): setup husky, lint-staged, and commitlint ([7026bd7](https://github.com/leocaseiro/alpha-drums/commit/7026bd7))
+* chore(yarn): force to use yarn over npm ([88fa703](https://github.com/leocaseiro/alpha-drums/commit/88fa703))
+* feat(e2e): add Playwright with example test and config ([d2448f7](https://github.com/leocaseiro/alpha-drums/commit/d2448f7))
+* feat(router): setup router with 2 pages ([73652a5](https://github.com/leocaseiro/alpha-drums/commit/73652a5))
+* ci(playwright): add workflow to run tests on pull requests ([82fea1c](https://github.com/leocaseiro/alpha-drums/commit/82fea1c))
+* docs: update plan for README task ([1ad3ecd](https://github.com/leocaseiro/alpha-drums/commit/1ad3ecd))
+* docs: update README with latest scripts and test status ([89409ad](https://github.com/leocaseiro/alpha-drums/commit/89409ad))
+
 ## [1.2.0](https://github.com/leocaseiro/alpha-drums/compare/v1.1.0...v1.2.0) (2025-08-21)
 
 ### Features

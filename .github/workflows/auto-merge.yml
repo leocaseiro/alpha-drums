@@ -1,0 +1,27 @@
+name: Auto-merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || contains(github.event.pull_request.labels.*.name, 'automerge')
+    
+    steps:
+      - name: Auto-merge
+        uses: pascalgn/merge-action@v0.15.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          merge_method: squash
+          merge_commit_message: pull-request-title-and-description
+        env:
+          # Merge when all status checks pass
+          MERGE_REQUIRED_APPROVALS: 0
+          MERGE_DELETE_BRANCH: true
+          MERGE_READY_STATE: clean

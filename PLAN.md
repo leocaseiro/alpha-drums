@@ -25,5 +25,5 @@ Steps to proceed:
 - [x] 6. Keep README updated: dev loop, CI/CD, best practices
 - [x] 7. Add Playwright for E2E testing all features
 - [x] 8. Configure VSCode/Cursor for optimal debugging (Jest+RTL, Playwright)
-- [ ] 9. Script for update/release (select version, PRs to CHANGELOG.md)
-- [ ] 10. Setup Husky, lint-staged, commitlint, best pre-commit/push hooks
+- [x] 9. Script for update/release (select version, PRs to CHANGELOG.md)
+- [x] 10. Setup Husky, lint-staged, commitlint, best pre-commit/push hooks

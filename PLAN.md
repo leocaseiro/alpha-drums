@@ -1,6 +1,6 @@
 # Project Plan
 
-- [ ] 1. Setup Prettier, ESLint (strict), TypeScript (strict), NVM (force Node version), dotfiles, package versions
+- [x] 1. Setup Prettier, ESLint (strict), TypeScript (strict), NVM (force Node version), dotfiles, package versions
 - [ ] 2. Add scripts to run tests before merging
 - [ ] 3. Setup GitHub Actions CI/CD for builds and deployment
 - [ ] 4. Configure automatic version bumping, automerge/minor, PR for major

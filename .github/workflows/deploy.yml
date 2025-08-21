@@ -27,6 +27,8 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn build
+        env:
+          GITHUB_PAGES: true
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

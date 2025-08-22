@@ -21,6 +21,11 @@
   resolved "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.27.1.tgz"
   integrity sha512-D2hP9eA+Sqx1kBZgzxZh0y1trbuU+JoDkiEwqhQ36nodYqJwyEIhPSdMNd7lOm/4io72luTPWH20Yda0xOuUow==
 
+"@coderline/alphatab@^1.6.1":
+  version "1.6.1"
+  resolved "https://packages.atlassian.com/api/npm/npm-remote/@coderline/alphatab/-/alphatab-1.6.1.tgz#1d8eefce8ea0bffb1395082f2a03a0451c13dd41"
+  integrity sha512-EAvtcymJ7sv6l6tvRsKppjTIMxHqHV2BKGJLDIv4BEFHt9URfZx3dqn086xEsRz4lCeqKaUAz0gs0XDnGzvtKw==
+
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz"

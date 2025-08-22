@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getAssetPath } from "@/lib/utils";
+import { I18nProvider } from "./i18n";
+import I18nSwitcher from "./I18nSwitcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { I18nProvider } = require("./i18n");
-  const I18nSwitcher = require("./I18nSwitcher").default;
+
   return (
     <html lang="en">
       <meta name="theme-color" content="#000" />

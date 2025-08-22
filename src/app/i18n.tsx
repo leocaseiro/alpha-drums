@@ -12,7 +12,7 @@ const defaultLang = typeof window !== "undefined" && localStorage.getItem("lang"
 
 const I18nContext = createContext({
   lang: defaultLang,
-  setLang: (_lang: string) => {},
+  setLang: (_: string) => {},
   t: (key: string) => key,
 });
 
@@ -26,9 +26,18 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const l = localStorage.getItem("lang");
     if (l && l !== lang) setLangState(l);
-  }, []);
+  }, [lang]);
   const t = useCallback((key: string) => {
-    return languages[lang][key] || key;
+    const langData = languages[lang as keyof typeof languages];
+    if (!langData) return key;
+    
+    const keys = key.split('.');
+    let value: unknown = langData;
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) return key;
+    }
+    return value || key;
   }, [lang]);
   return (
     <I18nContext.Provider value={{ lang, setLang, t }}>

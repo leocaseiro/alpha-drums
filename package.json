@@ -28,6 +28,7 @@
     "deploy": "yarn build && yarn serwist && gh-pages -d out"
   },
   "dependencies": {
+    "@coderline/alphatab": "^1.6.1",
     "next": "15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

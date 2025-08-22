@@ -36,7 +36,7 @@ Use the `AlphaTabPlayground` and `AlphaTabFull` components as reference. `~/Site
 All the features should have a playwright test, and you should validate if the tests are passing.
 
 Here is a list of features the app will have (tick as you as finished):
-- [ ] 1. play a guitar pro file
+- [x] 1. play a guitar pro file
 - [ ] 2. have a way to display track settings:
   - [ ] a. show toggle
   - [ ] b. track volume

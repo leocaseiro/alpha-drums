@@ -90,6 +90,16 @@
   background: #0056b3;
 }
 
+.fileButton.disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.fileButton.disabled:hover {
+  background: #6c757d;
+}
+
 .content {
   flex: 1;
   display: flex;
@@ -121,4 +131,9 @@
 .alphaTab {
   flex: 1;
   overflow: auto;
+  min-height: 500px;
+  height: 500px;
+  background: white;
+  border: 1px solid #ddd;
+  position: relative;
 }

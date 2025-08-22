@@ -38,7 +38,7 @@ export default function RootLayout({
           <div style={{position:'fixed',top:8,right:8,zIndex:20}}><I18nSwitcher /></div>
           {children}
         </I18nProvider>
-        <script src={getAssetPath("/sw.js")} defer></script>
+
       </body>
     </html>
   );

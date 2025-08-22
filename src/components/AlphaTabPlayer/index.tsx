@@ -18,37 +18,71 @@ export const AlphaTabPlayer: React.FC = () => {
     settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer;
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.display.scale = 0.8;
+    
+    // Ensure proper layout settings
+    settings.display.layoutMode = alphaTab.LayoutMode.Page;
+    settings.display.staveProfile = alphaTab.StaveProfile.Default;
+    
+    console.log('Player settings configured:', settings);
   }, []);
 
-  const [api, element] = useAlphaTab(settingsSetup);
+  const [api, element, isApiReady] = useAlphaTab(settingsSetup);
+
+  // Trigger resize only once when API becomes ready and has a score
+  React.useEffect(() => {
+    if (api && isApiReady && score) {
+      const timer = setTimeout(() => {
+        try {
+          console.log('Triggering one-time resize for loaded score');
+          api.updateSettings();
+        } catch (error) {
+          console.error('Error during settings update:', error);
+        }
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [api, isApiReady, score]);
 
   // Show loading when file starts loading
   useAlphaTabEvent(api, 'scoreLoaded', (loadedScore) => {
+    console.log('Score loaded event fired', loadedScore);
     setIsLoading(true); // Start loading when score is loaded and rendering begins
     setScore(loadedScore as alphaTab.model.Score);
   });
 
   useAlphaTabEvent(api, 'renderStarted', () => {
+    console.log('Render started event fired');
     // Set up initial track selection
-    const trackMap = new Map<number, alphaTab.model.Track>();
-    api!.tracks.forEach((track) => {
-      trackMap.set(track.index, track);
-    });
-    setSelectedTracks(trackMap);
+    if (api && api.tracks) {
+      const trackMap = new Map<number, alphaTab.model.Track>();
+      api.tracks.forEach((track) => {
+        trackMap.set(track.index, track);
+      });
+      setSelectedTracks(trackMap);
+    }
     // Keep loading state as true during rendering
   });
 
   useAlphaTabEvent(api, 'renderFinished', () => {
+    console.log('Render finished event fired');
     setIsLoading(false);
+    // Remove the api.render() call that was causing the infinite loop
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && api && api.load) {
+    if (file && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is selected
       setScore(undefined); // Clear previous score
       openFile(api, file);
-    } else if (file && !api) {
+      
+      // Fallback timeout to hide loading overlay if events don't fire
+      setTimeout(() => {
+        console.log('Fallback timeout - hiding loading overlay');
+        setIsLoading(false);
+      }, 10000); // 10 seconds timeout
+    } else if (file && (!api || !isApiReady)) {
       console.error('AlphaTab API not ready yet');
       alert('Player is still initializing, please wait a moment and try again.');
     }
@@ -81,11 +115,11 @@ export const AlphaTabPlayer: React.FC = () => {
     e.stopPropagation();
     e.preventDefault();
     const files = e.dataTransfer.files;
-    if (files.length === 1 && api && api.load) {
+    if (files.length === 1 && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is dropped
       setScore(undefined); // Clear previous score
       openFile(api, files[0]);
-    } else if (files.length === 1 && !api) {
+    } else if (files.length === 1 && (!api || !isApiReady)) {
       console.error('AlphaTab API not ready yet');
       alert('Player is still initializing, please wait a moment and try again.');
     }
@@ -117,8 +151,12 @@ export const AlphaTabPlayer: React.FC = () => {
               className={styles.hiddenInput}
               id="file-input"
             />
-            <label htmlFor="file-input" className={styles.fileButton}>
-              {t('player.openFile')}
+            <label 
+              htmlFor="file-input" 
+              className={`${styles.fileButton} ${!isApiReady ? styles.disabled : ''}`}
+              title={!isApiReady ? 'Initializing player...' : t('player.openFile')}
+            >
+              {!isApiReady ? 'Initializing...' : t('player.openFile')}
             </label>
           </div>
         </div>

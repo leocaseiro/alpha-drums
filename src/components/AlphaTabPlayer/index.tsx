@@ -44,10 +44,13 @@ export const AlphaTabPlayer: React.FC = () => {
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && api) {
+    if (file && api && api.load) {
       setIsLoading(true); // Show loading immediately when file is selected
       setScore(undefined); // Clear previous score
       openFile(api, file);
+    } else if (file && !api) {
+      console.error('AlphaTab API not ready yet');
+      alert('Player is still initializing, please wait a moment and try again.');
     }
   };
 
@@ -78,10 +81,13 @@ export const AlphaTabPlayer: React.FC = () => {
     e.stopPropagation();
     e.preventDefault();
     const files = e.dataTransfer.files;
-    if (files.length === 1 && api) {
+    if (files.length === 1 && api && api.load) {
       setIsLoading(true); // Show loading immediately when file is dropped
       setScore(undefined); // Clear previous score
       openFile(api, files[0]);
+    } else if (files.length === 1 && !api) {
+      console.error('AlphaTab API not ready yet');
+      alert('Player is still initializing, please wait a moment and try again.');
     }
   };
 

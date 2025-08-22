@@ -2,12 +2,24 @@ import * as alphaTab from '@coderline/alphatab';
 import React from 'react';
 
 export const openFile = (api: alphaTab.AlphaTabApi, file: File) => {
+  if (!api || !api.load) {
+    console.error('AlphaTab API not properly initialized');
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const arrayBuffer = e.target?.result as ArrayBuffer;
     if (arrayBuffer) {
-      api.load(arrayBuffer);
+      try {
+        api.load(arrayBuffer);
+      } catch (error) {
+        console.error('Failed to load file:', error);
+      }
     }
+  };
+  reader.onerror = () => {
+    console.error('Failed to read file');
   };
   reader.readAsArrayBuffer(file);
 };
@@ -28,15 +40,23 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
         settingsSetup(settings);
       }
       
-      const alphaTabApi = new alphaTab.AlphaTabApi(elementRef.current, settings);
-      setApi(alphaTabApi);
+      try {
+        const alphaTabApi = new alphaTab.AlphaTabApi(elementRef.current, settings);
+        
+        // Set API immediately - it should be usable right after construction
+        setApi(alphaTabApi);
 
-      return () => {
-        alphaTabApi.destroy();
-        setApi(null);
-      };
+        return () => {
+          if (alphaTabApi && typeof alphaTabApi.destroy === 'function') {
+            alphaTabApi.destroy();
+          }
+          setApi(null);
+        };
+      } catch (error) {
+        console.error('Failed to initialize AlphaTab:', error);
+      }
     }
-  }, []); // Remove settingsSetup from dependencies to prevent infinite loop
+  }, []);
 
   return [api, elementRef] as const;
 };
@@ -46,16 +66,19 @@ export const useAlphaTabEvent = (
   event: string,
   handler: (...args: unknown[]) => void
 ) => {
-  const handlerRef = React.useRef(handler);
-  handlerRef.current = handler;
-
   React.useEffect(() => {
     if (api) {
-      const stableHandler = (...args: unknown[]) => handlerRef.current(...args);
-      (api as unknown as Record<string, unknown>)[event] = stableHandler;
-      return () => {
-        delete (api as unknown as Record<string, unknown>)[event];
-      };
+      try {
+        // Use the proper AlphaTab event system
+        (api as any)[event] = handler;
+        return () => {
+          if (api) {
+            delete (api as any)[event];
+          }
+        };
+      } catch (error) {
+        console.error(`Failed to attach event handler for ${event}:`, error);
+      }
     }
-  }, [api, event]); // Remove handler from dependencies
+  }, [api, event, handler]);
 };

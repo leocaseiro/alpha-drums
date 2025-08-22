@@ -8,11 +8,14 @@
   },
   "scripts": {
     "preinstall": "node check-npm.js",
+    "postinstall": "node scripts/copy-alphatab-assets.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui",
     "typecheck": "tsc --noEmit",
@@ -28,6 +31,7 @@
     "deploy": "yarn build && yarn serwist && gh-pages -d out"
   },
   "dependencies": {
+    "@coderline/alphatab": "^1.6.1",
     "next": "15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -44,6 +48,10 @@
     "@serwist/cli": "^9.0.3",
     "@serwist/next": "^9.0.3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -58,6 +66,8 @@
     "eslint-plugin-unicorn": "^60.0.0",
     "gh-pages": "^6.0.0",
     "husky": "^9.1.7",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "lint-staged": "^16.1.5",
     "playwright": "^1.55.0",
     "prettier": "^3.6.2",

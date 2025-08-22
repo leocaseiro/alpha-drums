@@ -1,0 +1,32 @@
+{
+  "greeting": "Hello",
+  "player": {
+    "openFile": "Open File",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "loop": "Loop",
+    "metronome": "Metronome",
+    "countIn": "Count-In",
+    "speed": "Speed",
+    "zoom": "Zoom",
+    "tracks": "Tracks",
+    "volume": "Volume",
+    "solo": "Solo",
+    "mute": "Mute",
+    "showTrack": "Show Track",
+    "notation": "Notation",
+    "standard": "Standard",
+    "tablature": "Tablature",
+    "rhythm": "Rhythm",
+    "layout": "Layout",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "page": "Page",
+    "print": "Print",
+    "export": "Export",
+    "settings": "Settings",
+    "loadFile": "Load a Guitar Pro file to start playing",
+    "dragDropFile": "Drag and drop a file here or click to browse"
+  }
+}

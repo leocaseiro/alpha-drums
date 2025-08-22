@@ -27,3 +27,34 @@ Steps to proceed:
 - [x] 8. Configure VSCode/Cursor for optimal debugging (Jest+RTL, Playwright)
 - [x] 9. Script for update/release (select version, PRs to CHANGELOG.md)
 - [x] 10. Setup Husky, lint-staged, commitlint, best pre-commit/push hooks
+- [x] 11. Multiple languages. By default English, and translated to Brazilian Portuguese.
+
+For the Play We will display an alphatab player that will load a guitar pro file (on browser file input) and display a player that has multiple features
+
+Use the `AlphaTabPlayground` and `AlphaTabFull` components as reference. `~/Sites/Github/alphaTabWebsite/src/components/`.
+
+All the features should have a playwright test, and you should validate if the tests are passing.
+
+Here is a list of features the app will have (tick as you as finished):
+- [x] 1. play a guitar pro file
+- [x] 2. have a way to display track settings:
+  - [x] a. show toggle
+  - [x] b. track volume
+  - [x] c. play solo
+  - [x] d. mute track
+  - [ ] e. notation display options (standard, tab, rhythm)
+- [x] 3. have a toggle for loop (on/off)
+- [x] 4. control for metronome (on/off) with volume control
+- [x] 5. bpm speed control (playback speed)
+  - [x] a. should display original bpm (100%)
+  - [x] b. option to select by percentage and/or bpm
+  - [ ] c. option to automatic increase by X bpm after Y bars
+- [x] 6. control for count-in (on/off) with volume control
+- [x] 7. zoom control
+- [ ] 8. loop control
+- [ ] 9. Settings for Display
+- [ ] 10. Settings for Player
+- [ ] 11. Settings for Stylesheet
+- [ ] 12. Settings for Notation
+- [x] 13. Layout options (horizontal, vertical, scroll, etc)
+- [x] 14. Export options (midi, guitar pro, musicxml, print)

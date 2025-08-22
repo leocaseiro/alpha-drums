@@ -16,20 +16,20 @@ const I18nContext = createContext({
   t: (key: string) => key,
 });
 
+import { useEffect } from "react";
 export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
   const [lang, setLangState] = useState(defaultLang);
   const setLang = (v: string) => {
     setLangState(v);
     if (typeof window !== "undefined") localStorage.setItem("lang", v);
   };
+  useEffect(() => {
+    const l = localStorage.getItem("lang");
+    if (l && l !== lang) setLangState(l);
+  }, []);
   const t = useCallback((key: string) => {
     return languages[lang][key] || key;
   }, [lang]);
-  // on mount sync state from localStorage if changed elsewhere
-  typeof window !== "undefined" && useState(() => {
-    const l = localStorage.getItem("lang");
-    if (l && l !== lang) setLangState(l);
-  });
   return (
     <I18nContext.Provider value={{ lang, setLang, t }}>
       {children}

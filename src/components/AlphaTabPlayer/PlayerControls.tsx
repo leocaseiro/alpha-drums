@@ -8,9 +8,10 @@ import styles from './PlayerControls.module.css';
 
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
+  onOpenFileClick: () => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
+export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick }) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
@@ -260,6 +261,21 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
 
       {/* Toggle controls */}
       <div className={styles.toggleControls}>
+        <input
+          type="file"
+          accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx"
+          onChange={onOpenFileClick}
+          className={styles.hiddenInput}
+          style={{ display: 'none' }}
+          id="file-input"
+        />
+        <label
+          htmlFor="file-input"
+          className={styles.fileButton}
+          title={t('player.openFile')}
+        >
+          🔍
+        </label>
         <button
           onClick={() => setIsLooping(!isLooping)}
           disabled={!isReadyForPlayback}

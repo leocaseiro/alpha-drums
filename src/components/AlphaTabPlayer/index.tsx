@@ -78,6 +78,7 @@ export const AlphaTabPlayer: React.FC = () => {
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input event fired');
     const file = event.target.files?.[0];
     if (file && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is selected
@@ -192,18 +193,7 @@ export const AlphaTabPlayer: React.FC = () => {
         <div className={styles.alphaTab} ref={element} />
       </div>
 
-      {/* Persistent open file button even when a score is loaded */}
-      <div className={styles.footerBar}>
-        <label
-          htmlFor="file-input"
-          className={`${styles.fileButton} ${!isApiReady ? styles.disabled : ''}`}
-          title={!isApiReady ? 'Initializing player...' : t('player.openFile')}
-        >
-          {!isApiReady ? 'Initializing...' : t('player.openFile')}
-        </label>
-      </div>
-
-      {api && score && <PlayerControls api={api} />}
+      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
     </div>
   );
 };

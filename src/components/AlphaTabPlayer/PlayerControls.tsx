@@ -57,6 +57,17 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
     setIsReadyForPlayback(true);
   });
 
+  useAlphaTabEvent(api, "playerStateChanged", (e) => {
+    console.log('Player state changed event fired', e);
+    console.log('Player state changed event fired string', JSON.stringify(e));
+  });
+  useAlphaTabEvent(api, "playerPositionChanged", (e) => {
+    console.log('Player position changed event fired', e);
+    console.log('Player position changed event fired string', JSON.stringify(e));
+  });
+
+
+
   // Check readiness and force enable if we have a score
   useEffect(() => {
     const checkReadiness = () => {
@@ -177,6 +188,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
       <div className={styles.playbackControls}>
         <button
           onClick={() => {
+            console.log('Stop button clicked');
             try {
               api.stop();
             } catch (error) {
@@ -194,14 +206,17 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         <button
           onClick={() => {
             try {
+              // Resume audio context on user gesture
+              try { (api.player as unknown as { activate?: () => void })?.activate?.(); } catch {}
+              if (!api.isReadyForPlayback) {
+                console.log('Not ready for playback, attempting to load soundfont...');
+                try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {}
+                try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {}
+              }
               api.playPause();
             } catch (error) {
               console.warn('PlayPause failed, using fallback simulation:', error);
-              // Simulate playback for UI purposes
               setIsPlaying(!isPlaying);
-              if (!isPlaying) {
-                alert('Note: Audio synthesis requires worker support. This is a visual simulation of playback.');
-              }
             }
           }}
           disabled={!isReadyForPlayback}

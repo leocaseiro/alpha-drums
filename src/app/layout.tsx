@@ -24,6 +24,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { I18nProvider } = require("./i18n");
+  const I18nSwitcher = require("./I18nSwitcher").default;
   return (
     <html lang="en">
       <meta name="theme-color" content="#000" />
@@ -31,7 +33,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <I18nProvider>
+          <div style={{position:'fixed',top:8,right:8,zIndex:20}}><I18nSwitcher /></div>
+          {children}
+        </I18nProvider>
         <script src={getAssetPath("/sw.js")} defer></script>
       </body>
     </html>

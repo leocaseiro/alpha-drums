@@ -37,11 +37,11 @@ All the features should have a playwright test, and you should validate if the t
 
 Here is a list of features the app will have (tick as you as finished):
 - [x] 1. play a guitar pro file
-- [ ] 2. have a way to display track settings:
-  - [ ] a. show toggle
-  - [ ] b. track volume
-  - [ ] c. play solo
-  - [ ] d. mute track
+- [x] 2. have a way to display track settings:
+  - [x] a. show toggle
+  - [x] b. track volume
+  - [x] c. play solo
+  - [x] d. mute track
   - [ ] e. notation display options (standard, tab, rhythm)
 - [ ] 3. have a toggle for loop (on/off)
 - [ ] 4. control for metronome (on/off) with volume control

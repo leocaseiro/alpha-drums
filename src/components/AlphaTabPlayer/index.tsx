@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTab, useAlphaTabEvent, openFile } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
+import { TrackItem } from './TrackItem';
 import styles from './styles.module.css';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
   const [score, setScore] = useState<alphaTab.model.Score>();
+  const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   
   const [api, element] = useAlphaTab((settings) => {
     settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer;
@@ -19,6 +21,13 @@ export const AlphaTabPlayer: React.FC = () => {
 
   useAlphaTabEvent(api, 'renderStarted', () => {
     setScore(api!.score!);
+    
+    // Set up initial track selection
+    const trackMap = new Map<number, alphaTab.model.Track>();
+    api!.tracks.forEach((track) => {
+      trackMap.set(track.index, track);
+    });
+    setSelectedTracks(trackMap);
     setIsLoading(true);
   });
 
@@ -30,6 +39,23 @@ export const AlphaTabPlayer: React.FC = () => {
     const file = event.target.files?.[0];
     if (file && api) {
       openFile(api, file);
+    }
+  };
+
+  const handleToggleTrack = (track: alphaTab.model.Track) => {
+    const newSelectedTracks = new Map(selectedTracks);
+    
+    if (newSelectedTracks.has(track.index)) {
+      newSelectedTracks.delete(track.index);
+    } else {
+      newSelectedTracks.set(track.index, track);
+    }
+    
+    setSelectedTracks(newSelectedTracks);
+    
+    // Update AlphaTab to render only selected tracks
+    if (newSelectedTracks.size > 0) {
+      api?.renderTracks(Array.from(newSelectedTracks.values()));
     }
   };
 
@@ -81,7 +107,26 @@ export const AlphaTabPlayer: React.FC = () => {
         </div>
       )}
 
-      <div className={styles.alphaTab} ref={element} />
+      <div className={styles.content}>
+        {score && (
+          <div className={styles.sidebar}>
+            <h3 className={styles.sidebarTitle}>{t('player.tracks')}</h3>
+            <div className={styles.trackList}>
+              {score.tracks.map((track) => (
+                <TrackItem
+                  key={track.index}
+                  api={api!}
+                  track={track}
+                  isSelected={selectedTracks.has(track.index)}
+                  onToggleShow={handleToggleTrack}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div className={styles.alphaTab} ref={element} />
+      </div>
     </div>
   );
 };

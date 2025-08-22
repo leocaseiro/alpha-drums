@@ -42,9 +42,9 @@ export const useAlphaTabEvent = (
 ) => {
   React.useEffect(() => {
     if (api) {
-      (api as Record<string, unknown>)[event] = handler;
+      (api as unknown as Record<string, unknown>)[event] = handler;
       return () => {
-        delete (api as Record<string, unknown>)[event];
+        delete (api as unknown as Record<string, unknown>)[event];
       };
     }
   }, [api, event, handler]);

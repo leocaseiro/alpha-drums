@@ -1,0 +1,146 @@
+.track {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.track:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+}
+
+.track.active {
+  border-color: #007bff;
+  background: #f8f9ff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.trackHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.trackIcon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.trackName {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.showButton {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.showButton:hover {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.showButtonActive {
+  border-color: #007bff;
+  background: #007bff;
+  color: white;
+}
+
+.trackControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 6px;
+}
+
+.controlButton {
+  padding: 4px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.controlButton:hover {
+  border-color: #999;
+}
+
+.muteButton.active {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.soloButton.active {
+  background: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volumeIcon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.volumeSlider {
+  flex: 1;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: none;
+}
+
+.volumeValue {
+  font-size: 12px;
+  color: #666;
+  width: 20px;
+  text-align: center;
+}

@@ -34,10 +34,13 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
     const keys = key.split('.');
     let value: unknown = langData;
     for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) return key;
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        return key;
+      }
     }
-    return value || key;
+    return typeof value === 'string' ? value : key;
   }, [lang]);
   return (
     <I18nContext.Provider value={{ lang, setLang, t }}>

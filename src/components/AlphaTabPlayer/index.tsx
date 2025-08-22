@@ -22,7 +22,9 @@ export const AlphaTabPlayer: React.FC = () => {
     // Display configuration
     settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
-    settings.display.staveProfile = alphaTab.StaveProfile.Default;
+    settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
+    // Default to showing rhythm on tabs
+    settings.notation.rhythmMode = alphaTab.TabRhythmMode.Automatic;
 
     console.log('Player settings configured:', {
       playerMode: settings.player.playerMode,
@@ -139,7 +141,9 @@ export const AlphaTabPlayer: React.FC = () => {
         </div>
       )}
 
-      {!score && (
+      {(
+        !score
+      ) && (
         <div
           className={styles.fileInput}
           onDragOver={handleDragOver}
@@ -185,6 +189,17 @@ export const AlphaTabPlayer: React.FC = () => {
         )}
 
         <div className={styles.alphaTab} ref={element} />
+      </div>
+
+      {/* Persistent open file button even when a score is loaded */}
+      <div className={styles.footerBar}>
+        <label
+          htmlFor="file-input"
+          className={`${styles.fileButton} ${!isApiReady ? styles.disabled : ''}`}
+          title={!isApiReady ? 'Initializing player...' : t('player.openFile')}
+        >
+          {!isApiReady ? 'Initializing...' : t('player.openFile')}
+        </label>
       </div>
 
       {api && score && <PlayerControls api={api} />}

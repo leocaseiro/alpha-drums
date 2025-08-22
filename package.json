@@ -28,7 +28,7 @@
     "bump:minor": "yarn version --minor && yarn changelog",
     "bump:major": "yarn version --major && yarn changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "deploy": "yarn build && yarn serwist && gh-pages -d out"
+    "deploy": "GITHUB_PAGES=true NEXT_PUBLIC_BASE_PATH=/alpha-drums yarn build && yarn serwist && gh-pages -d out"
   },
   "dependencies": {
     "@coderline/alphatab": "^1.6.1",

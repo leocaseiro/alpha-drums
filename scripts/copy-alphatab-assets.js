@@ -21,8 +21,13 @@ fontFiles.forEach(file => {
   }
 });
 
-// Copy worker files
-const workerFiles = ['alphaTab.worker.mjs', 'alphaTab.worker.min.mjs'];
+// Copy worker/worklet files
+const workerFiles = [
+  'alphaTab.worker.mjs',
+  'alphaTab.worker.min.mjs',
+  'alphaTab.worklet.mjs',
+  'alphaTab.worklet.min.mjs'
+];
 workerFiles.forEach(file => {
   const source = path.join(sourceDir, file);
   const dest = path.join(publicDir, file);
@@ -33,3 +38,18 @@ workerFiles.forEach(file => {
 });
 
 console.log('AlphaTab assets copied successfully!');
+
+// Copy soundfont files
+const soundfontDir = path.join(publicDir, 'soundfont');
+if (!fs.existsSync(soundfontDir)) {
+  fs.mkdirSync(soundfontDir, { recursive: true });
+}
+const sfFiles = ['sonivox.sf3', 'sonivox.sf2'];
+sfFiles.forEach(file => {
+  const source = path.join(sourceDir, 'soundfont', file);
+  const dest = path.join(soundfontDir, file);
+  if (fs.existsSync(source)) {
+    fs.copyFileSync(source, dest);
+    console.log(`Copied ${file} to public/soundfont/`);
+  }
+});

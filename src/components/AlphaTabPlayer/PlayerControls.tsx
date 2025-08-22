@@ -20,6 +20,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [endTime, setEndTime] = useState(1);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [baseTempoBpm, setBaseTempoBpm] = useState<number | null>(null);
   const [metronomeVolume, setMetronomeVolume] = useState(1);
   const [countInVolume, setCountInVolume] = useState(1);
   const [zoom, setZoom] = useState(100);
@@ -63,7 +64,15 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         const ready = api.isReadyForPlayback;
         const hasScore = api.score !== null;
         console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
-        
+        if (hasScore && !baseTempoBpm) {
+          try {
+            const tempo = api.score?.tempo ?? null;
+            if (tempo) setBaseTempoBpm(tempo);
+          } catch {
+            // ignore
+          }
+        }
+
         // Force enable controls if we have a score (even without full audio synthesis)
         if (hasScore) {
           console.log('Score loaded - enabling controls for basic playback');
@@ -181,7 +190,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         >
           ⏹️
         </button>
-        
+
         <button
           onClick={() => {
             try {
@@ -205,6 +214,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         <div className={styles.speedControl}>
           <label className={styles.speedLabel}>
             {t('player.speed')}: {Math.round(playbackSpeed * 100)}%
+            {baseTempoBpm ? ` • ${Math.round(baseTempoBpm * playbackSpeed)} BPM` : ''}
           </label>
           <input
             type="range"
@@ -265,6 +275,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
               title={`${t('player.volume')}: ${Math.round(metronomeVolume * 100)}%`}
             />
           )}
+          {isMetronomeActive && (
+            <span className={styles.volumeLabel}>{Math.round(metronomeVolume * 100)}%</span>
+          )}
         </div>
 
         <div className={styles.countInControl}>
@@ -287,6 +300,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
               className={styles.volumeSlider}
               title={`${t('player.volume')}: ${Math.round(countInVolume * 100)}%`}
             />
+          )}
+          {isCountInActive && (
+            <span className={styles.volumeLabel}>{Math.round(countInVolume * 100)}%</span>
           )}
         </div>
 

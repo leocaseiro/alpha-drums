@@ -58,3 +58,4 @@ Here is a list of features the app will have (tick as you as finished):
 - [ ] 12. Settings for Notation
 - [x] 13. Layout options (horizontal, vertical, scroll, etc)
 - [x] 14. Export options (midi, guitar pro, musicxml, print)
+- [ ] 15. The Load file should be available as a button even after loading a file (in case I want to play another song).

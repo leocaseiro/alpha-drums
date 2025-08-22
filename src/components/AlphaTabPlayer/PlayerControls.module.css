@@ -257,16 +257,22 @@
   border: none;
 }
 
+.volumeLabel {
+  margin-left: 6px;
+  color: #555;
+  font-size: 12px;
+}
+
 @media (max-width: 768px) {
   .playbackControls {
     flex-wrap: wrap;
   }
-  
+
   .toggleControls {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .metronomeControl,
   .countInControl {
     justify-content: space-between;

@@ -13,6 +13,7 @@ export interface PlayerControlsProps {
 export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [isMetronomeActive, setIsMetronomeActive] = useState(false);
   const [isCountInActive, setIsCountInActive] = useState(false);
@@ -43,6 +44,40 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
     setEndTime(event.endTime);
     setCurrentTime(event.currentTime);
   });
+
+  // Add event listeners for player readiness
+  useAlphaTabEvent(api, 'playerReady', () => {
+    console.log('Player ready event fired');
+    setIsReadyForPlayback(true);
+  });
+
+  useAlphaTabEvent(api, 'soundFontLoaded', () => {
+    console.log('SoundFont loaded event fired');
+    setIsReadyForPlayback(true);
+  });
+
+  // Check readiness and force enable if we have a score
+  useEffect(() => {
+    const checkReadiness = () => {
+      if (api) {
+        const ready = api.isReadyForPlayback;
+        const hasScore = api.score !== null;
+        console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
+        
+        // Force enable controls if we have a score (even without full audio synthesis)
+        if (hasScore) {
+          console.log('Score loaded - enabling controls for basic playback');
+          setIsReadyForPlayback(true);
+        } else {
+          setIsReadyForPlayback(ready);
+        }
+      }
+    };
+
+    checkReadiness();
+    const interval = setInterval(checkReadiness, 2000);
+    return () => clearInterval(interval);
+  }, [api]);
 
   // Apply settings when they change
   useEffect(() => {
@@ -132,8 +167,15 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
       {/* Main playback controls */}
       <div className={styles.playbackControls}>
         <button
-          onClick={() => api.stop()}
-          disabled={!api.isReadyForPlayback}
+          onClick={() => {
+            try {
+              api.stop();
+            } catch (error) {
+              console.warn('Stop failed, using fallback:', error);
+              setIsPlaying(false);
+            }
+          }}
+          disabled={!isReadyForPlayback}
           className={styles.controlButton}
           title={t('player.stop')}
         >
@@ -141,8 +183,19 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         </button>
         
         <button
-          onClick={() => api.playPause()}
-          disabled={!api.isReadyForPlayback}
+          onClick={() => {
+            try {
+              api.playPause();
+            } catch (error) {
+              console.warn('PlayPause failed, using fallback simulation:', error);
+              // Simulate playback for UI purposes
+              setIsPlaying(!isPlaying);
+              if (!isPlaying) {
+                alert('Note: Audio synthesis requires worker support. This is a visual simulation of playback.');
+              }
+            }
+          }}
+          disabled={!isReadyForPlayback}
           className={`${styles.controlButton} ${styles.playButton}`}
           title={isPlaying ? t('player.pause') : t('player.play')}
         >
@@ -184,7 +237,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
       <div className={styles.toggleControls}>
         <button
           onClick={() => setIsLooping(!isLooping)}
-          disabled={!api.isReadyForPlayback}
+          disabled={!isReadyForPlayback}
           className={`${styles.toggleButton} ${isLooping ? styles.active : ''}`}
           title={t('player.loop')}
         >
@@ -194,7 +247,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         <div className={styles.metronomeControl}>
           <button
             onClick={() => setIsMetronomeActive(!isMetronomeActive)}
-            disabled={!api.isReadyForPlayback}
+            disabled={!isReadyForPlayback}
             className={`${styles.toggleButton} ${isMetronomeActive ? styles.active : ''}`}
             title={t('player.metronome')}
           >
@@ -217,7 +270,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         <div className={styles.countInControl}>
           <button
             onClick={() => setIsCountInActive(!isCountInActive)}
-            disabled={!api.isReadyForPlayback}
+            disabled={!isReadyForPlayback}
             className={`${styles.toggleButton} ${isCountInActive ? styles.active : ''}`}
             title={t('player.countIn')}
           >
@@ -252,7 +305,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
         <div className={styles.exportControls}>
           <button
             onClick={() => handleExport('gp')}
-            disabled={!api.isReadyForPlayback}
+            disabled={!isReadyForPlayback}
             className={styles.exportButton}
             title={t('player.export')}
           >
@@ -261,7 +314,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
 
           <button
             onClick={() => handlePrint()}
-            disabled={!api.isReadyForPlayback}
+            disabled={!isReadyForPlayback}
             className={styles.exportButton}
             title={t('player.print')}
           >

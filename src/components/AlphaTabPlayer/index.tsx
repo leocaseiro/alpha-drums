@@ -15,15 +15,19 @@ export const AlphaTabPlayer: React.FC = () => {
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
-    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer;
+    // Player configuration - use a mode that works without full synthesis
+    settings.player.playerMode = alphaTab.PlayerMode.Enabled; // Basic player mode
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
-    settings.display.scale = 0.8;
     
-    // Ensure proper layout settings
+    // Display configuration
+    settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
     settings.display.staveProfile = alphaTab.StaveProfile.Default;
     
-    console.log('Player settings configured:', settings);
+    console.log('Player settings configured:', {
+      playerMode: settings.player.playerMode,
+      useWorkers: settings.core.useWorkers
+    });
   }, []);
 
   const [api, element, isApiReady] = useAlphaTab(settingsSetup);

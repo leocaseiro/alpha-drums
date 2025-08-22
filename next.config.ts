@@ -15,12 +15,31 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Handle .mjs files
     config.module.rules.push({
       test: /\.mjs$/,
       type: 'javascript/auto',
     });
+    
+    // Configure AlphaTab worker resolution
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        // Redirect AlphaTab worker requests to our public directory
+        '@coderline/alphatab/dist/alphaTab.worker.mjs': '/alphaTab.worker.mjs',
+      };
+      
+      // Try to intercept and redirect worker loading
+      config.module.rules.push({
+        test: /alphaTab\.worker\.m?js$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'static/[name][ext]',
+          publicPath: '/_next/static/',
+        },
+      });
+    }
     
     return config;
   },

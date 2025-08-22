@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTab, useAlphaTabEvent, openFile } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
@@ -14,11 +14,13 @@ export const AlphaTabPlayer: React.FC = () => {
   const [score, setScore] = useState<alphaTab.model.Score>();
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   
-  const [api, element] = useAlphaTab((settings) => {
+  const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer;
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.display.scale = 0.8;
-  });
+  }, []);
+
+  const [api, element] = useAlphaTab(settingsSetup);
 
   useAlphaTabEvent(api, 'renderStarted', () => {
     setScore(api!.score!);

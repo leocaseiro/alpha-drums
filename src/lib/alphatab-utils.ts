@@ -17,8 +17,9 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
   const elementRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (elementRef.current) {
+    if (elementRef.current && !api) {
       const settings = new alphaTab.Settings();
+      
       if (settingsSetup) {
         settingsSetup(settings);
       }
@@ -28,9 +29,10 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
 
       return () => {
         alphaTabApi.destroy();
+        setApi(null);
       };
     }
-  }, [settingsSetup]);
+  }, []); // Remove settingsSetup from dependencies to prevent infinite loop
 
   return [api, elementRef] as const;
 };
@@ -40,12 +42,16 @@ export const useAlphaTabEvent = (
   event: string,
   handler: (...args: unknown[]) => void
 ) => {
+  const handlerRef = React.useRef(handler);
+  handlerRef.current = handler;
+
   React.useEffect(() => {
     if (api) {
-      (api as unknown as Record<string, unknown>)[event] = handler;
+      const stableHandler = (...args: unknown[]) => handlerRef.current(...args);
+      (api as unknown as Record<string, unknown>)[event] = stableHandler;
       return () => {
         delete (api as unknown as Record<string, unknown>)[event];
       };
     }
-  }, [api, event, handler]);
+  }, [api, event]); // Remove handler from dependencies
 };

@@ -5,6 +5,7 @@ import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTab, useAlphaTabEvent, openFile } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
 import { TrackItem } from './TrackItem';
+import { PlayerControls } from './PlayerControls';
 import styles from './styles.module.css';
 
 export const AlphaTabPlayer: React.FC = () => {
@@ -127,6 +128,8 @@ export const AlphaTabPlayer: React.FC = () => {
         
         <div className={styles.alphaTab} ref={element} />
       </div>
+
+      {api && score && <PlayerControls api={api} />}
     </div>
   );
 };

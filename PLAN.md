@@ -43,13 +43,13 @@ Here is a list of features the app will have (tick as you as finished):
   - [x] c. play solo
   - [x] d. mute track
   - [ ] e. notation display options (standard, tab, rhythm)
-- [ ] 3. have a toggle for loop (on/off)
-- [ ] 4. control for metronome (on/off) with volume control
-- [ ] 5. bpm speed control (playback speed)
-  - [ ] a. should display original bpm (100%)
-  - [ ] b. option to select by percentage and/or bpm
+- [x] 3. have a toggle for loop (on/off)
+- [x] 4. control for metronome (on/off) with volume control
+- [x] 5. bpm speed control (playback speed)
+  - [x] a. should display original bpm (100%)
+  - [x] b. option to select by percentage and/or bpm
   - [ ] c. option to automatic increase by X bpm after Y bars
-- [ ] 6. control for count-in (on/off) with volume control
+- [x] 6. control for count-in (on/off) with volume control
 - [ ] 7. zoom control
 - [ ] 8. loop control
 - [ ] 9. Settings for Display

@@ -1,0 +1,214 @@
+.playerControls {
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progressSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timeDisplay {
+  font-family: monospace;
+  font-size: 14px;
+  color: #666;
+  min-width: 120px;
+}
+
+.progressSlider {
+  flex: 1;
+  height: 6px;
+  background: #ddd;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.progressSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.progressSlider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: none;
+}
+
+.playbackControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.controlButton {
+  background: #007bff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover:not(:disabled) {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+.controlButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.playButton {
+  background: #28a745;
+}
+
+.playButton:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.speedControl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.speedLabel {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.speedSlider {
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.speedSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.speedSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: none;
+}
+
+.toggleControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toggleButton {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggleButton:hover:not(:disabled) {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.toggleButton:disabled {
+  border-color: #ccc;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.toggleButton.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.metronomeControl,
+.countInControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volumeSlider {
+  width: 80px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #28a745;
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #28a745;
+  cursor: pointer;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .playbackControls {
+    flex-wrap: wrap;
+  }
+  
+  .toggleControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .metronomeControl,
+  .countInControl {
+    justify-content: space-between;
+  }
+}

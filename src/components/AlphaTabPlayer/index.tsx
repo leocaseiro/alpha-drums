@@ -13,17 +13,17 @@ export const AlphaTabPlayer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false); // Start as false - only show when actually loading
   const [score, setScore] = useState<alphaTab.model.Score>();
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
-  
+
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works without full synthesis
-    settings.player.playerMode = alphaTab.PlayerMode.Enabled; // Basic player mode
+    settings.player.playerMode = alphaTab.PlayerMode.EnabledAutomatic; // Basic player mode
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
-    
+
     // Display configuration
     settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
     settings.display.staveProfile = alphaTab.StaveProfile.Default;
-    
+
     console.log('Player settings configured:', {
       playerMode: settings.player.playerMode,
       useWorkers: settings.core.useWorkers
@@ -43,7 +43,7 @@ export const AlphaTabPlayer: React.FC = () => {
           console.error('Error during settings update:', error);
         }
       }, 200);
-      
+
       return () => clearTimeout(timer);
     }
   }, [api, isApiReady, score]);
@@ -80,7 +80,7 @@ export const AlphaTabPlayer: React.FC = () => {
       setIsLoading(true); // Show loading immediately when file is selected
       setScore(undefined); // Clear previous score
       openFile(api, file);
-      
+
       // Fallback timeout to hide loading overlay if events don't fire
       setTimeout(() => {
         console.log('Fallback timeout - hiding loading overlay');
@@ -94,15 +94,15 @@ export const AlphaTabPlayer: React.FC = () => {
 
   const handleToggleTrack = (track: alphaTab.model.Track) => {
     const newSelectedTracks = new Map(selectedTracks);
-    
+
     if (newSelectedTracks.has(track.index)) {
       newSelectedTracks.delete(track.index);
     } else {
       newSelectedTracks.set(track.index, track);
     }
-    
+
     setSelectedTracks(newSelectedTracks);
-    
+
     // Update AlphaTab to render only selected tracks
     if (newSelectedTracks.size > 0) {
       api?.renderTracks(Array.from(newSelectedTracks.values()));
@@ -140,7 +140,7 @@ export const AlphaTabPlayer: React.FC = () => {
       )}
 
       {!score && (
-        <div 
+        <div
           className={styles.fileInput}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -155,8 +155,8 @@ export const AlphaTabPlayer: React.FC = () => {
               className={styles.hiddenInput}
               id="file-input"
             />
-            <label 
-              htmlFor="file-input" 
+            <label
+              htmlFor="file-input"
               className={`${styles.fileButton} ${!isApiReady ? styles.disabled : ''}`}
               title={!isApiReady ? 'Initializing player...' : t('player.openFile')}
             >
@@ -183,7 +183,7 @@ export const AlphaTabPlayer: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         <div className={styles.alphaTab} ref={element} />
       </div>
 

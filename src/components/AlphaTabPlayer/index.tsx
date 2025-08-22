@@ -10,7 +10,7 @@ import styles from './styles.module.css';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Start as false - only show when actually loading
   const [score, setScore] = useState<alphaTab.model.Score>();
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   
@@ -22,16 +22,20 @@ export const AlphaTabPlayer: React.FC = () => {
 
   const [api, element] = useAlphaTab(settingsSetup);
 
+  // Show loading when file starts loading
+  useAlphaTabEvent(api, 'scoreLoaded', (loadedScore) => {
+    setIsLoading(true); // Start loading when score is loaded and rendering begins
+    setScore(loadedScore as alphaTab.model.Score);
+  });
+
   useAlphaTabEvent(api, 'renderStarted', () => {
-    setScore(api!.score!);
-    
     // Set up initial track selection
     const trackMap = new Map<number, alphaTab.model.Track>();
     api!.tracks.forEach((track) => {
       trackMap.set(track.index, track);
     });
     setSelectedTracks(trackMap);
-    setIsLoading(true);
+    // Keep loading state as true during rendering
   });
 
   useAlphaTabEvent(api, 'renderFinished', () => {
@@ -41,6 +45,8 @@ export const AlphaTabPlayer: React.FC = () => {
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && api) {
+      setIsLoading(true); // Show loading immediately when file is selected
+      setScore(undefined); // Clear previous score
       openFile(api, file);
     }
   };
@@ -73,6 +79,8 @@ export const AlphaTabPlayer: React.FC = () => {
     e.preventDefault();
     const files = e.dataTransfer.files;
     if (files.length === 1 && api) {
+      setIsLoading(true); // Show loading immediately when file is dropped
+      setScore(undefined); // Clear previous score
       openFile(api, files[0]);
     }
   };

@@ -50,11 +50,11 @@ Here is a list of features the app will have (tick as you as finished):
   - [x] b. option to select by percentage and/or bpm
   - [ ] c. option to automatic increase by X bpm after Y bars
 - [x] 6. control for count-in (on/off) with volume control
-- [ ] 7. zoom control
+- [x] 7. zoom control
 - [ ] 8. loop control
 - [ ] 9. Settings for Display
 - [ ] 10. Settings for Player
 - [ ] 11. Settings for Stylesheet
 - [ ] 12. Settings for Notation
-- [ ] 13. Layout options (horizontal, vertical, scroll, etc)
+- [x] 13. Layout options (horizontal, vertical, scroll, etc)
 - [ ] 14. Export options (midi, guitar pro, musicxml, print)

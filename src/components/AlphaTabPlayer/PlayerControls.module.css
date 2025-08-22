@@ -48,6 +48,32 @@
   border: none;
 }
 
+.layoutControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.layoutLabel {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.layoutSelect {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.layoutSelect:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
 .playbackControls {
   display: flex;
   align-items: center;
@@ -84,20 +110,23 @@
   background: #1e7e34;
 }
 
-.speedControl {
+.speedControl,
+.zoomControl {
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 150px;
 }
 
-.speedLabel {
+.speedLabel,
+.zoomLabel {
   font-size: 12px;
   color: #666;
   font-weight: 500;
 }
 
-.speedSlider {
+.speedSlider,
+.zoomSlider {
   height: 4px;
   background: #ddd;
   border-radius: 2px;
@@ -105,7 +134,8 @@
   -webkit-appearance: none;
 }
 
-.speedSlider::-webkit-slider-thumb {
+.speedSlider::-webkit-slider-thumb,
+.zoomSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 16px;
@@ -115,7 +145,8 @@
   cursor: pointer;
 }
 
-.speedSlider::-moz-range-thumb {
+.speedSlider::-moz-range-thumb,
+.zoomSlider::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;

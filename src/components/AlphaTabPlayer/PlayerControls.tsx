@@ -21,6 +21,8 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [metronomeVolume, setMetronomeVolume] = useState(1);
   const [countInVolume, setCountInVolume] = useState(1);
+  const [zoom, setZoom] = useState(100);
+  const [layoutMode, setLayoutMode] = useState<alphaTab.LayoutMode>(alphaTab.LayoutMode.Page);
 
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
     setIsPlaying((e as unknown as { state: alphaTab.synth.PlayerState }).state === alphaTab.synth.PlayerState.Playing);
@@ -58,6 +60,22 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
   useEffect(() => {
     api.playbackSpeed = playbackSpeed;
   }, [api, playbackSpeed]);
+
+  useEffect(() => {
+    if (api) {
+      api.settings.display.scale = zoom / 100.0;
+      api.updateSettings();
+      api.render();
+    }
+  }, [api, zoom]);
+
+  useEffect(() => {
+    if (api) {
+      api.settings.display.layoutMode = layoutMode;
+      api.updateSettings();
+      api.render();
+    }
+  }, [api, layoutMode]);
 
   const formatDuration = (milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -123,6 +141,21 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
             className={styles.speedSlider}
           />
         </div>
+
+        <div className={styles.zoomControl}>
+          <label className={styles.zoomLabel}>
+            🔍 {t('player.zoom')}: {zoom}%
+          </label>
+          <input
+            type="range"
+            min="25"
+            max="200"
+            step="5"
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            className={styles.zoomSlider}
+          />
+        </div>
       </div>
 
       {/* Toggle controls */}
@@ -180,6 +213,18 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
               title={`${t('player.volume')}: ${Math.round(countInVolume * 100)}%`}
             />
           )}
+        </div>
+
+        <div className={styles.layoutControl}>
+          <label className={styles.layoutLabel}>📄 {t('player.layout')}:</label>
+          <select
+            value={layoutMode}
+            onChange={(e) => setLayoutMode(Number(e.target.value) as alphaTab.LayoutMode)}
+            className={styles.layoutSelect}
+          >
+            <option value={alphaTab.LayoutMode.Page}>{t('player.page')}</option>
+            <option value={alphaTab.LayoutMode.Horizontal}>{t('player.horizontal')}</option>
+          </select>
         </div>
       </div>
     </div>

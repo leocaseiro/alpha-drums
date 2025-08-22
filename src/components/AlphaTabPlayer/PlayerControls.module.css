@@ -74,6 +74,35 @@
   border-color: #007bff;
 }
 
+.exportControls {
+  display: flex;
+  gap: 8px;
+}
+
+.exportButton {
+  background: #6c757d;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.exportButton:hover:not(:disabled) {
+  background: #545b62;
+}
+
+.exportButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .playbackControls {
   display: flex;
   align-items: center;

@@ -57,4 +57,4 @@ Here is a list of features the app will have (tick as you as finished):
 - [ ] 11. Settings for Stylesheet
 - [ ] 12. Settings for Notation
 - [x] 13. Layout options (horizontal, vertical, scroll, etc)
-- [ ] 14. Export options (midi, guitar pro, musicxml, print)
+- [x] 14. Export options (midi, guitar pro, musicxml, print)

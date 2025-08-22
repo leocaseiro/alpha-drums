@@ -90,6 +90,36 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
     api.tickPosition = newTime;
   };
 
+  const handleExport = (format: 'gp' | 'midi') => {
+    if (!api.score) return;
+
+    try {
+      if (format === 'gp') {
+        const exporter = new alphaTab.exporter.Gp7Exporter();
+        const data = exporter.export(api.score, api.settings);
+        const blob = new Blob([new Uint8Array(data.buffer)], { type: 'application/gp' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = api.score.title.length > 0 ? `${api.score.title.trim()}.gp` : 'Untitled.gp';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handlePrint = () => {
+    try {
+      api.print();
+    } catch (error) {
+      console.error('Print failed:', error);
+    }
+  };
+
   return (
     <div className={styles.playerControls}>
       {/* Progress bar */}
@@ -225,6 +255,26 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api }) => {
             <option value={alphaTab.LayoutMode.Page}>{t('player.page')}</option>
             <option value={alphaTab.LayoutMode.Horizontal}>{t('player.horizontal')}</option>
           </select>
+        </div>
+
+        <div className={styles.exportControls}>
+          <button
+            onClick={() => handleExport('gp')}
+            disabled={!api.isReadyForPlayback}
+            className={styles.exportButton}
+            title={t('player.export')}
+          >
+            💾 {t('player.export')}
+          </button>
+
+          <button
+            onClick={() => handlePrint()}
+            disabled={!api.isReadyForPlayback}
+            className={styles.exportButton}
+            title={t('player.print')}
+          >
+            🖨️ {t('player.print')}
+          </button>
         </div>
       </div>
     </div>

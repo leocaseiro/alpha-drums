@@ -2109,6 +2109,14 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
+"@types/jest@^30.0.0":
+  version "30.0.0"
+  resolved "https://packages.atlassian.com/api/npm/npm-remote/@types/jest/-/jest-30.0.0.tgz#5e85ae568006712e4ad66f25433e9bdac8801f1d"
+  integrity sha512-XTYugzhuwqWjws0CVz8QpM36+T+Dz5mTEBKhNs/esGLnCIlGdRy+Dq78NRjd7ls7r8BC8ZRMOrKlkO1hU0JOwA==
+  dependencies:
+    expect "^30.0.0"
+    pretty-format "^30.0.0"
+
 "@types/jsdom@^21.1.7":
   version "21.1.7"
   resolved "https://packages.atlassian.com/api/npm/npm-remote/@types/jsdom/-/jsdom-21.1.7.tgz#9edcb09e0b07ce876e7833922d3274149c898cfa"
@@ -4191,7 +4199,7 @@ exit-x@^0.2.2:
   resolved "https://packages.atlassian.com/api/npm/npm-remote/exit-x/-/exit-x-0.2.2.tgz#1f9052de3b8d99a696b10dad5bced9bdd5c3aa64"
   integrity sha512-+I6B/IkJc1o/2tiURyz/ivu/O0nKNEArIUB5O7zBrlDVJr22SCLH3xTeEry428LvFhRzIA1g8izguxJ/gbNcVQ==
 
-expect@30.0.5:
+expect@30.0.5, expect@^30.0.0:
   version "30.0.5"
   resolved "https://packages.atlassian.com/api/npm/npm-remote/expect/-/expect-30.0.5.tgz#c23bf193c5e422a742bfd2990ad990811de41a5a"
   integrity sha512-P0te2pt+hHI5qLJkIR+iMvS+lYUZml8rKKsohVHAGY+uClp9XVbdyYNJOIjSRpHVp8s8YqxJCiHUkSYZGr8rtQ==
@@ -7416,7 +7424,7 @@ pretty-bytes@6.1.1:
   resolved "https://registry.npmjs.org/pretty-bytes/-/pretty-bytes-6.1.1.tgz"
   integrity sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==
 
-pretty-format@30.0.5:
+pretty-format@30.0.5, pretty-format@^30.0.0:
   version "30.0.5"
   resolved "https://packages.atlassian.com/api/npm/npm-remote/pretty-format/-/pretty-format-30.0.5.tgz#e001649d472800396c1209684483e18a4d250360"
   integrity sha512-D1tKtYvByrBkFLe2wHJl2bwMJIiT8rW+XA+TiataH79/FszLQMrpGEvzUVkzPau7OCO0Qnrhpe87PqtOAIB8Yw==

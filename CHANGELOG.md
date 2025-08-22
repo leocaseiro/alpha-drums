@@ -1,3 +1,9 @@
+## <small>1.4.1 (2025-08-22)</small>
+
+* Merge pull request #11 from leocaseiro/alphatab-integration ([f4b8191](https://github.com/leocaseiro/alpha-drums/commit/f4b8191)), closes [#11](https://github.com/leocaseiro/alpha-drums/issues/11)
+* fix(render): load notation on gh-pages ([34cb540](https://github.com/leocaseiro/alpha-drums/commit/34cb540))
+* fix(sw): remove sw from local ([c911f6c](https://github.com/leocaseiro/alpha-drums/commit/c911f6c))
+
 ## 1.4.0 (2025-08-22)
 
 * Merge pull request #10 from leocaseiro/alphatab-integration ([0de858a](https://github.com/leocaseiro/alpha-drums/commit/0de858a)), closes [#10](https://github.com/leocaseiro/alpha-drums/issues/10)

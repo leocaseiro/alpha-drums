@@ -7,12 +7,12 @@ const mockApi = {
 
 // Mock FileReader
 const mockFileReader = {
-  onload: null as any,
+  onload: null as unknown as ((ev: ProgressEvent<FileReader>) => void) | null,
   readAsArrayBuffer: jest.fn(),
   result: new ArrayBuffer(8),
 };
 
-global.FileReader = jest.fn(() => mockFileReader) as any;
+global.FileReader = jest.fn(() => mockFileReader) as unknown as { new (): FileReader };
 
 describe('AlphaTab Utils', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('AlphaTab Utils', () => {
   it('opens a file and loads it into AlphaTab API', () => {
     const mockFile = new File(['test content'], 'test.gp5', { type: 'application/octet-stream' });
     
-    openFile(mockApi as any, mockFile);
+    openFile(mockApi as { load: jest.Mock }, mockFile);
 
     expect(mockFileReader.readAsArrayBuffer).toHaveBeenCalledWith(mockFile);
     
@@ -37,7 +37,7 @@ describe('AlphaTab Utils', () => {
   it('handles file reading error gracefully', () => {
     const mockFile = new File(['test content'], 'test.gp5', { type: 'application/octet-stream' });
     
-    openFile(mockApi as any, mockFile);
+    openFile(mockApi as { load: jest.Mock }, mockFile);
 
     expect(mockFileReader.readAsArrayBuffer).toHaveBeenCalledWith(mockFile);
     

@@ -1,15 +1,24 @@
 import * as alphaTab from '@coderline/alphatab';
+import { IEventEmitter, IEventEmitterOfT } from '@coderline/alphatab';
 import React from 'react';
+
+
+type AlphaTabModule = typeof alphaTab & {
+  Environment?: {
+    scriptFile: string;
+    fontDirectory: string;
+  };
+};
 
 // Try to set global worker path
 if (typeof window !== 'undefined') {
   const baseUrl = window.location.origin;
-  
+
   // Set global AlphaTab configuration if available
-  if ((alphaTab as any).Environment) {
+  if ((alphaTab as AlphaTabModule).Environment) {
     console.log('Setting global AlphaTab environment...');
-    (alphaTab as any).Environment.scriptFile = `${baseUrl}/alphaTab.worker.mjs`;
-    (alphaTab as any).Environment.fontDirectory = `${baseUrl}/font/`;
+    (alphaTab as AlphaTabModule).Environment!.scriptFile = `${baseUrl}/alphaTab.worker.mjs`;
+    (alphaTab as AlphaTabModule).Environment!.fontDirectory = `${baseUrl}/font/`;
   }
 }
 
@@ -44,18 +53,18 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
   React.useEffect(() => {
     if (elementRef.current && !api) {
       const settings = new alphaTab.Settings();
-      
+
       // Configure asset paths
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
       settings.core.fontDirectory = `${baseUrl}/font/`;
       settings.core.scriptFile = `${baseUrl}/alphaTab.worker.mjs`;
-      
+
       // Temporarily disable workers until we fix the path issue
       settings.core.useWorkers = false;
-      
+
       // But enable the player anyway for basic functionality
       settings.player.enablePlayer = true;
-      
+
       console.log('AlphaTab settings:', {
         fontDirectory: settings.core.fontDirectory,
         scriptFile: settings.core.scriptFile,
@@ -73,34 +82,34 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
             console.error('Worker file accessibility check failed:', error);
           });
       }
-      
+
       if (settingsSetup) {
         settingsSetup(settings);
       }
-      
+
       try {
         console.log('Creating AlphaTab API with settings:', {
           scriptFile: settings.core.scriptFile,
           useWorkers: settings.core.useWorkers,
           fontDirectory: settings.core.fontDirectory
         });
-        
+
         const alphaTabApi = new alphaTab.AlphaTabApi(elementRef.current, settings);
-        
+
         // Force the worker path after creation
         if (alphaTabApi.settings && alphaTabApi.settings.core) {
           alphaTabApi.settings.core.scriptFile = `${baseUrl}/alphaTab.worker.mjs`;
           console.log('Forced worker path to:', alphaTabApi.settings.core.scriptFile);
         }
-        
+
         // Wait for AlphaTab to be properly initialized
         const initTimeout = setTimeout(() => {
           console.log('AlphaTab initialized, checking API...');
-          
+
           // Check if the API has the required methods and event system
-          if (alphaTabApi && 
-              typeof alphaTabApi.load === 'function' && 
-              alphaTabApi.scoreLoaded && 
+          if (alphaTabApi &&
+              typeof alphaTabApi.load === 'function' &&
+              alphaTabApi.scoreLoaded &&
               typeof alphaTabApi.scoreLoaded.on === 'function') {
             setApi(alphaTabApi);
             setIsReady(true);
@@ -136,7 +145,7 @@ export const useAlphaTabEvent = (
     if (api) {
       try {
         // Use the proper AlphaTab event system with .on() method
-        const eventEmitter = (api as any)[event];
+        const eventEmitter = api[event as keyof alphaTab.AlphaTabApi] as Partial<IEventEmitter> | Partial<IEventEmitterOfT<unknown>> | undefined;
         if (eventEmitter && typeof eventEmitter.on === 'function') {
           eventEmitter.on(handler);
           return () => {

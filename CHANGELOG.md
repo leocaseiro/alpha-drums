@@ -1,3 +1,8 @@
+## 1.5.0 (2025-08-22)
+
+* Merge pull request #12 from leocaseiro/alphatab-integration ([12ebbc0](https://github.com/leocaseiro/alpha-drums/commit/12ebbc0)), closes [#12](https://github.com/leocaseiro/alpha-drums/issues/12)
+* feat(audio): audio should play ([3271f9b](https://github.com/leocaseiro/alpha-drums/commit/3271f9b))
+
 ## <small>1.4.1 (2025-08-22)</small>
 
 * Merge pull request #11 from leocaseiro/alphatab-integration ([f4b8191](https://github.com/leocaseiro/alpha-drums/commit/f4b8191)), closes [#11](https://github.com/leocaseiro/alpha-drums/issues/11)

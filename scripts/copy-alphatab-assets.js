@@ -21,8 +21,13 @@ fontFiles.forEach(file => {
   }
 });
 
-// Copy worker files
-const workerFiles = ['alphaTab.worker.mjs', 'alphaTab.worker.min.mjs'];
+// Copy worker/worklet files
+const workerFiles = [
+  'alphaTab.worker.mjs',
+  'alphaTab.worker.min.mjs',
+  'alphaTab.worklet.mjs',
+  'alphaTab.worklet.min.mjs'
+];
 workerFiles.forEach(file => {
   const source = path.join(sourceDir, file);
   const dest = path.join(publicDir, file);

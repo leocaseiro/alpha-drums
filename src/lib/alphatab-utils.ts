@@ -65,8 +65,8 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
       settings.core.fontDirectory = resolvePublicUrl('/font/');
       settings.core.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
 
-      // Enable workers when path is correct; fallback check below may disable
-      settings.core.useWorkers = true;
+      // In dev we disable workers to avoid file:// worker resolution edge cases
+      settings.core.useWorkers = process.env.NODE_ENV === 'production';
 
       // But enable the player anyway for basic functionality
       settings.player.enablePlayer = true;

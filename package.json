@@ -8,6 +8,7 @@
   },
   "scripts": {
     "preinstall": "node check-npm.js",
+    "postinstall": "node scripts/copy-alphatab-assets.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

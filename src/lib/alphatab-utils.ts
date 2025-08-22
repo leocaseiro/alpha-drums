@@ -20,6 +20,10 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
     if (elementRef.current && !api) {
       const settings = new alphaTab.Settings();
       
+      // Configure asset paths
+      settings.core.fontDirectory = '/font/';
+      settings.core.scriptFile = '/alphaTab.worker.mjs';
+      
       if (settingsSetup) {
         settingsSetup(settings);
       }

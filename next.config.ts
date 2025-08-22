@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },
+  webpack: (config) => {
+    // Handle .mjs files
+    config.module.rules.push({
+      test: /\.mjs$/,
+      type: 'javascript/auto',
+    });
+    
+    return config;
+  },
 };
 
 export default nextConfig;

@@ -3,13 +3,6 @@ import { IEventEmitter, IEventEmitterOfT } from '@coderline/alphatab';
 import React from 'react';
 
 
-type AlphaTabModule = typeof alphaTab & {
-  Environment?: {
-    scriptFile: string;
-    fontDirectory: string;
-  };
-};
-
 // Resolve basePath configured for GitHub Pages (from next.config.ts)
 const NEXT_PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
@@ -21,11 +14,13 @@ const resolvePublicUrl = (relativePath: string): string => {
   return `${normalizedBase}${normalizedRel}`;
 };
 
-// Try to set global worker/font path
+// Ensure AlphaTab resolves worker and font over HTTP (prevents file:// in dev)
 if (typeof window !== 'undefined') {
-  if ((alphaTab as AlphaTabModule).Environment) {
-    (alphaTab as AlphaTabModule).Environment!.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
-    (alphaTab as AlphaTabModule).Environment!.fontDirectory = resolvePublicUrl('/font/');
+  try {
+    (alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }).Environment!.scriptFile = '/alphaTab.worker.mjs';
+    (alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }).Environment!.fontDirectory = '/font/';
+  } catch {
+    // ignore if not writable in this build
   }
 }
 
@@ -64,14 +59,20 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
       // Configure asset paths (respecting basePath)
       settings.core.fontDirectory = resolvePublicUrl('/font/');
       settings.core.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
+      settings.core.engine = 'svg';
 
-      // In dev we disable workers to avoid file:// worker resolution edge cases
-      settings.core.useWorkers = process.env.NODE_ENV === 'production';
+      // Always use workers; path points to public worker
+      settings.core.useWorkers = true;
 
       // But enable the player anyway for basic functionality
       settings.player.enablePlayer = true;
       // Ensure soundfont is available for audio playback
+      // Try sf3 first, fallback to sf2
       settings.player.soundFont = resolvePublicUrl('/soundfont/sonivox.sf3');
+      if (process.env.NODE_ENV !== 'production') {
+        // Prefer legacy script processor in dev to avoid worklet constraints
+        settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor;
+      }
 
       console.log('AlphaTab settings:', {
         fontDirectory: settings.core.fontDirectory,
@@ -105,8 +106,8 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
 
         const alphaTabApi = new alphaTab.AlphaTabApi(elementRef.current, settings);
 
-        // Force the worker path after creation
-        if (alphaTabApi.settings && alphaTabApi.settings.core) {
+        // Ensure the worker path is correct after creation
+        if (alphaTabApi.settings && alphaTabApi.settings.core && alphaTabApi.settings.core.useWorkers) {
           alphaTabApi.settings.core.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
           console.log('Forced worker path to:', alphaTabApi.settings.core.scriptFile);
         }
@@ -115,7 +116,12 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
         try {
           alphaTabApi.loadSoundFontFromUrl(resolvePublicUrl('/soundfont/sonivox.sf3'), false);
         } catch (e) {
-          console.warn('SoundFont load trigger failed:', e);
+          console.warn('SoundFont load trigger failed (sf3), trying sf2:', e);
+          try {
+            alphaTabApi.loadSoundFontFromUrl(resolvePublicUrl('/soundfont/sonivox.sf2'), false);
+          } catch (e2) {
+            console.warn('SoundFont load trigger failed (sf2):', e2);
+          }
         }
 
         // Wait for AlphaTab to be properly initialized

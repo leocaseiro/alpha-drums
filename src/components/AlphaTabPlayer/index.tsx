@@ -16,7 +16,8 @@ export const AlphaTabPlayer: React.FC = () => {
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works without full synthesis
-    settings.player.playerMode = alphaTab.PlayerMode.EnabledAutomatic; // Basic player mode
+    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback
+    settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Avoid worklet requirements in dev
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
 
     // Display configuration

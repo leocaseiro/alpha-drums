@@ -25,7 +25,7 @@ export const AlphaTabPlayer: React.FC = () => {
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works with cursors
-    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback  
+    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback
     settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Use script processor for compatibility
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.player.enablePlayer = true;
@@ -82,7 +82,7 @@ export const AlphaTabPlayer: React.FC = () => {
         // Force a render to apply the new settings
         if (api.score) {
           api.render();
-          
+
           // Additional attempt to ensure cursor is visible
           setTimeout(() => {
             try {
@@ -92,7 +92,7 @@ export const AlphaTabPlayer: React.FC = () => {
                 // Check if cursor elements exist
                 const cursorElements = container.querySelectorAll('.at-cursor-bar, .at-cursor-beat');
                 console.log('Found cursor elements:', cursorElements.length);
-                
+
                 // Force cursor visibility
                 api.settings.player.enableCursor = true;
                 api.updateSettings();

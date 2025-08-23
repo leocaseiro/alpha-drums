@@ -30,6 +30,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
   const [endTime, setEndTime] = useState(1);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [baseTempoBpm, setBaseTempoBpm] = useState<number | null>(null);
+  const [speedMode, setSpeedMode] = useState<'percentage' | 'bpm'>('percentage');
   const [metronomeVolume, setMetronomeVolume] = useState(1);
   const [countInVolume, setCountInVolume] = useState(1);
   const [zoom, setZoom] = useState(100);
@@ -205,17 +206,37 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           <HStack gap={2} align="center">
             <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
             <Editable.Root
-              value={String(Math.round(playbackSpeed * 100))}
+              value={speedMode === 'percentage' 
+                ? String(Math.round(playbackSpeed * 100))
+                : baseTempoBpm ? String(Math.round(baseTempoBpm * playbackSpeed)) : '120'
+              }
               onValueChange={(details) => {
-                const value = Math.max(25, Math.min(200, Number(details.value) || 100));
-                setPlaybackSpeed(value / 100);
+                const inputValue = Number(details.value) || (speedMode === 'percentage' ? 100 : 120);
+                if (speedMode === 'percentage') {
+                  const value = Math.max(25, Math.min(200, inputValue));
+                  setPlaybackSpeed(value / 100);
+                } else {
+                  // BPM mode
+                  if (baseTempoBpm) {
+                    const newSpeed = Math.max(0.25, Math.min(2, inputValue / baseTempoBpm));
+                    setPlaybackSpeed(newSpeed);
+                  }
+                }
               }}
-              w="30px"
+              w="40px"
             >
-              <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
-              <Editable.Input fontSize="xs" w="30px" textAlign="right" />
+              <Editable.Preview fontSize="xs" w="40px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="40px" textAlign="right" />
             </Editable.Root>
-            <Text fontSize="xs" color="gray.600" w="10px">%</Text>
+            <IconButton
+              aria-label={t('player.toggleSpeedMode')}
+              size="xs"
+              variant="ghost"
+              onClick={() => setSpeedMode(speedMode === 'percentage' ? 'bpm' : 'percentage')}
+              w="20px"
+            >
+              {speedMode === 'percentage' ? t('player.percentage') : t('player.bpm')}
+            </IconButton>
             <IconButton
               aria-label="Reset speed"
               size="xs"
@@ -233,7 +254,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           </Slider.Root>
           {baseTempoBpm && (
             <Text fontSize="xs" color="gray.500" textAlign="center">
-              {Math.round(baseTempoBpm * playbackSpeed)} BPM
+              {speedMode === 'percentage' 
+                ? `${Math.round(baseTempoBpm * playbackSpeed)} BPM`
+                : `${Math.round(playbackSpeed * 100)}%`
+              }
             </Text>
           )}
         </VStack>

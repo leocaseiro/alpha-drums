@@ -7,7 +7,7 @@ import { useI18n } from '@/app/i18n';
 import { TrackItem } from './TrackItem';
 import { PlayerControls } from './PlayerControls';
 import styles from './styles.module.css';
-import { Box, Center, Text } from '@chakra-ui/react';
+import { AbsoluteCenter, Box, Center, Text } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { ProgressCircle } from '@chakra-ui/react';
 import { SettingsDrawer } from './SettingsDrawer';
@@ -61,7 +61,14 @@ export const AlphaTabPlayer: React.FC = () => {
     console.log('Score loaded event fired', loadedScore);
     setIsLoading(true); // Start loading when score is loaded and rendering begins
     setScore(loadedScore as alphaTab.model.Score);
-    toaster.create({ type: 'info', title: t('player.loading'), description: t('player.renderingScore') });
+    // toaster.create({
+    //   title: "Toast Title",
+    //   description: "Toast Description",
+    // })
+    // toaster.create({
+    //   title: t('player.loading'),
+    //   description: t('player.renderingScore'),
+    // });
   });
 
   useAlphaTabEvent(api, 'renderStarted', () => {
@@ -89,7 +96,7 @@ export const AlphaTabPlayer: React.FC = () => {
     const file = event.target.files?.[0];
     if (file && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is selected
-      toaster.create({ type: 'info', title: t('player.loading'), description: file.name });
+      // toaster.create({ type: 'info', title: t('player.loading'), description: file.name });
       setScore(undefined); // Clear previous score
       openFile(api, file);
 
@@ -148,11 +155,14 @@ export const AlphaTabPlayer: React.FC = () => {
         <Box position="absolute" inset={0} bg="blackAlpha.700" zIndex={1000}>
           <Center w="full" h="full" flexDirection="column" color="white" gap={3}>
             <ProgressCircle.Root value={80} size="md">
+            <ProgressCircle.Circle>
               <ProgressCircle.Track />
               <ProgressCircle.Range />
-              <ProgressCircle.ValueText>...</ProgressCircle.ValueText>
+            </ProgressCircle.Circle>
+            <AbsoluteCenter>
+              <ProgressCircle.ValueText />
+            </AbsoluteCenter>
             </ProgressCircle.Root>
-            <Text fontSize="md">{t('player.loading')}</Text>
           </Center>
         </Box>
       )}

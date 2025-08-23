@@ -5,16 +5,11 @@ import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTabEvent } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
 import {
-  Box,
   HStack,
   VStack,
   Button,
-  Select,
   Text,
   Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
   IconButton,
 } from '@chakra-ui/react';
 
@@ -205,73 +200,83 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
   };
 
   return (
-    <VStack bg="gray.50" borderTopWidth="1px" borderColor="gray.200" p={4} spacing={4} align="stretch">
-      <HStack align="center" spacing={3}>
+    <VStack bg="gray.50" borderTopWidth="1px" borderColor="gray.200" p={4} gap={4} align="stretch">
+      <HStack align="center" gap={3}>
         <Text fontFamily="mono" fontSize="sm" color="gray.600" minW="120px">
           {formatDuration(currentTime)} / {formatDuration(endTime)}
         </Text>
-        <Slider min={0} max={100} value={endTime > 0 ? (currentTime / endTime) * 100 : 0} onChange={(v) => handleSeek({ target: { value: String(v) } } as unknown as React.ChangeEvent<HTMLInputElement>)} flex="1">
-          <SliderTrack>
-            <SliderFilledTrack />
-          </SliderTrack>
-          <SliderThumb />
-        </Slider>
+        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={(details) => handleSeek({ target: { value: String(details.value[0]) } } as unknown as React.ChangeEvent<HTMLInputElement>)} flex="1">
+          <Slider.Control>
+            <Slider.Track>
+              <Slider.Range />
+            </Slider.Track>
+            <Slider.Thumbs />
+          </Slider.Control>
+        </Slider.Root>
       </HStack>
 
-      <HStack align="center" spacing={4}>
-        <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} isDisabled={!isReadyForPlayback}>
+      <HStack align="center" gap={4}>
+        <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} disabled={!isReadyForPlayback}>
           ⏹️
         </IconButton>
         <Button onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} isDisabled={!isReadyForPlayback} colorScheme="green">
           {isPlaying ? t('player.pause') : t('player.play')}
         </Button>
 
-        <VStack minW="180px" spacing={1} align="stretch">
+        <VStack minW="180px" gap={1} align="stretch">
           <Text fontSize="xs" color="gray.600">{t('player.speed')}: {Math.round(playbackSpeed * 100)}%{baseTempoBpm ? ` • ${Math.round(baseTempoBpm * playbackSpeed)} BPM` : ''}</Text>
-          <Slider min={0.25} max={2} step={0.05} value={playbackSpeed} onChange={(v) => setPlaybackSpeed(v as number)}>
-            <SliderTrack><SliderFilledTrack /></SliderTrack>
-            <SliderThumb />
-          </Slider>
+          <Slider.Root min={0.25} max={2} step={0.05} value={[playbackSpeed]} onValueChange={(details) => setPlaybackSpeed(details.value[0])}>
+            <Slider.Control>
+              <Slider.Track><Slider.Range /></Slider.Track>
+              <Slider.Thumbs />
+            </Slider.Control>
+          </Slider.Root>
         </VStack>
 
-        <VStack minW="180px" spacing={1} align="stretch">
+        <VStack minW="180px" gap={1} align="stretch">
           <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}: {zoom}%</Text>
-          <Slider min={25} max={200} step={5} value={zoom} onChange={(v) => setZoom(v as number)}>
-            <SliderTrack><SliderFilledTrack /></SliderTrack>
-            <SliderThumb />
-          </Slider>
+          <Slider.Root min={25} max={200} step={5} value={[zoom]} onValueChange={(details) => setZoom(details.value[0])}>
+            <Slider.Control>
+              <Slider.Track><Slider.Range /></Slider.Track>
+              <Slider.Thumbs />
+            </Slider.Control>
+          </Slider.Root>
         </VStack>
       </HStack>
 
-      <HStack spacing={3} wrap="wrap">
+      <HStack gap={3} wrap="wrap">
         <input type="file" accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx" onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
         <label htmlFor="file-input" title={t('player.openFile')}>
           <Button as="span">🔍</Button>
         </label>
 
-        <Button variant={isLooping ? 'solid' : 'outline'} colorScheme="blue" onClick={() => setIsLooping(!isLooping)} isDisabled={!isReadyForPlayback}>🔁 {t('player.loop')}</Button>
+        <Button variant={isLooping ? 'solid' : 'outline'} colorScheme="blue" onClick={() => setIsLooping(!isLooping)} disabled={!isReadyForPlayback}>🔁 {t('player.loop')}</Button>
 
         <HStack>
-          <Button variant={isMetronomeActive ? 'solid' : 'outline'} colorScheme="purple" onClick={() => setIsMetronomeActive(!isMetronomeActive)} isDisabled={!isReadyForPlayback}>🎼 {t('player.metronome')}</Button>
+          <Button variant={isMetronomeActive ? 'solid' : 'outline'} colorScheme="purple" onClick={() => setIsMetronomeActive(!isMetronomeActive)} disabled={!isReadyForPlayback}>🎼 {t('player.metronome')}</Button>
           {isMetronomeActive && (
             <HStack>
-              <Slider min={0} max={1} step={0.1} value={metronomeVolume} onChange={(v) => setMetronomeVolume(v as number)} w="80px">
-                <SliderTrack><SliderFilledTrack /></SliderTrack>
-                <SliderThumb />
-              </Slider>
+              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="80px">
+                <Slider.Control>
+                  <Slider.Track><Slider.Range /></Slider.Track>
+                  <Slider.Thumbs />
+                </Slider.Control>
+              </Slider.Root>
               <Text fontSize="xs">{Math.round(metronomeVolume * 100)}%</Text>
             </HStack>
           )}
         </HStack>
 
         <HStack>
-          <Button variant={isCountInActive ? 'solid' : 'outline'} colorScheme="orange" onClick={() => setIsCountInActive(!isCountInActive)} isDisabled={!isReadyForPlayback}>⏳ {t('player.countIn')}</Button>
+          <Button variant={isCountInActive ? 'solid' : 'outline'} colorScheme="orange" onClick={() => setIsCountInActive(!isCountInActive)} disabled={!isReadyForPlayback}>⏳ {t('player.countIn')}</Button>
           {isCountInActive && (
             <HStack>
-              <Slider min={0} max={1} step={0.1} value={countInVolume} onChange={(v) => setCountInVolume(v as number)} w="80px">
-                <SliderTrack><SliderFilledTrack /></SliderTrack>
-                <SliderThumb />
-              </Slider>
+              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="80px">
+                <Slider.Control>
+                  <Slider.Track><Slider.Range /></Slider.Track>
+                  <Slider.Thumbs />
+                </Slider.Control>
+              </Slider.Root>
               <Text fontSize="xs">{Math.round(countInVolume * 100)}%</Text>
             </HStack>
           )}
@@ -279,15 +284,11 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
 
         <HStack>
           <Text fontSize="sm">📄 {t('player.layout')}:</Text>
-          <Select value={layoutMode} onChange={(e) => setLayoutMode(Number(e.target.value) as alphaTab.LayoutMode)} maxW="200px">
-            <option value={alphaTab.LayoutMode.Page}>{t('player.page')}</option>
-            <option value={alphaTab.LayoutMode.Horizontal}>{t('player.horizontal')}</option>
-          </Select>
         </HStack>
 
         <HStack>
-          <Button onClick={() => handleExport('gp')} isDisabled={!isReadyForPlayback}>💾 {t('player.export')}</Button>
-          <Button onClick={() => handlePrint()} isDisabled={!isReadyForPlayback}>🖨️ {t('player.print')}</Button>
+          <Button onClick={() => handleExport('gp')} disabled={!isReadyForPlayback}>💾 {t('player.export')}</Button>
+          <Button onClick={() => handlePrint()} disabled={!isReadyForPlayback}>🖨️ {t('player.print')}</Button>
         </HStack>
       </HStack>
     </VStack>

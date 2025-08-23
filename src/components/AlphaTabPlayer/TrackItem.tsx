@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useI18n } from '@/app/i18n';
-import { Box, HStack, VStack, Text, Button, ButtonGroup, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Switch } from '@chakra-ui/react';
+import { Box, HStack, VStack, Text, Button, ButtonGroup, Slider, Switch } from '@chakra-ui/react';
 
 export interface TrackItemProps {
   api: alphaTab.AlphaTabApi;
@@ -40,9 +40,8 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
     return '🎸';
   };
 
-  const handleShowToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleShowToggle = (details: { checked: boolean }) => {
+    console.log('handleShowToggle', details);
     if (onToggleShow) {
       onToggleShow(track);
     }
@@ -50,29 +49,34 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
 
   return (
     <Box borderWidth="1px" borderRadius="md" p={3} mb={2} bg="white" _hover={{ shadow: 'sm', borderColor: 'blue.400' }} borderColor={isSelected ? 'blue.400' : 'gray.200'}>
-      <HStack spacing={2} mb={2} align="center">
+      <HStack gap={2} mb={2} align="center">
         <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
         <Text flex="1" fontWeight="medium">{track.name}</Text>
         <HStack>
           <Text fontSize="sm">{t('player.showTrack')}</Text>
-          <Switch isChecked={isSelected} onChange={handleShowToggle} />
+          <Switch.Root checked={isSelected} onCheckedChange={handleShowToggle}>
+            <Switch.HiddenInput />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
         </HStack>
       </HStack>
-
-      <VStack align="stretch" spacing={2}>
-        <ButtonGroup size="sm" isAttached>
+      <VStack align="stretch" gap={2}>
+        <ButtonGroup size="sm" attached>
           <Button colorScheme={isMute ? 'red' : 'gray'} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMute(v => !v); }}>{t('player.mute')}</Button>
           <Button colorScheme={isSolo ? 'green' : 'gray'} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSolo(v => !v); }}>{t('player.solo')}</Button>
         </ButtonGroup>
-
         <HStack>
           <Text w="20px" textAlign="center">🔊</Text>
-          <Slider min={0} max={16} value={volume} onChange={(v) => setVolume(v as number)} flex="1">
-            <SliderTrack>
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb />
-          </Slider>
+          <Slider.Root min={0} max={16} value={[volume]} onValueChange={(details) => setVolume(details.value[0])} flex="1">
+            <Slider.Control>
+              <Slider.Track>
+                <Slider.Range />
+              </Slider.Track>
+              <Slider.Thumbs />
+            </Slider.Control>
+          </Slider.Root>
           <Text w="24px" textAlign="center" fontSize="sm">{volume}</Text>
         </HStack>
       </VStack>

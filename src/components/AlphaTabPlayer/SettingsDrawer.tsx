@@ -91,14 +91,13 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
               <VStack align="stretch" gap={4}>
               <VStack align="stretch" gap={2}>
                 <Text fontSize="sm">Scale: {Math.round(scale * 100)}%</Text>
-                <Slider.Root min={0.5} max={2} step={0.05} value={[scale]} onValueChange={(e) => setScale(e.value[0])}>
-                  <Slider.Track>
-                    <Slider.Range />
-                  </Slider.Track>
-                  <Slider.Thumb index={0}>
-                    <Slider.DraggingIndicator />
-                    <Slider.HiddenInput />
-                  </Slider.Thumb>
+                <Slider.Root min={0.5} max={2} step={0.05} value={[scale]} onValueChange={(details) => setScale(details.value[0])}>
+                  <Slider.Control>
+                    <Slider.Track>
+                      <Slider.Range />
+                    </Slider.Track>
+                    <Slider.Thumbs />
+                  </Slider.Control>
                 </Slider.Root>
               </VStack>
 
@@ -155,13 +154,12 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
               <HStack justify="space-between">
                 <Text fontSize="sm">Continuous Scroll</Text>
-                <Switch.Root checked={continuousScroll} onCheckedChange={(e) => setContinuousScroll(e.checked)}>
-                <Switch.HiddenInput />
-                <Switch.Control>
-                  <Switch.Thumb />
-                </Switch.Control>
-                <Switch.Label />
-              </Switch.Root>
+                <Switch.Root checked={continuousScroll} onCheckedChange={(details) => setContinuousScroll(details.checked)}>
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
               </HStack>
             </VStack>
             </Drawer.Body>

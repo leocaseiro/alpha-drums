@@ -33,8 +33,8 @@ Steps to proceed:
 - [x] Add MPL-2.0 license and update package metadata and README
 
 ### UI Migration to Chakra UI (on branch `chakra-ui`)
-- [ ] Install Chakra UI and dependencies (`@chakra-ui/react`, `@emotion/react`, `@emotion/styled`, `framer-motion`)
-- [ ] Wrap app with `ChakraProvider`, `ColorModeScript` in `src/app/layout.tsx`
+- [x] Install Chakra UI and dependencies (`@chakra-ui/react`, `@emotion/react`, `@emotion/styled`, `framer-motion`)
+- [x] Wrap app with `ChakraProvider`, `ColorModeScript` in `src/app/layout.tsx`
 - [ ] Replace global fonts & base colors with Chakra theme tokens
 - [ ] Migrate loading overlay to Chakra `ProgressCircle`
 - [ ] Add `Toast` notifications for load, error, success

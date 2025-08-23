@@ -32,7 +32,11 @@
     "deploy": "GITHUB_PAGES=true NEXT_PUBLIC_BASE_PATH=/alpha-drums yarn build && yarn serwist && gh-pages -d out"
   },
   "dependencies": {
+    "@chakra-ui/react": "^3.25.0",
     "@coderline/alphatab": "^1.6.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "framer-motion": "^12.23.12",
     "next": "15.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

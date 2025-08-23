@@ -24,17 +24,22 @@ export const AlphaTabPlayer: React.FC = () => {
     settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback
     settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Avoid worklet requirements in dev
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
-
+    settings.player.enablePlayer = true;
+    settings.player.enableCursor = true;
+    
     // Display configuration
     settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
     settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
+    
     // Default to showing rhythm on tabs
     settings.notation.rhythmMode = alphaTab.TabRhythmMode.Automatic;
 
     console.log('Player settings configured:', {
       playerMode: settings.player.playerMode,
-      useWorkers: settings.core.useWorkers
+      useWorkers: settings.core.useWorkers,
+      enableCursor: settings.player.enableCursor,
+      scrollMode: settings.player.scrollMode
     });
   }, []);
 
@@ -61,14 +66,7 @@ export const AlphaTabPlayer: React.FC = () => {
     console.log('Score loaded event fired', loadedScore);
     setIsLoading(true); // Start loading when score is loaded and rendering begins
     setScore(loadedScore as alphaTab.model.Score);
-    // toaster.create({
-    //   title: "Toast Title",
-    //   description: "Toast Description",
-    // })
-    // toaster.create({
-    //   title: t('player.loading'),
-    //   description: t('player.renderingScore'),
-    // });
+    toaster.create({ type: 'success', title: t('player.loaded'), description: t('player.readyToPlay') });
   });
 
   useAlphaTabEvent(api, 'renderStarted', () => {
@@ -87,8 +85,7 @@ export const AlphaTabPlayer: React.FC = () => {
   useAlphaTabEvent(api, 'renderFinished', () => {
     console.log('Render finished event fired');
     setIsLoading(false);
-    toaster.create({ type: 'success', title: t('player.loaded'), description: t('player.readyToPlay') });
-    // Remove the api.render() call that was causing the infinite loop
+    // Don't show toast on every render, only on initial load
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,7 +214,7 @@ export const AlphaTabPlayer: React.FC = () => {
         <div className={styles.alphaTab} ref={element} />
       </div>
 
-      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
+      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} onOpenSettings={() => setSettingsOpen(true)} />}
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
     </div>
   );

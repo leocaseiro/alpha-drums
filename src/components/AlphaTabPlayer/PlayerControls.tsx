@@ -16,9 +16,10 @@ import {
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
   onOpenFileClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenSettings?: () => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick }) => {
+export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick, onOpenSettings }) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
@@ -289,6 +290,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <HStack>
           <Button onClick={() => handleExport('gp')} disabled={!isReadyForPlayback}>💾 {t('player.export')}</Button>
           <Button onClick={() => handlePrint()} disabled={!isReadyForPlayback}>🖨️ {t('player.print')}</Button>
+          {onOpenSettings && <Button onClick={onOpenSettings}>⚙️ Settings</Button>}
         </HStack>
       </HStack>
     </VStack>

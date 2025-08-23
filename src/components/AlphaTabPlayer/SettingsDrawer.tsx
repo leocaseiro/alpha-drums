@@ -15,6 +15,7 @@ import {
   Portal,
   createListCollection,
 } from '@chakra-ui/react';
+import { toaster } from '@/app/toaster';
 
 export interface SettingsDrawerProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export interface SettingsDrawerProps {
 export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
   const [scale, setScale] = React.useState<number>(api?.settings.display.scale ?? 0.8);
   const [layout, setLayout] = React.useState<number>(api?.settings.display.layoutMode ?? alphaTab.LayoutMode.Page);
-  const [staveProfile, setStaveProfile] = React.useState<number>(api?.settings.display.staveProfile ?? alphaTab.StaveProfile.ScoreTab);
+
   const [rhythmMode, setRhythmMode] = React.useState<number>(api?.settings.notation.rhythmMode ?? alphaTab.TabRhythmMode.Automatic);
   const [continuousScroll, setContinuousScroll] = React.useState<boolean>((api?.settings.player.scrollMode ?? alphaTab.ScrollMode.Continuous) === alphaTab.ScrollMode.Continuous);
 
@@ -33,12 +34,12 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
     if (!api) return;
     api.settings.display.scale = scale;
     api.settings.display.layoutMode = layout as alphaTab.LayoutMode;
-    api.settings.display.staveProfile = staveProfile as alphaTab.StaveProfile;
+
     api.settings.notation.rhythmMode = rhythmMode as alphaTab.TabRhythmMode;
-    api.settings.player.scrollMode = continuousScroll ? alphaTab.ScrollMode.Continuous : alphaTab.ScrollMode.Page;
+    api.settings.player.scrollMode = continuousScroll ? alphaTab.ScrollMode.Continuous : alphaTab.ScrollMode.OffScreen;
     api.updateSettings();
     api.render();
-  }, [api, scale, layout, staveProfile, rhythmMode, continuousScroll]);
+  }, [api, scale, layout, rhythmMode, continuousScroll]);
 
   const layoutModes = createListCollection({
     items: [
@@ -47,13 +48,7 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
     ],
   })
 
-  const staveProfiles = createListCollection({
-    items: [
-      { label: "Score", value: alphaTab.StaveProfile.Score },
-      { label: "Tab", value: alphaTab.StaveProfile.Tab },
-      { label: "Score + Tab", value: alphaTab.StaveProfile.ScoreTab },
-    ],
-  })
+
 
   const rhythmModes = createListCollection({
     items: [
@@ -103,9 +98,14 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
               <VStack align="stretch" gap={2}>
                 <Text fontSize="sm">Layout</Text>
-                <Select.Root collection={layoutModes} value={[layout.toString()]} onValueChange={(e) => setLayout(Number(e.value[0]))}>
+                <Select.Root collection={layoutModes} defaultValue={[layout.toString()]} onValueChange={(e) => {
+                  const newLayout = Number(e.value[0]);
+                  setLayout(newLayout);
+                  const layoutName = layoutModes.items.find(item => item.value === newLayout)?.label || 'Unknown';
+                  toaster.create({ type: 'info', title: 'Layout Changed', description: `Changed to ${layoutName}` });
+                }}>
                   <Select.Trigger>
-                    <Select.ValueText />
+                    <Select.ValueText placeholder={layoutModes.items.find(item => item.value === layout)?.label || 'Select Layout'} />
                   </Select.Trigger>
                   <Select.Content>
                   {layoutModes.items.map((layoutMode) => (
@@ -119,27 +119,15 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
               </VStack>
 
               <VStack align="stretch" gap={2}>
-                <Text fontSize="sm">Stave Profile</Text>
-                <Select.Root collection={staveProfiles} value={[staveProfile.toString()]} onValueChange={(e) => setStaveProfile(Number(e.value[0]))}>
-                  <Select.Trigger>
-                    <Select.ValueText />
-                  </Select.Trigger>
-                  <Select.Content>
-                    {staveProfiles.items.map((staveProfile) => (
-                      <Select.Item item={staveProfile} key={staveProfile.value}>
-                        {staveProfile.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select.Root>
-              </VStack>
-
-              <VStack align="stretch" gap={2}>
                 <Text fontSize="sm">Tab Rhythm Mode</Text>
-                <Select.Root collection={rhythmModes} value={[rhythmMode.toString()]} onValueChange={(e) => setRhythmMode(Number(e.value[0]))}>
+                <Select.Root collection={rhythmModes} defaultValue={[rhythmMode.toString()]} onValueChange={(e) => {
+                  const newRhythmMode = Number(e.value[0]);
+                  setRhythmMode(newRhythmMode);
+                  const rhythmName = rhythmModes.items.find(item => item.value === newRhythmMode)?.label || 'Unknown';
+                  toaster.create({ type: 'info', title: 'Rhythm Mode Changed', description: `Changed to ${rhythmName}` });
+                }}>
                   <Select.Trigger>
-                    <Select.ValueText />
+                    <Select.ValueText placeholder={rhythmModes.items.find(item => item.value === rhythmMode)?.label || 'Select Rhythm Mode'} />
                   </Select.Trigger>
                   <Select.Content>
                     {rhythmModes.items.map((rhythmMode) => (
@@ -154,7 +142,10 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
               <HStack justify="space-between">
                 <Text fontSize="sm">Continuous Scroll</Text>
-                <Switch.Root checked={continuousScroll} onCheckedChange={(details) => setContinuousScroll(details.checked)}>
+                <Switch.Root checked={continuousScroll} onCheckedChange={(details) => {
+                  setContinuousScroll(details.checked);
+                  toaster.create({ type: 'info', title: 'Scroll Mode', description: details.checked ? 'Enabled continuous scroll' : 'Disabled continuous scroll' });
+                }}>
                   <Switch.HiddenInput />
                   <Switch.Control>
                     <Switch.Thumb />

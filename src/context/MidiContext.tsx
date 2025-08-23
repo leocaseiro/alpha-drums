@@ -102,8 +102,10 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     };
   });
 
-  // Handle MIDI messages
+  // Handle MIDI messages (only from connected devices)
   const handleMidiMessage = useCallback((message: MidiMessage, deviceId: string) => {
+    console.log(`MIDI message from device ${deviceId}:`, message.type, message.note, message.velocity);
+    
     const historyEntry: MidiHistory = {
       id: `${Date.now()}-${Math.random()}`,
       timestamp: Date.now(),
@@ -193,7 +195,7 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     );
   }, [inputDevices]);
 
-  // Auto-connect to selected devices when they become available
+  // Auto-connect to selected devices when they become available (only for previously selected devices)
   useEffect(() => {
     if (!settings.autoConnectInputs) return;
     
@@ -201,7 +203,7 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
       if (settings.selectedInputs.has(device.id) && 
           device.state === 'connected' && 
           !connectedInputs.has(device.id)) {
-        console.log('Auto-connecting to input device:', device.name);
+        console.log('Auto-reconnecting to previously selected input device:', device.name);
         connectInput(device.id);
       }
     });
@@ -214,7 +216,7 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
       if (settings.selectedOutputs.has(device.id) && 
           device.state === 'connected' && 
           !connectedOutputs.has(device.id)) {
-        console.log('Auto-connecting to output device:', device.name);
+        console.log('Auto-reconnecting to previously selected output device:', device.name);
         connectOutput(device.id);
       }
     });
@@ -222,24 +224,38 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
 
   // Auto-connect to single devices when auto-connect is enabled and no devices are currently connected
   useEffect(() => {
-    if (settings.autoConnectInputs && inputDevices.length === 1 && connectedInputs.size === 0) {
+    if (settings.autoConnectInputs && 
+        inputDevices.length === 1 && 
+        connectedInputs.size === 0 && 
+        settings.selectedInputs.size === 0) { // Only if no devices were manually selected
       const device = inputDevices[0];
       if (device.state === 'connected') {
-        console.log('Auto-connecting to single input device:', device.name);
+        console.log('Auto-connecting to single input device (no manual selection):', device.name);
         connectInput(device.id);
+        // Also add to settings so it persists
+        updateSettings({
+          selectedInputs: new Set([device.id])
+        });
       }
     }
-  }, [inputDevices, settings.autoConnectInputs, connectedInputs, connectInput]);
+  }, [inputDevices, settings.autoConnectInputs, settings.selectedInputs, connectedInputs, connectInput, updateSettings]);
 
   useEffect(() => {
-    if (settings.autoConnectOutputs && outputDevices.length === 1 && connectedOutputs.size === 0) {
+    if (settings.autoConnectOutputs && 
+        outputDevices.length === 1 && 
+        connectedOutputs.size === 0 && 
+        settings.selectedOutputs.size === 0) { // Only if no devices were manually selected
       const device = outputDevices[0];
       if (device.state === 'connected') {
-        console.log('Auto-connecting to single output device:', device.name);
+        console.log('Auto-connecting to single output device (no manual selection):', device.name);
         connectOutput(device.id);
+        // Also add to settings so it persists
+        updateSettings({
+          selectedOutputs: new Set([device.id])
+        });
       }
     }
-  }, [outputDevices, settings.autoConnectOutputs, connectedOutputs, connectOutput]);
+  }, [outputDevices, settings.autoConnectOutputs, settings.selectedOutputs, connectedOutputs, connectOutput, updateSettings]);
 
   const contextValue: MidiContextValue = {
     // Inputs

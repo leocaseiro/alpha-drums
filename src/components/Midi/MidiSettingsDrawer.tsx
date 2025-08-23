@@ -44,6 +44,8 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
 
   const handleInputToggle = (deviceId: string, connected: boolean) => {
     console.log(`Toggle input device ${deviceId}: ${connected ? 'disconnect' : 'connect'}`);
+    console.log('Current connected inputs:', Array.from(connectedInputs));
+    console.log('Current selected inputs in settings:', Array.from(settings.selectedInputs));
     const device = inputDevices.find(d => d.id === deviceId);
     const deviceName = device?.name || 'Unknown Device';
     
@@ -233,6 +235,7 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
                     <VStack align="stretch" gap={2}>
                       {inputDevices.map((device) => {
                         const isConnected = connectedInputs.has(device.id);
+                        console.log(`Device ${device.name} (${device.id}): connected=${isConnected}, state=${device.state}`);
                         return (
                           <Box
                             key={device.id}

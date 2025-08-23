@@ -88,15 +88,7 @@ export function useMidiOutputs(options: UseMidiOutputsOptions = {}) {
     });
 
     setDevices(deviceList);
-
-    // Auto-connect to devices if enabled and only one device available
-    if (autoConnect && deviceList.length === 1) {
-      const device = deviceList[0];
-      if (device.state === 'connected' && !connectedDevices.has(device.id)) {
-        connectDevice(device.id);
-      }
-    }
-  }, [midiAccess, autoConnect, connectedDevices]);
+  }, [midiAccess]);
 
   // Connect to a device
   const connectDevice = useCallback((deviceId: string) => {
@@ -189,6 +181,16 @@ export function useMidiOutputs(options: UseMidiOutputsOptions = {}) {
       refreshDevices();
     }
   }, [midiAccess, refreshDevices]);
+
+  // Auto-connect logic (separate from refreshDevices to avoid loops)
+  useEffect(() => {
+    if (autoConnect && devices.length === 1) {
+      const device = devices[0];
+      if (device.state === 'connected' && !connectedDevices.has(device.id)) {
+        connectDevice(device.id);
+      }
+    }
+  }, [devices, autoConnect, connectedDevices, connectDevice]);
 
   // Cleanup on unmount
   useEffect(() => {

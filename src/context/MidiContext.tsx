@@ -104,12 +104,11 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
 
   // Handle MIDI messages
   const handleMidiMessage = useCallback((message: MidiMessage, deviceId: string) => {
-    const device = inputDevices.find(d => d.id === deviceId);
     const historyEntry: MidiHistory = {
       id: `${Date.now()}-${Math.random()}`,
       timestamp: Date.now(),
       deviceId,
-      deviceName: device?.name || 'Unknown Device',
+      deviceName: deviceId, // Use deviceId as fallback, will be updated by effect
       message
     };
 
@@ -181,6 +180,18 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
   const clearHistory = useCallback(() => {
     setHistory([]);
   }, []);
+
+  // Update device names in history when devices change
+  useEffect(() => {
+    setHistory(prev => 
+      prev.map(entry => {
+        const device = inputDevices.find(d => d.id === entry.deviceId);
+        return device && device.name !== entry.deviceName
+          ? { ...entry, deviceName: device.name }
+          : entry;
+      })
+    );
+  }, [inputDevices]);
 
   // Auto-connect to selected devices when they become available
   useEffect(() => {

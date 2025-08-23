@@ -11,7 +11,9 @@ declare global {
     onstatechange: ((event: MIDIConnectionEvent) => void) | null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface MIDIInputMap extends ReadonlyMap<string, MIDIInput> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface MIDIOutputMap extends ReadonlyMap<string, MIDIOutput> {}
 
   interface MIDIPort extends EventTarget {

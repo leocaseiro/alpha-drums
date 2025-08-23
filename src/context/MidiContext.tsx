@@ -107,7 +107,7 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     console.log(`MIDI message from device ${deviceId}:`, message.type, message.note, message.velocity);
     
     const historyEntry: MidiHistory = {
-      id: `${Date.now()}-${Math.random()}`,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: Date.now(),
       deviceId,
       deviceName: deviceId, // Use deviceId as fallback, will be updated by effect

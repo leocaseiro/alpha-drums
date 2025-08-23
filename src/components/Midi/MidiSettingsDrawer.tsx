@@ -12,7 +12,6 @@ import {
   Portal,
   Badge,
   IconButton,
-  Alert,
   Box,
 } from '@chakra-ui/react';
 import { useMidi } from '@/context/MidiContext';
@@ -137,7 +136,7 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
                 <Box p={4} bg="red.50" borderRadius="md" borderWidth="1px" borderColor="red.200">
                   <Text fontWeight="bold" color="red.700">MIDI Not Supported</Text>
                   <Text color="red.600" fontSize="sm" mt={1}>
-                    Your browser doesn't support the Web MIDI API. Please use a modern browser like Chrome, Edge, or Opera.
+                    Your browser doesn&apos;t support the Web MIDI API. Please use a modern browser like Chrome, Edge, or Opera.
                   </Text>
                 </Box>
               </Drawer.Body>

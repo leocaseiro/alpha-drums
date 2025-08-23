@@ -95,23 +95,23 @@ All the features should have a playwright test, and you should validate if the t
 <!-- - [ ] 30. we should have a playwright passing for every feature -->
 
 ## Midi Features https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API (new branch after UI changes)
-- [ ] 1. Implement a way to detect midi inputs (ref: https://github.com/sightread/sightread/blob/main/src/features/midi/index.tsx)
-  - [ ] a. should automatic midi inputs, and outputs
-  - [ ] b. user should select what midi to subscribe as input, or disable all, if only one available, select it by default (ref: https://github.com/sightread/sightread/blob/main/src/hooks/useMidiInputs.ts)
-  - [ ] c. user should select what midi to subscribe as output, or disable all, if only one available, disabled by default (ref: https://github.com/sightread/sightread/blob/main/src/hooks/useMidiOutputs.ts)
-  - [ ] d. we should persist those settings in case we refresh the app
-  - [ ] e. we should automatic update the list if remove/add device
-  - [ ] f. auto subscribe on input connect, auto disable when input is removed
-  - [ ] g. user should be able to force refresh inputs
-  - [ ] h. add a toggle to log the inputs on console, and into a drawer called history, and a way to reset it.
-- [ ] 2. Rhytim game
-  - [ ] a. the user can select to practice or play score
-  - [ ] b. when user click in play score, we should start the song, and also detect if the midi inputs are played correctly
-  - [ ] c. we should score streak, accuracy, perfect, early, late, miss, etc and display in percentage, as well as 5 stars.
-  - [ ] d. we should use the alphatab colors to detect when user pressed the right note in the right time as a visual feedback using the PercussionNoteHeadGlyph.paint from alphatab https://github.com/CoderLine/alphaTab/blob/main/src/rendering/glyphs/PercussionNoteHeadGlyph.ts#L24-L46 and https://www.alphatab.net/docs/guides/coloring
-  - [ ] e. if the user miss the note (not played in the time, or too late), we should red, and add black cross (x)
-  - [ ] f. for every correct note, we should also wrap the notehead with a green circle.
-  - [ ] g. for every extra note (played extra notes), we should display as a cross.
-  - [ ] h. we should be able to see our last scores (save as indexedDB with the name of song, when I played last time, and the score in details)
+- [x] 1. Implement a way to detect midi inputs (ref: https://github.com/sightread/sightread/blob/main/src/features/midi/index.tsx)
+  - [x] a. should automatic midi inputs, and outputs
+  - [x] b. user should select what midi to subscribe as input, or disable all, if only one available, select it by default (ref: https://github.com/sightread/sightread/blob/main/src/hooks/useMidiInputs.ts)
+  - [x] c. user should select what midi to subscribe as output, or disable all, if only one available, disabled by default (ref: https://github.com/sightread/sightread/blob/main/src/hooks/useMidiOutputs.ts)
+  - [x] d. we should persist those settings in case we refresh the app
+  - [x] e. we should automatic update the list if remove/add device
+  - [x] f. auto subscribe on input connect, auto disable when input is removed
+  - [x] g. user should be able to force refresh inputs
+  - [x] h. add a toggle to log the inputs on console, and into a drawer called history, and a way to reset it.
+- [x] 2. Rhytim game
+  - [x] a. the user can select to practice or play score
+  - [x] b. when user click in play score, we should start the song, and also detect if the midi inputs are played correctly
+  - [x] c. we should score streak, accuracy, perfect, early, late, miss, etc and display in percentage, as well as 5 stars.
+  - [x] d. we should use the alphatab colors to detect when user pressed the right note in the right time as a visual feedback using the PercussionNoteHeadGlyph.paint from alphatab https://github.com/CoderLine/alphaTab/blob/main/src/rendering/glyphs/PercussionNoteHeadGlyph.ts#L24-L46 and https://www.alphatab.net/docs/guides/coloring
+  - [x] e. if the user miss the note (not played in the time, or too late), we should red, and add black cross (x)
+  - [x] f. for every correct note, we should also wrap the notehead with a green circle.
+  - [x] g. for every extra note (played extra notes), we should display as a cross.
+  - [x] h. we should be able to see our last scores (save as indexedDB with the name of song, when I played last time, and the score in details)
   - [ ] i. we should have a record button, so I could record, and replay my play
-  - [ ] h. when I play, I should be able to mute the drum track (or any other track if user select), but it is optional. However, we should still able to listen to the input device (control if play from device or from alphatab synthesizer)
+  - [ ] j. when I play, I should be able to mute the drum track (or any other track if user select), but it is optional. However, we should still able to listen to the input device (control if play from device or from alphatab synthesizer)

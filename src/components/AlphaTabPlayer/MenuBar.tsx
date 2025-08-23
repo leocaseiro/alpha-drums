@@ -14,6 +14,7 @@ export interface MenuBarProps {
   onToggleTrackSidebar: () => void;
   onOpenMidiSettings?: () => void;
   onOpenMidiHistory?: () => void;
+  onOpenMidiGame?: () => void;
 }
 
 export const MenuBar: React.FC<MenuBarProps> = ({ 
@@ -23,7 +24,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onOpenSettings, 
   onToggleTrackSidebar,
   onOpenMidiSettings,
-  onOpenMidiHistory
+  onOpenMidiHistory,
+  onOpenMidiGame
 }) => {
   const { t } = useI18n();
 
@@ -134,6 +136,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 </MenuItem>
                 <MenuItem value="midi-history" onClick={onOpenMidiHistory} disabled={!onOpenMidiHistory}>
                   📝 MIDI History
+                </MenuItem>
+                <MenuItem value="midi-game" onClick={onOpenMidiGame} disabled={!onOpenMidiGame}>
+                  🎮 MIDI Game
                 </MenuItem>
               </MenuContent>
             </MenuPositioner>

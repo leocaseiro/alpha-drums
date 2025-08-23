@@ -14,6 +14,8 @@ import { SettingsDrawer } from './SettingsDrawer';
 import { MenuBar } from './MenuBar';
 import { MidiSettingsDrawer } from '../Midi/MidiSettingsDrawer';
 import { MidiHistoryDrawer } from '../Midi/MidiHistoryDrawer';
+import { MidiGameDrawer } from '../Midi/MidiGameDrawer';
+import { AlphaTabNoteHighlighter } from '../Midi/AlphaTabNoteHighlighter';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
@@ -26,6 +28,7 @@ export const AlphaTabPlayer: React.FC = () => {
   const [singleTrackMode, setSingleTrackMode] = useState<alphaTab.model.Track | null>(null);
   const [isMidiSettingsOpen, setMidiSettingsOpen] = useState(false);
   const [isMidiHistoryOpen, setMidiHistoryOpen] = useState(false);
+  const [isMidiGameOpen, setMidiGameOpen] = useState(false);
   const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
@@ -326,6 +329,7 @@ export const AlphaTabPlayer: React.FC = () => {
         onToggleTrackSidebar={() => setSidebarVisible(!isSidebarVisible)}
         onOpenMidiSettings={() => setMidiSettingsOpen(true)}
         onOpenMidiHistory={() => setMidiHistoryOpen(true)}
+        onOpenMidiGame={() => setMidiGameOpen(true)}
       />
       {isLoading && (
         <Box position="absolute" inset={0} bg="blackAlpha.700" zIndex={1000}>
@@ -462,6 +466,8 @@ export const AlphaTabPlayer: React.FC = () => {
           ref={viewPortRef}
         >
           <Box w="full" h="auto" minH="500px" ref={element} />
+          {/* MIDI Note Highlighter - only active when score is loaded */}
+          {api && score && <AlphaTabNoteHighlighter api={api} enabled={true} />}
         </Box>
       </Flex>
 
@@ -469,6 +475,7 @@ export const AlphaTabPlayer: React.FC = () => {
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
       <MidiSettingsDrawer isOpen={isMidiSettingsOpen} onClose={() => setMidiSettingsOpen(false)} />
       <MidiHistoryDrawer isOpen={isMidiHistoryOpen} onClose={() => setMidiHistoryOpen(false)} />
+      <MidiGameDrawer isOpen={isMidiGameOpen} onClose={() => setMidiGameOpen(false)} api={api ?? undefined} score={score} />
     </Flex>
   );
 };

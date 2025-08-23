@@ -12,14 +12,27 @@ import {
   Slider,
   IconButton,
   Editable,
+  Switch,
+  Badge,
 } from '@chakra-ui/react';
 
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
   onOpenFileClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isGameEnabled?: boolean;
+  isPracticeMode?: boolean;
+  onGameToggle?: (enabled: boolean) => void;
+  onPracticeModeToggle?: (practice: boolean) => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick }) => {
+export const PlayerControls: React.FC<PlayerControlsProps> = ({ 
+  api, 
+  onOpenFileClick,
+  isGameEnabled = false,
+  isPracticeMode = false,
+  onGameToggle,
+  onPracticeModeToggle
+}) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
@@ -201,6 +214,41 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <IconButton aria-label={isPlaying ? t('player.pause') : t('player.play')} onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
           {isPlaying ? `⏸︎` : `▶︎`}
         </IconButton>
+
+        {/* Game Mode Controls */}
+        <VStack gap={1} align="center" minW="120px">
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">🎮 Game:</Text>
+            <Switch.Root
+              checked={isGameEnabled}
+              onCheckedChange={(details) => onGameToggle?.(details.checked)}
+              size="sm"
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </HStack>
+          {isGameEnabled && (
+            <HStack gap={2} align="center">
+              <Text fontSize="xs" color="gray.600">Mode:</Text>
+              <Switch.Root
+                checked={isPracticeMode}
+                onCheckedChange={(details) => onPracticeModeToggle?.(details.checked)}
+                size="sm"
+              >
+                <Switch.HiddenInput />
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+              <Badge colorScheme={isPracticeMode ? 'blue' : 'purple'} size="sm">
+                {isPracticeMode ? 'Practice' : 'Score'}
+              </Badge>
+            </HStack>
+          )}
+        </VStack>
 
         <VStack minW="180px" gap={1} align="stretch">
           <HStack gap={2} align="center">

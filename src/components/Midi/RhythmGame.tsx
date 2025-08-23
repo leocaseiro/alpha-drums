@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useImperativeHandle } from 'react';
 import {
   Box,
   VStack,
@@ -48,6 +48,9 @@ interface ExpectedNote {
 interface RhythmGameProps {
   api?: alphaTab.AlphaTabApi;
   score?: alphaTab.model.Score;
+  onGameStateChange?: (state: GameState) => void;
+  practiceMode?: boolean;
+  hideUI?: boolean;
 }
 
 const TIMING_WINDOWS = {
@@ -66,7 +69,10 @@ const SCORE_VALUES = {
   extra: -25, // penalty for extra notes
 };
 
-export function RhythmGame({ api, score }: RhythmGameProps) {
+export const RhythmGame = React.forwardRef<
+  { startGame: (practice: boolean) => void; stopGame: () => void },
+  RhythmGameProps
+>(({ api, score, onGameStateChange, practiceMode = false, hideUI = false }, ref) => {
   const { history } = useMidi();
   const [gameState, setGameState] = useState<GameState>({
     isPlaying: false,
@@ -91,6 +97,16 @@ export function RhythmGame({ api, score }: RhythmGameProps) {
   const gameStartTimeRef = useRef<number>(0);
   const lastProcessedMessageRef = useRef<string>('');
   const sessionStartTimeRef = useRef<number>(0);
+
+  // Notify parent of game state changes
+  useEffect(() => {
+    onGameStateChange?.(gameState);
+  }, [gameState, onGameStateChange]);
+
+  // Update practice mode when prop changes
+  useEffect(() => {
+    setGameState(prev => ({ ...prev, isPracticeMode: practiceMode }));
+  }, [practiceMode]);
 
   // Calculate accuracy and stars
   const calculateStats = useCallback((state: GameState) => {
@@ -426,7 +442,18 @@ export function RhythmGame({ api, score }: RhythmGameProps) {
     ));
   };
 
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    startGame: (practice: boolean = false) => {
+      startGame(practice);
+    },
+    stopGame: () => {
+      stopGame();
+    }
+  }), []);
+
   if (!api || !score) {
+    if (hideUI) return null;
     return (
       <Box p={4} bg="gray.100" borderRadius="lg">
         <Text textAlign="center" color="gray.600">
@@ -434,6 +461,11 @@ export function RhythmGame({ api, score }: RhythmGameProps) {
         </Text>
       </Box>
     );
+  }
+
+  if (hideUI) {
+    // Return null for hidden mode - the game logic still runs via effects
+    return null;
   }
 
   return (
@@ -603,4 +635,6 @@ export function RhythmGame({ api, score }: RhythmGameProps) {
       </VStack>
     </Box>
   );
-}
+});
+
+RhythmGame.displayName = 'RhythmGame';

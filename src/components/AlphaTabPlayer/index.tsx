@@ -16,6 +16,8 @@ import { MidiSettingsDrawer } from '../Midi/MidiSettingsDrawer';
 import { MidiHistoryDrawer } from '../Midi/MidiHistoryDrawer';
 import { MidiGameDrawer } from '../Midi/MidiGameDrawer';
 import { AlphaTabNoteHighlighter } from '../Midi/AlphaTabNoteHighlighter';
+import { MidiScoreDisplay } from '../Midi/MidiScoreDisplay';
+import { RhythmGame } from '../Midi/RhythmGame';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
@@ -29,6 +31,25 @@ export const AlphaTabPlayer: React.FC = () => {
   const [isMidiSettingsOpen, setMidiSettingsOpen] = useState(false);
   const [isMidiHistoryOpen, setMidiHistoryOpen] = useState(false);
   const [isMidiGameOpen, setMidiGameOpen] = useState(false);
+  const [isGameEnabled, setGameEnabled] = useState(false);
+  const [isPracticeMode, setPracticeMode] = useState(false);
+  const [gameState, setGameState] = useState({
+    isPlaying: false,
+    isPracticeMode: false,
+    score: 0,
+    streak: 0,
+    totalNotes: 0,
+    hitNotes: 0,
+    perfectHits: 0,
+    goodHits: 0,
+    lateHits: 0,
+    earlyHits: 0,
+    missedNotes: 0,
+    extraNotes: 0,
+    accuracy: 0,
+    stars: 0,
+  });
+  const rhythmGameRef = React.useRef<{ startGame: (practice: boolean) => void; stopGame: () => void } | null>(null);
   const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
@@ -192,6 +213,17 @@ export const AlphaTabPlayer: React.FC = () => {
   // Add debug events for cursor and playback
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
     console.log('Player state changed:', e);
+    const state = (e as unknown as { state: alphaTab.synth.PlayerState }).state;
+    const isPlaying = state === alphaTab.synth.PlayerState.Playing;
+    
+    // Auto-start/stop game when player starts/stops
+    if (isGameEnabled && rhythmGameRef.current) {
+      if (isPlaying && !gameState.isPlaying) {
+        rhythmGameRef.current.startGame(isPracticeMode);
+      } else if (!isPlaying && gameState.isPlaying) {
+        rhythmGameRef.current.stopGame();
+      }
+    }
   });
 
   useAlphaTabEvent(api, 'playerPositionChanged', (e) => {
@@ -467,15 +499,45 @@ export const AlphaTabPlayer: React.FC = () => {
         >
           <Box w="full" h="auto" minH="500px" ref={element} />
           {/* MIDI Note Highlighter - only active when score is loaded */}
-          {api && score && <AlphaTabNoteHighlighter api={api} enabled={true} />}
+          {api && score && <AlphaTabNoteHighlighter api={api} enabled={isGameEnabled} />}
+          
+          {/* Hidden Rhythm Game Logic - only when game is enabled */}
+          {api && score && isGameEnabled && (
+            <RhythmGame 
+              api={api} 
+              score={score} 
+              ref={rhythmGameRef}
+              onGameStateChange={setGameState}
+              practiceMode={isPracticeMode}
+              hideUI={true}
+            />
+          )}
         </Box>
       </Flex>
 
-      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
+      {api && score && (
+        <>
+          {/* MIDI Score Display */}
+          {isGameEnabled && (
+            <Box p={4}>
+              <MidiScoreDisplay gameState={gameState} isGameEnabled={isGameEnabled} />
+            </Box>
+          )}
+          
+          <PlayerControls 
+            api={api} 
+            onOpenFileClick={handleFileInput}
+            isGameEnabled={isGameEnabled}
+            isPracticeMode={isPracticeMode}
+            onGameToggle={setGameEnabled}
+            onPracticeModeToggle={setPracticeMode}
+          />
+        </>
+      )}
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
       <MidiSettingsDrawer isOpen={isMidiSettingsOpen} onClose={() => setMidiSettingsOpen(false)} />
       <MidiHistoryDrawer isOpen={isMidiHistoryOpen} onClose={() => setMidiHistoryOpen(false)} />
-      <MidiGameDrawer isOpen={isMidiGameOpen} onClose={() => setMidiGameOpen(false)} api={api ?? undefined} score={score} />
+      <MidiGameDrawer isOpen={isMidiGameOpen} onClose={() => setMidiGameOpen(false)} />
     </Flex>
   );
 };

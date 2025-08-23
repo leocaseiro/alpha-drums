@@ -138,7 +138,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                   📝 MIDI History
                 </MenuItem>
                 <MenuItem value="midi-game" onClick={onOpenMidiGame} disabled={!onOpenMidiGame}>
-                  🎮 MIDI Game
+                  🎹 MIDI Feedback
                 </MenuItem>
               </MenuContent>
             </MenuPositioner>

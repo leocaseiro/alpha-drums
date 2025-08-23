@@ -4,6 +4,7 @@ import React from 'react';
 import { HStack, Button, Text, MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuSeparator } from '@chakra-ui/react';
 import { useI18n } from '@/app/i18n';
 import * as alphaTab from '@coderline/alphatab';
+import I18nSwitcher from '@/app/I18nSwitcher';
 
 export interface MenuBarProps {
   api?: alphaTab.AlphaTabApi;
@@ -110,6 +111,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
         <Button variant="outline" size="sm" onClick={onOpenSettings}>
           ⚙️ Settings
         </Button>
+
+        <I18nSwitcher />
       </HStack>
     </HStack>
   );

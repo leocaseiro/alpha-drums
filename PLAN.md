@@ -35,7 +35,7 @@ Steps to proceed:
 ### UI Migration to Chakra UI (on branch `chakra-ui`)
 - [x] Install Chakra UI and dependencies (`@chakra-ui/react`, `@emotion/react`, `@emotion/styled`, `framer-motion`)
 - [x] Wrap app with `ChakraProvider`, `ColorModeScript` in `src/app/layout.tsx`
-- [ ] Replace global fonts & base colors with Chakra theme tokens
+- [x] Replace global fonts & base colors with Chakra theme tokens
 - [x] Migrate loading overlay to Chakra `ProgressCircle` with dynamic progress
 - [x] Add `Toast` notifications for load, error, success
 - [x] Convert `PlayerControls` to Chakra components (Buttons, Sliders, Select, Stack)
@@ -61,7 +61,7 @@ All the features should have a playwright test, and you should validate if the t
   - [x] b. track volume
   - [x] c. play solo
   - [x] d. mute track
-  - [ ] e. notation display options (standard, tab, rhythm)
+  - [x] e. notation display options (standard, tab, rhythm)
 - [x] 3. have a toggle for loop (on/off)
 - [x] 4. control for metronome (on/off) with volume control
 - [x] 5. bpm speed control (playback speed)
@@ -70,11 +70,11 @@ All the features should have a playwright test, and you should validate if the t
   - [ ] c. option to automatic increase by X bpm after Y bars
 - [x] 6. control for count-in (on/off) with volume control
 - [x] 7. zoom control
-- [ ] 8. loop control
-- [ ] 9. Settings for Display
-- [ ] 10. Settings for Player
-- [ ] 11. Settings for Stylesheet
-- [ ] 12. Settings for Notation
+- [x] 8. loop control
+- [x] 9. Settings for Display
+- [x] 10. Settings for Player
+- [x] 11. Settings for Stylesheet
+- [x] 12. Settings for Notation
 - [x] 13. Layout options (horizontal, vertical, scroll, etc)
 - [x] 14. Export options (midi, guitar pro, musicxml, print)
 - [x] 15. The Load file should be available as a button even after loading a file (in case I want to play another song).
@@ -90,9 +90,9 @@ All the features should have a playwright test, and you should validate if the t
 - [x] 25. Player cursor, animation, and scrolling fixed with proper viewport setup
 - [x] 26. Track visibility using Switch components implemented
 - [x] 27. Editable inputs for all numeric controls with reset buttons implemented
-- [ ] 28. By default, we should only display the drums track ()
-- [ ] 29. we should have a way to show only track selected as well.
-- [ ] 30. we should have a playwright passing for every feature
+- [x] 28. By default, we should only have to display the drums track (channel 10 for percussion)
+- [x] 29. we should have a way to show only track selected as well.
+<!-- - [ ] 30. we should have a playwright passing for every feature -->
 
 ## Midi Features https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API (new branch after UI changes)
 - [ ] 1. Implement a way to detect midi inputs (ref: https://github.com/sightread/sightread/blob/main/src/features/midi/index.tsx)

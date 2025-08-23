@@ -11,10 +11,12 @@ export interface TrackItemProps {
   api: alphaTab.AlphaTabApi;
   track: alphaTab.model.Track;
   isSelected: boolean;
+  isSingleTrackMode?: boolean;
   onToggleShow?: (track: alphaTab.model.Track) => void;
+  onShowOnlyTrack?: (track: alphaTab.model.Track) => void;
 }
 
-export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, onToggleShow }) => {
+export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, isSingleTrackMode, onToggleShow, onShowOnlyTrack }) => {
   const { t } = useI18n();
   const [isMute, setMute] = useState(track.playbackInfo.isMute);
   const [isSolo, setSolo] = useState(track.playbackInfo.isSolo);
@@ -100,6 +102,19 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
       <HStack gap={2} mb={2} align="center">
         <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
         <Text flex="1" fontWeight="medium" fontSize="sm" textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap">{track.name}</Text>
+        {onShowOnlyTrack && (
+          <Tooltip content={isSingleTrackMode ? 'Already in single track mode' : 'Show only this track'} showArrow>
+            <IconButton
+              aria-label="Show only this track"
+              size="xs"
+              variant="ghost"
+              onClick={() => onShowOnlyTrack(track)}
+              disabled={isSingleTrackMode}
+            >
+              🎯
+            </IconButton>
+          </Tooltip>
+        )}
       </HStack>
       <VStack align="stretch" gap={3} w="full">
         <HStack gap={4} justify="center">

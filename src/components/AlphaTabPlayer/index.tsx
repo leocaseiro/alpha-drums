@@ -7,7 +7,7 @@ import { useI18n } from '@/app/i18n';
 import { TrackItem } from './TrackItem';
 import { PlayerControls } from './PlayerControls';
 
-import { AbsoluteCenter, Box, Center, Text, VStack, Button, Flex } from '@chakra-ui/react';
+import { AbsoluteCenter, Box, Center, Text, VStack, HStack, Button, Flex } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { ProgressCircle } from '@chakra-ui/react';
 import { SettingsDrawer } from './SettingsDrawer';
@@ -21,6 +21,7 @@ export const AlphaTabPlayer: React.FC = () => {
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isSidebarVisible, setSidebarVisible] = useState(true);
+  const [singleTrackMode, setSingleTrackMode] = useState<alphaTab.model.Track | null>(null);
   const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
@@ -136,12 +137,27 @@ export const AlphaTabPlayer: React.FC = () => {
   useAlphaTabEvent(api, 'renderStarted', () => {
     console.log('Render started event fired');
     setLoadingProgress(60); // Rendering started
-    // Set up initial track selection
+    // Set up initial track selection - default to drums only
     if (api && api.tracks) {
       const trackMap = new Map<number, alphaTab.model.Track>();
-      api.tracks.forEach((track) => {
-        trackMap.set(track.index, track);
-      });
+      // Find percussion tracks (drums) first
+      const drumTracks = api.tracks.filter((track) => 
+        track.staves.some((stave) => stave.isPercussion)
+      );
+      
+      if (drumTracks.length > 0) {
+        // Default to drums only
+        drumTracks.forEach((track) => {
+          trackMap.set(track.index, track);
+        });
+        console.log('Defaulting to drum tracks:', drumTracks.map(t => t.name));
+      } else {
+        // Fallback to all tracks if no drums found
+        api.tracks.forEach((track) => {
+          trackMap.set(track.index, track);
+        });
+        console.log('No drum tracks found, showing all tracks');
+      }
       setSelectedTracks(trackMap);
     }
     // Keep loading state as true during rendering
@@ -213,10 +229,64 @@ export const AlphaTabPlayer: React.FC = () => {
     }
 
     setSelectedTracks(newSelectedTracks);
+    setSingleTrackMode(null); // Exit single track mode when toggling
 
     // Update AlphaTab to render only selected tracks
     if (newSelectedTracks.size > 0) {
       api?.renderTracks(Array.from(newSelectedTracks.values()));
+    }
+  };
+
+  const handleShowOnlyTrack = (track: alphaTab.model.Track) => {
+    setSingleTrackMode(track);
+    const singleTrackMap = new Map<number, alphaTab.model.Track>();
+    singleTrackMap.set(track.index, track);
+    setSelectedTracks(singleTrackMap);
+    api?.renderTracks([track]);
+    toaster.create({
+      type: 'info',
+      title: 'Single Track Mode',
+      description: `Now showing only "${track.name}"`
+    });
+  };
+
+  const handleShowAllTracks = () => {
+    if (score) {
+      setSingleTrackMode(null);
+      const allTracksMap = new Map<number, alphaTab.model.Track>();
+      score.tracks.forEach((track) => {
+        allTracksMap.set(track.index, track);
+      });
+      setSelectedTracks(allTracksMap);
+      api?.renderTracks(score.tracks);
+      toaster.create({
+        type: 'info',
+        title: 'All Tracks Mode',
+        description: 'Now showing all tracks'
+      });
+    }
+  };
+
+  const handleShowDrumsOnly = () => {
+    if (score) {
+      setSingleTrackMode(null);
+      const drumTracks = score.tracks.filter((track) => 
+        track.staves.some((stave) => stave.isPercussion)
+      );
+      
+      if (drumTracks.length > 0) {
+        const drumTracksMap = new Map<number, alphaTab.model.Track>();
+        drumTracks.forEach((track) => {
+          drumTracksMap.set(track.index, track);
+        });
+        setSelectedTracks(drumTracksMap);
+        api?.renderTracks(drumTracks);
+        toaster.create({
+          type: 'info',
+          title: 'Drums Only Mode',
+          description: `Now showing ${drumTracks.length} drum track(s)`
+        });
+      }
     }
   };
 
@@ -326,9 +396,39 @@ export const AlphaTabPlayer: React.FC = () => {
             flexShrink={0}
             css={{ resize: 'horizontal' }}
           >
-            <Text fontSize="lg" fontWeight="semibold" color="gray.700" mb={4}>
-              {t('player.tracks')}
-            </Text>
+            <VStack align="stretch" mb={4} gap={2}>
+              <Text fontSize="lg" fontWeight="semibold" color="gray.700">
+                {t('player.tracks')}
+              </Text>
+              <HStack gap={1}>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={handleShowAllTracks}
+                  disabled={!singleTrackMode && selectedTracks.size === score.tracks.length}
+                >
+                  All
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={handleShowDrumsOnly}
+                  colorScheme="orange"
+                >
+                  🥁 Drums
+                </Button>
+                {singleTrackMode && (
+                  <Button
+                    size="xs"
+                    variant="solid"
+                    colorScheme="teal"
+                    onClick={handleShowAllTracks}
+                  >
+                    Exit Solo
+                  </Button>
+                )}
+              </HStack>
+            </VStack>
             <VStack align="stretch" gap={0}>
               {score.tracks.map((track) => (
                 <TrackItem
@@ -336,7 +436,9 @@ export const AlphaTabPlayer: React.FC = () => {
                   api={api!}
                   track={track}
                   isSelected={selectedTracks.has(track.index)}
+                  isSingleTrackMode={singleTrackMode?.index === track.index}
                   onToggleShow={handleToggleTrack}
+                  onShowOnlyTrack={handleShowOnlyTrack}
                 />
               ))}
             </VStack>

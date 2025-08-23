@@ -253,7 +253,7 @@ export const AlphaTabPlayer: React.FC = () => {
       <Flex flex="1" gap={4} overflow="hidden">
         {score && isSidebarVisible && (
           <Box
-            w="300px"
+            w="320px"
             bg="gray.50"
             borderRightWidth="1px"
             borderColor="gray.200"

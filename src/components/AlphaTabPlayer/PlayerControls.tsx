@@ -290,7 +290,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           <Button variant={isMetronomeActive ? 'solid' : 'outline'} colorScheme="purple" onClick={() => setIsMetronomeActive(!isMetronomeActive)} disabled={!isReadyForPlayback}>🎼 {t('player.metronome')}</Button>
           {isMetronomeActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="80px">
+              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="100px">
                 <Slider.Control>
                   <Slider.Track><Slider.Range /></Slider.Track>
                   <Slider.Thumbs />
@@ -323,7 +323,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           <Button variant={isCountInActive ? 'solid' : 'outline'} colorScheme="orange" onClick={() => setIsCountInActive(!isCountInActive)} disabled={!isReadyForPlayback}>⏳ {t('player.countIn')}</Button>
           {isCountInActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="80px">
+              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="100px">
                 <Slider.Control>
                   <Slider.Track><Slider.Range /></Slider.Track>
                   <Slider.Thumbs />

@@ -87,12 +87,21 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
   };
 
   return (
-    <Box borderWidth="1px" borderRadius="md" p={3} mb={2} bg="white" _hover={{ shadow: 'sm', borderColor: 'teal.400' }} borderColor={isSelected ? 'teal.400' : 'gray.200'}>
+    <Box 
+      borderWidth="1px" 
+      borderRadius="md" 
+      p={3} 
+      mb={2} 
+      bg="white" 
+      _hover={{ shadow: 'sm', borderColor: 'teal.400' }} 
+      borderColor={isSelected ? 'teal.400' : 'gray.200'}
+      w="full"
+    >
       <HStack gap={2} mb={2} align="center">
         <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
-        <Text flex="1" fontWeight="medium">{track.name}</Text>
+        <Text flex="1" fontWeight="medium" fontSize="sm" textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap">{track.name}</Text>
       </HStack>
-      <VStack align="stretch" gap={2}>
+      <VStack align="stretch" gap={3} w="full">
         <HStack gap={4} justify="center">
           <Tooltip ids={{ trigger: `mute-${track.index}` }} content={isMute ? 'Unmute' : 'Mute'}>
             <Switch.Root ids={{ root: `mute-${track.index}` }} checked={!isMute} onCheckedChange={() => {
@@ -200,9 +209,16 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
           </ButtonGroup>
         </VStack>
 
-        <HStack>
-          <Text w="20px" textAlign="center">🔊</Text>
-          <Slider.Root min={0} max={16} value={[volume]} onValueChange={(details) => setVolume(details.value[0])} flex="1">
+        <HStack align="center" gap={2} w="full">
+          <Text w="20px" textAlign="center" flexShrink={0}>🔊</Text>
+          <Slider.Root 
+            min={0} 
+            max={16} 
+            value={[volume]} 
+            onValueChange={(details) => setVolume(details.value[0])} 
+            flex="1"
+            minW="80px"
+          >
             <Slider.Control>
               <Slider.Track>
                 <Slider.Range />
@@ -220,12 +236,13 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
             <Editable.Preview fontSize="sm" minW="30px" textAlign="center" />
             <Editable.Input fontSize="sm" minW="30px" textAlign="center" />
           </Editable.Root>
-          <Text fontSize="sm">%</Text>
+          <Text fontSize="sm" flexShrink={0}>%</Text>
           <IconButton 
             aria-label="Reset volume" 
             size="xs" 
             variant="ghost" 
             onClick={() => setVolume(16)}
+            flexShrink={0}
           >
             🔄
           </IconButton>

@@ -134,10 +134,23 @@ export function useMidiOutputs(options: UseMidiOutputsOptions = {}) {
 
   // Disconnect all devices
   const disconnectAll = useCallback(() => {
-    connectedDevices.forEach(deviceId => {
-      disconnectDevice(deviceId);
+    // Use the current state directly to avoid dependency issues
+    setConnectedDevices(currentConnected => {
+      currentConnected.forEach(deviceId => {
+        const device = devices.find(d => d.id === deviceId);
+        if (device) {
+          try {
+            if (enableLogging) {
+              console.log(`Disconnected from MIDI output device: ${device.name}`);
+            }
+          } catch (err) {
+            console.error('Failed to disconnect from MIDI output device:', err);
+          }
+        }
+      });
+      return new Set(); // Clear all connections
     });
-  }, [connectedDevices, disconnectDevice]);
+  }, [devices, enableLogging]);
 
   // Initialize MIDI
   useEffect(() => {

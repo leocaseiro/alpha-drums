@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useI18n } from '@/app/i18n';
-import { Box, HStack, VStack, Text, Slider, Switch, Select, createListCollection } from '@chakra-ui/react';
+import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
-import { Tooltip } from '../ui/Tooltip';
+import { Tooltip } from '@/components/ui/Tooltip';
 
 export interface TrackItemProps {
   api: alphaTab.AlphaTabApi;
@@ -19,7 +19,10 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
   const [isMute, setMute] = useState(track.playbackInfo.isMute);
   const [isSolo, setSolo] = useState(track.playbackInfo.isSolo);
   const [volume, setVolume] = useState(track.playbackInfo.volume);
-  const [staveProfile, setStaveProfile] = useState<number>(alphaTab.StaveProfile.ScoreTab);
+  const [showStandardNotation, setShowStandardNotation] = useState(true);
+  const [showTablature, setShowTablature] = useState(true);
+  const [showSlash, setShowSlash] = useState(false);
+  const [showNumbered, setShowNumbered] = useState(false);
 
   useEffect(() => {
     track.playbackInfo.isMute = isMute;
@@ -37,18 +40,33 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
   }, [api, track, volume]);
 
   useEffect(() => {
-    // Apply stave profile per track
+    // Apply stave profile per track based on individual toggles
     if (api && track) {
       try {
-        // Update track settings and re-render
-        api.settings.display.staveProfile = staveProfile as alphaTab.StaveProfile;
+        let newProfile = alphaTab.StaveProfile.Score; // Default fallback
+        
+        if (showStandardNotation && showTablature) {
+          newProfile = alphaTab.StaveProfile.ScoreTab;
+        } else if (showStandardNotation) {
+          newProfile = alphaTab.StaveProfile.Score;
+        } else if (showTablature) {
+          newProfile = alphaTab.StaveProfile.Tab;
+        }
+        
+        // Update slash and numbered notation on all staves of this track
+        track.staves.forEach((stave) => {
+          stave.showSlash = showSlash;
+          stave.showNumbered = showNumbered;
+        });
+        
+        api.settings.display.staveProfile = newProfile;
         api.updateSettings();
         api.render();
       } catch (error) {
         console.warn('Could not update stave profile:', error);
       }
     }
-  }, [api, track, staveProfile]);
+  }, [api, track, showStandardNotation, showTablature, showSlash, showNumbered]);
 
   const getTrackIcon = () => {
     if (track.staves.some((s) => s.isPercussion)) {
@@ -69,37 +87,27 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
   };
 
   return (
-    <Box borderWidth="1px" borderRadius="md" p={3} mb={2} bg="white" _hover={{ shadow: 'sm', borderColor: 'blue.400' }} borderColor={isSelected ? 'blue.400' : 'gray.200'}>
+    <Box borderWidth="1px" borderRadius="md" p={3} mb={2} bg="white" _hover={{ shadow: 'sm', borderColor: 'teal.400' }} borderColor={isSelected ? 'teal.400' : 'gray.200'}>
       <HStack gap={2} mb={2} align="center">
         <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
         <Text flex="1" fontWeight="medium">{track.name}</Text>
       </HStack>
       <VStack align="stretch" gap={2}>
         <HStack gap={4} justify="center">
-          <Tooltip ids={{ trigger: `show-${track.index}` }} content={t('player.showTrack') || 'Show/Hide Track'}>
-            <Switch.Root ids={{ root: `show-${track.index}` }} checked={isSelected} onCheckedChange={handleShowToggle}>
-              <Switch.HiddenInput />
-              <Switch.Control>
-                <Switch.Indicator fallback={<span>🫥</span>}>
-                  <span>👁️</span>
-                </Switch.Indicator>
-              </Switch.Control>
-            </Switch.Root>
-          </Tooltip>
-          <Tooltip ids={{ trigger: `mute-${track.index}` }} content={t('player.mute') || 'Mute Track'}>
-            <Switch.Root ids={{ root: `mute-${track.index}` }} checked={isMute} onCheckedChange={() => {
+          <Tooltip ids={{ trigger: `mute-${track.index}` }} content={isMute ? 'Unmute' : 'Mute'}>
+            <Switch.Root ids={{ root: `mute-${track.index}` }} checked={!isMute} onCheckedChange={() => {
               setMute(v => !v);
               toaster.create({ type: 'info', title: 'Track Mute', description: `Track "${track.name}" ${!isMute ? 'muted' : 'unmuted'}` });
             }}>
               <Switch.HiddenInput />
               <Switch.Control>
-                <Switch.Indicator fallback={<span>🔈</span>}>
-                  <span>🔇</span>
+                <Switch.Indicator fallback={<span>🔇</span>}>
+                  <span>🔈</span>
                 </Switch.Indicator>
               </Switch.Control>
             </Switch.Root>
           </Tooltip>
-          <Tooltip ids={{ trigger: `solo-${track.index}` }} content={t('player.solo') || 'Solo Track'}>
+          <Tooltip ids={{ trigger: `solo-${track.index}` }} content={isSolo ? 'Listen with all tracks' : 'Listen solo'}>
             <Switch.Root ids={{ root: `solo-${track.index}` }} checked={isSolo} onCheckedChange={() => {
               setSolo(v => !v);
               toaster.create({ type: 'info', title: 'Track Solo', description: `Track "${track.name}" ${!isSolo ? 'soloed' : 'unsoloed'}` });
@@ -112,7 +120,86 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               </Switch.Control>
             </Switch.Root>
           </Tooltip>
+          <Tooltip ids={{ trigger: `show-${track.index}` }} content={isSelected ? 'Hide track' : 'Show track'}>
+            <Switch.Root ids={{ root: `show-${track.index}` }} checked={isSelected} onCheckedChange={handleShowToggle}>
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Indicator fallback={<span>🫥</span>}>
+                  <span>👁️</span>
+                </Switch.Indicator>
+              </Switch.Control>
+            </Switch.Root>
+          </Tooltip>
         </HStack>
+        <VStack align="stretch" gap={2}>
+          <ButtonGroup size="sm" attached>
+            <Tooltip content="Toggle standard notation" showArrow>
+              <Button
+                variant={showStandardNotation ? 'surface' : 'outline'}
+                colorScheme="teal"
+                onClick={() => {
+                  setShowStandardNotation(!showStandardNotation);
+                  toaster.create({
+                    type: 'info',
+                    title: 'Notation Changed',
+                    description: `Track "${track.name}" ${!showStandardNotation ? 'enabled' : 'disabled'} standard notation`
+                  });
+                }}
+              >
+                🎼
+              </Button>
+            </Tooltip>
+            <Tooltip content="Toggle tablature" showArrow>
+              <Button
+                variant={showTablature ? 'surface' : 'outline'}
+                colorScheme="teal"
+                onClick={() => {
+                  setShowTablature(!showTablature);
+                  toaster.create({
+                    type: 'info',
+                    title: 'Notation Changed',
+                    description: `Track "${track.name}" ${!showTablature ? 'enabled' : 'disabled'} tablature`
+                  });
+                }}
+              >
+                {track.staves.some((s) => s.isPercussion) ? '🥁' : '🎸'}
+              </Button>
+            </Tooltip>
+            <Tooltip content="Toggle slash notation" showArrow>
+              <Button 
+                variant={showSlash ? 'surface' : 'outline'}
+                colorScheme="teal"
+                onClick={() => {
+                  setShowSlash(!showSlash);
+                  toaster.create({ 
+                    type: 'info', 
+                    title: 'Notation Changed', 
+                    description: `Track "${track.name}" ${!showSlash ? 'enabled' : 'disabled'} slash notation` 
+                  });
+                }}
+              >
+                /
+              </Button>
+            </Tooltip>
+            <Tooltip content="Toggle numbers" showArrow>
+              <Button 
+                variant={showNumbered ? 'surface' : 'outline'}
+                colorScheme="teal"
+                onClick={() => {
+                  setShowNumbered(!showNumbered);
+                  toaster.create({ 
+                    type: 'info', 
+                    title: 'Notation Changed', 
+                    description: `Track "${track.name}" ${!showNumbered ? 'enabled' : 'disabled'} numbers` 
+                  });
+                }}
+              >
+                🔢
+              </Button>
+            </Tooltip>
+          </ButtonGroup>
+        </VStack>
+
         <HStack>
           <Text w="20px" textAlign="center">🔊</Text>
           <Slider.Root min={0} max={16} value={[volume]} onValueChange={(details) => setVolume(details.value[0])} flex="1">
@@ -123,44 +210,8 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
-          <Text w="24px" textAlign="center" fontSize="sm">{volume}</Text>
+          <Text w="40px" textAlign="center" fontSize="sm">{Math.round((volume / 16) * 100)}%</Text>
         </HStack>
-
-        <VStack align="stretch" gap={2}>
-          <Text fontSize="xs" color="gray.600">{t('player.staveProfile') || 'Stave Profile'}</Text>
-          <Select.Root
-            collection={createListCollection({
-              items: [
-                { label: "Score", value: alphaTab.StaveProfile.Score },
-                { label: "Tab", value: alphaTab.StaveProfile.Tab },
-                { label: "Score + Tab", value: alphaTab.StaveProfile.ScoreTab },
-              ],
-            })}
-            defaultValue={[staveProfile.toString()]}
-            onValueChange={(e) => setStaveProfile(Number(e.value[0]))}
-            size="sm"
-          >
-            <Select.Trigger>
-              <Select.ValueText placeholder={[
-                { label: "Score", value: alphaTab.StaveProfile.Score },
-                { label: "Tab", value: alphaTab.StaveProfile.Tab },
-                { label: "Score + Tab", value: alphaTab.StaveProfile.ScoreTab },
-              ].find(item => item.value === staveProfile)?.label || 'Select Stave Profile'} />
-            </Select.Trigger>
-            <Select.Content>
-              {[
-                { label: "Score", value: alphaTab.StaveProfile.Score },
-                { label: "Tab", value: alphaTab.StaveProfile.Tab },
-                { label: "Score + Tab", value: alphaTab.StaveProfile.ScoreTab },
-              ].map((profile) => (
-                <Select.Item item={profile} key={profile.value}>
-                  {profile.label}
-                  <Select.ItemIndicator />
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </VStack>
       </VStack>
     </Box>
   );

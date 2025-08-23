@@ -67,7 +67,7 @@ All the features should have a playwright test, and you should validate if the t
 - [x] 5. bpm speed control (playback speed)
   - [x] a. should display original bpm (100%)
   - [x] b. option to select by percentage and/or bpm
-  - [ ] c. option to automatic increase by X bpm after Y bars
+  - [ ] c. option to automatic increase by X bpm after Y loops
 - [x] 6. control for count-in (on/off) with volume control
 - [x] 7. zoom control
 - [x] 8. loop control

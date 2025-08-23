@@ -12,6 +12,8 @@ import { toaster } from '@/app/toaster';
 import { ProgressCircle } from '@chakra-ui/react';
 import { SettingsDrawer } from './SettingsDrawer';
 import { MenuBar } from './MenuBar';
+import { MidiSettingsDrawer } from '../Midi/MidiSettingsDrawer';
+import { MidiHistoryDrawer } from '../Midi/MidiHistoryDrawer';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
@@ -22,6 +24,8 @@ export const AlphaTabPlayer: React.FC = () => {
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isSidebarVisible, setSidebarVisible] = useState(true);
   const [singleTrackMode, setSingleTrackMode] = useState<alphaTab.model.Track | null>(null);
+  const [isMidiSettingsOpen, setMidiSettingsOpen] = useState(false);
+  const [isMidiHistoryOpen, setMidiHistoryOpen] = useState(false);
   const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
@@ -320,6 +324,8 @@ export const AlphaTabPlayer: React.FC = () => {
         onOpenFile={triggerFileInput}
         onOpenSettings={() => setSettingsOpen(true)}
         onToggleTrackSidebar={() => setSidebarVisible(!isSidebarVisible)}
+        onOpenMidiSettings={() => setMidiSettingsOpen(true)}
+        onOpenMidiHistory={() => setMidiHistoryOpen(true)}
       />
       {isLoading && (
         <Box position="absolute" inset={0} bg="blackAlpha.700" zIndex={1000}>
@@ -461,6 +467,8 @@ export const AlphaTabPlayer: React.FC = () => {
 
       {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
+      <MidiSettingsDrawer isOpen={isMidiSettingsOpen} onClose={() => setMidiSettingsOpen(false)} />
+      <MidiHistoryDrawer isOpen={isMidiHistoryOpen} onClose={() => setMidiHistoryOpen(false)} />
     </Flex>
   );
 };

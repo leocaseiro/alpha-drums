@@ -12,6 +12,8 @@ export interface MenuBarProps {
   onOpenFile: () => void;
   onOpenSettings: () => void;
   onToggleTrackSidebar: () => void;
+  onOpenMidiSettings?: () => void;
+  onOpenMidiHistory?: () => void;
 }
 
 export const MenuBar: React.FC<MenuBarProps> = ({ 
@@ -19,7 +21,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   score, 
   onOpenFile, 
   onOpenSettings, 
-  onToggleTrackSidebar 
+  onToggleTrackSidebar,
+  onOpenMidiSettings,
+  onOpenMidiHistory
 }) => {
   const { t } = useI18n();
 
@@ -110,6 +114,26 @@ export const MenuBar: React.FC<MenuBarProps> = ({
               <MenuContent>
                 <MenuItem value="toggle-tracks" onClick={onToggleTrackSidebar}>
                   🎸 Toggle Tracks Sidebar
+                </MenuItem>
+              </MenuContent>
+            </MenuPositioner>
+          </Portal>
+        </MenuRoot>
+
+        <MenuRoot positioning={{ placement: "bottom-start" }}>
+          <MenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              🎹 MIDI
+            </Button>
+          </MenuTrigger>
+          <Portal>
+            <MenuPositioner>
+              <MenuContent>
+                <MenuItem value="midi-settings" onClick={onOpenMidiSettings} disabled={!onOpenMidiSettings}>
+                  ⚙️ MIDI Settings
+                </MenuItem>
+                <MenuItem value="midi-history" onClick={onOpenMidiHistory} disabled={!onOpenMidiHistory}>
+                  📝 MIDI History
                 </MenuItem>
               </MenuContent>
             </MenuPositioner>

@@ -128,15 +128,19 @@
   flex-direction: column;
 }
 
-.alphaTab {
+.viewport {
   flex: 1;
   overflow: auto;
-  min-height: 500px;
-  height: 500px;
   background: white;
   border: 1px solid #ddd;
   position: relative;
   scroll-behavior: smooth;
+}
+
+.alphaTab {
+  width: 100%;
+  height: auto;
+  min-height: 500px;
 }
 
 .footerBar {

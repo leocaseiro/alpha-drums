@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useI18n } from '@/app/i18n';
-import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup } from '@chakra-ui/react';
+import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup, Editable, IconButton } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { Tooltip } from '@/components/ui/Tooltip';
 
@@ -210,7 +210,25 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
-          <Text w="40px" textAlign="center" fontSize="sm">{Math.round((volume / 16) * 100)}%</Text>
+          <Editable.Root 
+            value={String(Math.round((volume / 16) * 100))} 
+            onValueChange={(details) => {
+              const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+              setVolume((value / 100) * 16);
+            }}
+          >
+            <Editable.Preview fontSize="sm" minW="30px" textAlign="center" />
+            <Editable.Input fontSize="sm" minW="30px" textAlign="center" />
+          </Editable.Root>
+          <Text fontSize="sm">%</Text>
+          <IconButton 
+            aria-label="Reset volume" 
+            size="xs" 
+            variant="ghost" 
+            onClick={() => setVolume(16)}
+          >
+            🔄
+          </IconButton>
         </HStack>
       </VStack>
     </Box>

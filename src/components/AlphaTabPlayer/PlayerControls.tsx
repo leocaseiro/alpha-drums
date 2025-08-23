@@ -11,6 +11,7 @@ import {
   Text,
   Slider,
   IconButton,
+  Editable,
 } from '@chakra-ui/react';
 
 export interface PlayerControlsProps {
@@ -148,10 +149,15 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const percentage = Number(e.target.value) / 100;
+  const handleSeek = (details: { value: number[] }) => {
+    if (!api || !isReadyForPlayback) return;
+    const percentage = details.value[0] / 100;
     const newTime = endTime * percentage;
-    api.tickPosition = newTime;
+    try {
+      api.tickPosition = newTime;
+    } catch (error) {
+      console.error('Seek failed:', error);
+    }
   };
 
   // Keyboard controls
@@ -178,27 +184,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     return () => window.removeEventListener('keydown', onKey);
   }, [api]);
 
-  const handleExport = (format: 'gp' | 'midi') => {
-    if (!api.score) return;
 
-    try {
-      if (format === 'gp') {
-        // Export functionality temporarily disabled due to type issues
-        console.log('Export functionality would be implemented here');
-        alert('Export functionality coming soon!');
-      }
-    } catch (error) {
-      console.error('Export failed:', error);
-    }
-  };
-
-  const handlePrint = () => {
-    try {
-      api.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-    }
-  };
 
   return (
     <VStack bg="gray.50" borderTopWidth="1px" borderColor="gray.200" p={4} gap={4} align="stretch">
@@ -206,7 +192,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <Text fontFamily="mono" fontSize="sm" color="gray.600" minW="120px">
           {formatDuration(currentTime)} / {formatDuration(endTime)}
         </Text>
-        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={(details) => handleSeek({ target: { value: String(details.value[0]) } } as unknown as React.ChangeEvent<HTMLInputElement>)} flex="1">
+        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={handleSeek} flex="1">
           <Slider.Control>
             <Slider.Track>
               <Slider.Range />
@@ -220,22 +206,69 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} disabled={!isReadyForPlayback}>
           ⏹️
         </IconButton>
-        <Button onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} isDisabled={!isReadyForPlayback} colorScheme="green">
+        <Button onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
           {isPlaying ? t('player.pause') : t('player.play')}
         </Button>
 
         <VStack minW="180px" gap={1} align="stretch">
-          <Text fontSize="xs" color="gray.600">{t('player.speed')}: {Math.round(playbackSpeed * 100)}%{baseTempoBpm ? ` • ${Math.round(baseTempoBpm * playbackSpeed)} BPM` : ''}</Text>
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
+            <Editable.Root 
+              value={String(Math.round(playbackSpeed * 100))} 
+              onValueChange={(details) => {
+                const value = Math.max(25, Math.min(200, Number(details.value) || 100));
+                setPlaybackSpeed(value / 100);
+              }}
+            >
+              <Editable.Preview fontSize="xs" minW="40px" />
+              <Editable.Input fontSize="xs" minW="40px" />
+            </Editable.Root>
+            <Text fontSize="xs" color="gray.600">%</Text>
+            <IconButton 
+              aria-label="Reset speed" 
+              size="xs" 
+              variant="ghost" 
+              onClick={() => setPlaybackSpeed(1)}
+            >
+              🔄
+            </IconButton>
+          </HStack>
           <Slider.Root min={0.25} max={2} step={0.05} value={[playbackSpeed]} onValueChange={(details) => setPlaybackSpeed(details.value[0])}>
             <Slider.Control>
               <Slider.Track><Slider.Range /></Slider.Track>
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
+          {baseTempoBpm && (
+            <Text fontSize="xs" color="gray.500" textAlign="center">
+              {Math.round(baseTempoBpm * playbackSpeed)} BPM
+            </Text>
+          )}
         </VStack>
 
         <VStack minW="180px" gap={1} align="stretch">
-          <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}: {zoom}%</Text>
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}:</Text>
+            <Editable.Root 
+              value={String(zoom)} 
+              onValueChange={(details) => {
+                const value = Math.max(25, Math.min(200, Number(details.value) || 100));
+                setZoom(value);
+              }}
+            >
+              <Editable.Preview fontSize="xs" minW="40px" />
+              <Editable.Input fontSize="xs" minW="40px" />
+            </Editable.Root>
+            <Text fontSize="xs" color="gray.600">%</Text>
+            <IconButton 
+              aria-label="Reset zoom" 
+              size="xs" 
+              variant="ghost" 
+              onClick={() => setZoom(100)}
+            >
+              🔄
+            </IconButton>
+          </HStack>
           <Slider.Root min={25} max={200} step={5} value={[zoom]} onValueChange={(details) => setZoom(details.value[0])}>
             <Slider.Control>
               <Slider.Track><Slider.Range /></Slider.Track>
@@ -263,7 +296,25 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Text fontSize="xs">{Math.round(metronomeVolume * 100)}%</Text>
+              <Editable.Root 
+                value={String(Math.round(metronomeVolume * 100))} 
+                onValueChange={(details) => {
+                  const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+                  setMetronomeVolume(value / 100);
+                }}
+              >
+                <Editable.Preview fontSize="xs" minW="30px" />
+                <Editable.Input fontSize="xs" minW="30px" />
+              </Editable.Root>
+              <Text fontSize="xs">%</Text>
+              <IconButton 
+                aria-label="Reset metronome volume" 
+                size="xs" 
+                variant="ghost" 
+                onClick={() => setMetronomeVolume(1)}
+              >
+                🔄
+              </IconButton>
             </HStack>
           )}
         </HStack>
@@ -278,7 +329,25 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Text fontSize="xs">{Math.round(countInVolume * 100)}%</Text>
+              <Editable.Root 
+                value={String(Math.round(countInVolume * 100))} 
+                onValueChange={(details) => {
+                  const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+                  setCountInVolume(value / 100);
+                }}
+              >
+                <Editable.Preview fontSize="xs" minW="30px" />
+                <Editable.Input fontSize="xs" minW="30px" />
+              </Editable.Root>
+              <Text fontSize="xs">%</Text>
+              <IconButton 
+                aria-label="Reset count-in volume" 
+                size="xs" 
+                variant="ghost" 
+                onClick={() => setCountInVolume(1)}
+              >
+                🔄
+              </IconButton>
             </HStack>
           )}
         </HStack>
@@ -288,8 +357,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         </HStack>
 
         <HStack>
-          <Button onClick={() => handleExport('gp')} disabled={!isReadyForPlayback}>💾 {t('player.export')}</Button>
-          <Button onClick={() => handlePrint()} disabled={!isReadyForPlayback}>🖨️ {t('player.print')}</Button>
           {onOpenSettings && <Button onClick={onOpenSettings}>⚙️ Settings</Button>}
         </HStack>
       </HStack>

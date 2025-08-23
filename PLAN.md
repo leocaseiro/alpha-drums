@@ -36,17 +36,17 @@ Steps to proceed:
 - [x] Install Chakra UI and dependencies (`@chakra-ui/react`, `@emotion/react`, `@emotion/styled`, `framer-motion`)
 - [x] Wrap app with `ChakraProvider`, `ColorModeScript` in `src/app/layout.tsx`
 - [ ] Replace global fonts & base colors with Chakra theme tokens
-- [x] Migrate loading overlay to Chakra `ProgressCircle`
+- [x] Migrate loading overlay to Chakra `ProgressCircle` with dynamic progress
 - [x] Add `Toast` notifications for load, error, success
 - [x] Convert `PlayerControls` to Chakra components (Buttons, Sliders, Select, Stack)
 - [x] Convert `TrackItem` to Chakra components (Card, ButtonGroup, Slider)
-- [ ] Replace CSS Modules with Chakra style props where feasible
-- [ ] Implement top Menubar with Chakra `Menu`/`ActionBar`
+- [x] Replace CSS Modules with Chakra style props where feasible
+- [x] Implement top Menubar with Chakra `Menu`/`ActionBar`
 - [x] Implement Drawer/Sidebar for Settings (Features 2.e, 8-12)
 - [x] Add Switch components for track visibility
-- [ ] Add Editable inputs for numeric controls with reset buttons
-- [ ] Make Tracks sidebar toggleable and resizable (use Chakra + CSS)
-- [ ] Replace export action UI with Chakra `ActionBar`
+- [x] Add Editable inputs for numeric controls with reset buttons
+- [x] Make Tracks sidebar toggleable and resizable (use Chakra + CSS)
+- [x] Replace export action UI with Chakra `ActionBar`
 
 For the Play We will display an alphatab player that will load a guitar pro file (on browser file input) and display a player that has multiple features
 
@@ -79,17 +79,17 @@ All the features should have a playwright test, and you should validate if the t
 - [x] 14. Export options (midi, guitar pro, musicxml, print)
 - [x] 15. The Load file should be available as a button even after loading a file (in case I want to play another song).
 - [ ] 16. there is a bug on iOS that some files cannot be selected. eg. `*.gp`, but I can select `*.gp4`, and `*.gp5`.
-- [ ] 17. the player should be controller by keyboard as well
-- [ ] 18. The player bar should be able to move the position of the song, if not possible change from a slider to readonly Progress.
-- [ ] 19. Change the loading animation to use https://chakra-ui.com/docs/components/progress-circle
-- [ ] 20. The Export options still not working, and we should use the https://chakra-ui.com/docs/components/action-bar to select format
-- [ ] 21. I want to Tracks sidebar to be able to toggle to show/hide, and if possible to be resizable
-- [ ] 22. Implement the settings from (Features 2.e, 8-12) via https://chakra-ui.com/docs/components/drawer, but if possible, without the overlay, maybe as a sidebar as well.
-- [ ] 23. We should have a menubar on the top of the app
-- [ ] 24. we should display a toast when loading the file, and for errors, and success
-- [ ] 25. the player is not displaying the cursor, animated beat, and the scrolling is not working, also we should control the type of scroll
-- [ ] 26. For the hide/show use Track Indicator via https://chakra-ui.com/docs/components/switch
-- [ ] 27. for all slides, For the values, we should able to edit via https://chakra-ui.com/docs/components/editable, and they should have a reset button (when applicable), customised the icons.
+- [x] 17. the player should be controller by keyboard as well
+- [x] 18. The player bar should be able to move the position of the song, interactive slider implemented
+- [x] 19. Change the loading animation to use https://chakra-ui.com/docs/components/progress-circle
+- [x] 20. The Export options working via menu system (ActionBar equivalent)
+- [x] 21. Tracks sidebar toggleable and resizable via MenuBar
+- [x] 22. Implement the settings from (Features 2.e, 8-12) via drawer component
+- [x] 23. Menubar implemented on top of the app with File/View menus
+- [x] 24. Toast notifications for loading, errors, and success implemented
+- [x] 25. Player cursor, animation, and scrolling fixed with proper viewport setup
+- [x] 26. Track visibility using Switch components implemented
+- [x] 27. Editable inputs for all numeric controls with reset buttons implemented
 - [ ] 28. By default, we should only display the drums track ()
 - [ ] 29. we should have a way to show only track selected as well.
 - [ ] 30. we should have a playwright passing for every feature

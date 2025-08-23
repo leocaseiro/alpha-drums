@@ -43,62 +43,63 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
   } = useMidi();
 
   const handleInputToggle = (deviceId: string, connected: boolean) => {
+    console.log(`Toggle input device ${deviceId}: ${connected ? 'disconnect' : 'connect'}`);
+    
     if (connected) {
+      // Disconnect
       const success = disconnectInput(deviceId);
-      if (success) {
-        updateSettings({
-          selectedInputs: new Set([...settings.selectedInputs].filter(id => id !== deviceId))
-        });
-        toaster.create({
-          type: 'info',
-          title: 'MIDI Input',
-          description: 'Disconnected from input device'
-        });
-      }
+      console.log('Disconnect result:', success);
+      updateSettings({
+        selectedInputs: new Set([...settings.selectedInputs].filter(id => id !== deviceId))
+      });
+      toaster.create({
+        type: 'info',
+        title: 'MIDI Input',
+        description: 'Disconnected from input device'
+      });
     } else {
+      // Connect
       const success = connectInput(deviceId);
-      if (success) {
-        updateSettings({
-          selectedInputs: new Set([...settings.selectedInputs, deviceId])
-        });
-        toaster.create({
-          type: 'success',
-          title: 'MIDI Input',
-          description: 'Connected to input device'
-        });
-      }
+      console.log('Connect result:', success);
+      updateSettings({
+        selectedInputs: new Set([...settings.selectedInputs, deviceId])
+      });
+      toaster.create({
+        type: 'success',
+        title: 'MIDI Input',
+        description: 'Connected to input device'
+      });
     }
   };
 
   const handleOutputToggle = (deviceId: string, connected: boolean) => {
     if (connected) {
-      const success = disconnectOutput(deviceId);
-      if (success) {
-        updateSettings({
-          selectedOutputs: new Set([...settings.selectedOutputs].filter(id => id !== deviceId))
-        });
-        toaster.create({
-          type: 'info',
-          title: 'MIDI Output',
-          description: 'Disconnected from output device'
-        });
-      }
+      // Disconnect
+      disconnectOutput(deviceId);
+      updateSettings({
+        selectedOutputs: new Set([...settings.selectedOutputs].filter(id => id !== deviceId))
+      });
+      toaster.create({
+        type: 'info',
+        title: 'MIDI Output',
+        description: 'Disconnected from output device'
+      });
     } else {
-      const success = connectOutput(deviceId);
-      if (success) {
-        updateSettings({
-          selectedOutputs: new Set([...settings.selectedOutputs, deviceId])
-        });
-        toaster.create({
-          type: 'success',
-          title: 'MIDI Output',
-          description: 'Connected to output device'
-        });
-      }
+      // Connect
+      connectOutput(deviceId);
+      updateSettings({
+        selectedOutputs: new Set([...settings.selectedOutputs, deviceId])
+      });
+      toaster.create({
+        type: 'success',
+        title: 'MIDI Output',
+        description: 'Connected to output device'
+      });
     }
   };
 
   const handleRefresh = () => {
+    console.log('Manual MIDI device refresh requested');
     refreshInputs();
     refreshOutputs();
     toaster.create({

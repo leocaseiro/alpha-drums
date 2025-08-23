@@ -171,10 +171,24 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
         setMidiAccess(access);
         setIsSupported(true);
 
-        // Set up state change listeners
+        // Set up state change listeners (define inline to avoid stale closure)
         access.onstatechange = (event) => {
           console.log('MIDI state changed:', event);
-          refreshDevices();
+          // Force refresh devices when state changes
+          const deviceList: MidiInputDevice[] = [];
+          
+          access.inputs.forEach((input) => {
+            deviceList.push({
+              id: input.id,
+              name: input.name || 'Unknown Device',
+              manufacturer: input.manufacturer || 'Unknown',
+              state: input.state,
+              connection: input.connection,
+              input
+            });
+          });
+
+          setDevices(deviceList);
         };
 
         // Initial devices scan

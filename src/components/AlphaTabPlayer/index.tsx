@@ -21,7 +21,7 @@ export const AlphaTabPlayer: React.FC = () => {
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isSidebarVisible, setSidebarVisible] = useState(true);
-  const viewPortRef = React.createRef<HTMLDivElement>();
+  const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works without full synthesis
@@ -33,7 +33,7 @@ export const AlphaTabPlayer: React.FC = () => {
 
     // Display configuration
     settings.display.scale = 0.8;
-    settings.display.layoutMode = alphaTab.LayoutMode.Page;
+    settings.display.layoutMode = alphaTab.LayoutMode.Horizontal;
     settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
 
     // Default to showing rhythm on tabs
@@ -56,7 +56,24 @@ export const AlphaTabPlayer: React.FC = () => {
         console.log('Configuring scroll element for alphaTab');
         api.settings.player.scrollElement = viewPortRef.current;
         api.settings.player.scrollOffsetY = -10;
+        api.settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
+        api.settings.player.enableCursor = true;
+        api.settings.player.enablePlayer = true;
+        api.settings.player.enableUserInteraction = true;
+        
+        console.log('Updated player settings:', {
+          scrollElement: !!api.settings.player.scrollElement,
+          scrollMode: api.settings.player.scrollMode,
+          enableCursor: api.settings.player.enableCursor,
+          enablePlayer: api.settings.player.enablePlayer,
+          playerMode: api.settings.player.playerMode
+        });
+        
         api.updateSettings();
+        // Force a render to apply the new settings
+        if (api.score) {
+          api.render();
+        }
       } catch (error) {
         console.error('Error configuring scroll element:', error);
       }
@@ -108,7 +125,26 @@ export const AlphaTabPlayer: React.FC = () => {
     setTimeout(() => {
       setIsLoading(false);
       setLoadingProgress(0);
+      
+      // Try to activate the player after render is complete
+      if (api && api.player) {
+        try {
+          console.log('Attempting to activate player after render...');
+          (api.player as unknown as { activate?: () => void })?.activate?.();
+        } catch (error) {
+          console.log('Player activation failed (expected in some cases):', error);
+        }
+      }
     }, 300); // Brief delay to show completion
+  });
+
+  // Add debug events for cursor and playback
+  useAlphaTabEvent(api, 'playerStateChanged', (e) => {
+    console.log('Player state changed:', e);
+  });
+
+  useAlphaTabEvent(api, 'playerPositionChanged', (e) => {
+    console.log('Player position changed:', e);
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {

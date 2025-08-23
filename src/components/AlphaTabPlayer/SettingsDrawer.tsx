@@ -8,14 +8,15 @@ import {
   VStack,
   HStack,
   Text,
-  Select,
-  Slider,
-  Switch,
   CloseButton,
   Portal,
-  createListCollection,
+  Tabs,
+  Accordion,
+  Box,
+  IconButton,
 } from '@chakra-ui/react';
-import { toaster } from '@/app/toaster';
+import { buildSettingsGroups, SettingsContextProps } from './settings-config';
+import { SettingsControl } from './SettingsControls';
 
 export interface SettingsDrawerProps {
   isOpen: boolean;
@@ -24,213 +25,129 @@ export interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
-  const [scale, setScale] = React.useState<number>(api?.settings.display.scale ?? 0.8);
-  const [layout, setLayout] = React.useState<number>(api?.settings.display.layoutMode ?? alphaTab.LayoutMode.Page);
-
-  const [rhythmMode, setRhythmMode] = React.useState<number>(api?.settings.notation.rhythmMode ?? alphaTab.TabRhythmMode.Automatic);
-  const [continuousScroll, setContinuousScroll] = React.useState<boolean>((api?.settings.player.scrollMode ?? alphaTab.ScrollMode.Continuous) === alphaTab.ScrollMode.Continuous);
+  const [settingsUpdated, setSettingsUpdated] = React.useState(0);
   
-  // Player interaction and cursor settings
-  const [showCursors, setShowCursors] = React.useState<boolean>(api?.settings.player.enableCursor ?? true);
-  const [animatedBeatCursor, setAnimatedBeatCursor] = React.useState<boolean>(api?.settings.player.enableAnimatedBeatCursor ?? true);
-  const [highlightNotes, setHighlightNotes] = React.useState<boolean>(api?.settings.player.enableElementHighlighting ?? true);
-  const [enableUserInteraction, setEnableUserInteraction] = React.useState<boolean>(api?.settings.player.enableUserInteraction ?? true);
+  const context: SettingsContextProps = React.useMemo(() => ({
+    api: api!,
+    onSettingsUpdated: () => setSettingsUpdated(prev => prev + 1)
+  }), [api]);
 
-  const apply = React.useCallback(() => {
-    if (!api) return;
-    api.settings.display.scale = scale;
-    api.settings.display.layoutMode = layout as alphaTab.LayoutMode;
+  const settingsGroups = React.useMemo(() => buildSettingsGroups(), []);
 
-    api.settings.notation.rhythmMode = rhythmMode as alphaTab.TabRhythmMode;
-    api.settings.player.scrollMode = continuousScroll ? alphaTab.ScrollMode.Continuous : alphaTab.ScrollMode.OffScreen;
-    
-    // Apply cursor and interaction settings
-    api.settings.player.enableCursor = showCursors;
-    api.settings.player.enableAnimatedBeatCursor = animatedBeatCursor;
-    api.settings.player.enableElementHighlighting = highlightNotes;
-    api.settings.player.enableUserInteraction = enableUserInteraction;
-    
-    console.log('Applied player settings:', {
-      enableCursor: api.settings.player.enableCursor,
-      enableAnimatedBeatCursor: api.settings.player.enableAnimatedBeatCursor,
-      enableElementHighlighting: api.settings.player.enableElementHighlighting,
-      enableUserInteraction: api.settings.player.enableUserInteraction
+  // Group settings by category
+  const categoryGroups = React.useMemo(() => {
+    const groups: Record<string, typeof settingsGroups> = {};
+    settingsGroups.forEach(group => {
+      const category = group.title.split(' ▸ ')[0];
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(group);
     });
+    return groups;
+  }, [settingsGroups]);
+
+  const resetToDefaults = () => {
+    if (!api) return;
     
+    // Reset to default settings
+    const defaultSettings = new alphaTab.Settings();
+    Object.assign(api.settings, defaultSettings);
     api.updateSettings();
     api.render();
-  }, [api, scale, layout, rhythmMode, continuousScroll, showCursors, animatedBeatCursor, highlightNotes, enableUserInteraction]);
+    setSettingsUpdated(prev => prev + 1);
+  };
 
-  const layoutModes = createListCollection({
-    items: [
-      { label: "Page", value: alphaTab.LayoutMode.Page },
-      { label: "Horizontal", value: alphaTab.LayoutMode.Horizontal },
-    ],
-  })
-
-
-
-  const rhythmModes = createListCollection({
-    items: [
-      { label: "Automatic", value: alphaTab.TabRhythmMode.Automatic },
-      { label: "Hide", value: alphaTab.TabRhythmMode.Hidden },
-    ],
-  })
-
-  // const scrollModes = createListCollection({
-  //   items: [
-  //     { label: "Continuous", value: alphaTab.ScrollMode.Continuous },
-  //     { label: "Page", value: alphaTab.ScrollMode.Page },
-  //   ],
-  // })
-
-  // const playerModes = createListCollection({
-  //   items: [
-  //     { label: "Enabled Synthesizer", value: alphaTab.PlayerMode.EnabledSynthesizer },
-  //     { label: "Disabled Synthesizer", value: alphaTab.PlayerMode.DisabledSynthesizer },
-  //   ],
-  // })
-
-  React.useEffect(() => { apply(); }, [apply]);
+  if (!api) {
+    return (
+      <Drawer.Root open={isOpen} onOpenChange={onClose}>
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content>
+              <Drawer.Header>
+                <Drawer.Title>Settings</Drawer.Title>
+              </Drawer.Header>
+              <Drawer.Body>
+                <Text>No API available</Text>
+              </Drawer.Body>
+              <Drawer.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Drawer.CloseTrigger>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
+    );
+  }
 
   return (
     <Drawer.Root open={isOpen} onOpenChange={onClose}>
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
-          <Drawer.Content>
+          <Drawer.Content maxW="800px">
             <Drawer.Header>
-              <Drawer.Title>Player Settings</Drawer.Title>
+              <HStack justify="space-between" w="full">
+                <Drawer.Title>Settings</Drawer.Title>
+                <IconButton
+                  aria-label="Reset to defaults"
+                  size="sm"
+                  variant="outline"
+                  onClick={resetToDefaults}
+                >
+                  🔄
+                </IconButton>
+              </HStack>
             </Drawer.Header>
             <Drawer.Body>
-              <VStack align="stretch" gap={4}>
-              <VStack align="stretch" gap={2}>
-                <Text fontSize="sm">Scale: {Math.round(scale * 100)}%</Text>
-                <Slider.Root min={0.5} max={2} step={0.05} value={[scale]} onValueChange={(details) => setScale(details.value[0])}>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Range />
-                    </Slider.Track>
-                    <Slider.Thumbs />
-                  </Slider.Control>
-                </Slider.Root>
-              </VStack>
-
-              <VStack align="stretch" gap={2}>
-                <Text fontSize="sm">Layout</Text>
-                <Select.Root collection={layoutModes} defaultValue={[layout.toString()]} onValueChange={(e) => {
-                  const newLayout = Number(e.value[0]);
-                  setLayout(newLayout);
-                  const layoutName = layoutModes.items.find(item => item.value === newLayout)?.label || 'Unknown';
-                  toaster.create({ type: 'info', title: 'Layout Changed', description: `Changed to ${layoutName}` });
-                }}>
-                  <Select.Trigger>
-                    <Select.ValueText placeholder={layoutModes.items.find(item => item.value === layout)?.label || 'Select Layout'} />
-                  </Select.Trigger>
-                  <Select.Content>
-                  {layoutModes.items.map((layoutMode) => (
-                    <Select.Item item={layoutMode} key={layoutMode.value}>
-                      {layoutMode.label}
-                      <Select.ItemIndicator />
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-                </Select.Root>
-              </VStack>
-
-              <VStack align="stretch" gap={2}>
-                <Text fontSize="sm">Tab Rhythm Mode</Text>
-                <Select.Root collection={rhythmModes} defaultValue={[rhythmMode.toString()]} onValueChange={(e) => {
-                  const newRhythmMode = Number(e.value[0]);
-                  setRhythmMode(newRhythmMode);
-                  const rhythmName = rhythmModes.items.find(item => item.value === newRhythmMode)?.label || 'Unknown';
-                  toaster.create({ type: 'info', title: 'Rhythm Mode Changed', description: `Changed to ${rhythmName}` });
-                }}>
-                  <Select.Trigger>
-                    <Select.ValueText placeholder={rhythmModes.items.find(item => item.value === rhythmMode)?.label || 'Select Rhythm Mode'} />
-                  </Select.Trigger>
-                  <Select.Content>
-                    {rhythmModes.items.map((rhythmMode) => (
-                      <Select.Item item={rhythmMode} key={rhythmMode.value}>
-                        {rhythmMode.label}
-                        <Select.ItemIndicator />
-                      </Select.Item>
+              <Tabs.Root defaultValue="Display" orientation="vertical">
+                <HStack align="start" gap={4} h="600px">
+                  <Tabs.List w="200px" flexShrink={0}>
+                    {Object.keys(categoryGroups).map((category) => (
+                      <Tabs.Trigger key={category} value={category} w="full" justifyContent="start">
+                        {category}
+                      </Tabs.Trigger>
                     ))}
-                  </Select.Content>
-                </Select.Root>
-              </VStack>
+                  </Tabs.List>
 
-              <HStack justify="space-between">
-                <Text fontSize="sm">Continuous Scroll</Text>
-                <Switch.Root checked={continuousScroll} onCheckedChange={(details) => {
-                  setContinuousScroll(details.checked);
-                  toaster.create({ type: 'info', title: 'Scroll Mode', description: details.checked ? 'Enabled continuous scroll' : 'Disabled continuous scroll' });
-                }}>
-                  <Switch.HiddenInput />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </HStack>
-
-              <Text fontSize="md" fontWeight="semibold" mt={4} mb={2}>Player & Cursor</Text>
-              
-              <HStack justify="space-between">
-                <Text fontSize="sm">Show Cursors</Text>
-                <Switch.Root checked={showCursors} onCheckedChange={(details) => {
-                  setShowCursors(details.checked);
-                  toaster.create({ type: 'info', title: 'Cursor Display', description: details.checked ? 'Enabled cursor display' : 'Disabled cursor display' });
-                }}>
-                  <Switch.HiddenInput />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </HStack>
-
-              <HStack justify="space-between">
-                <Text fontSize="sm">Animated Beat Cursor</Text>
-                <Switch.Root checked={animatedBeatCursor} onCheckedChange={(details) => {
-                  setAnimatedBeatCursor(details.checked);
-                  toaster.create({ type: 'info', title: 'Beat Cursor', description: details.checked ? 'Enabled animated beat cursor' : 'Disabled animated beat cursor' });
-                }}>
-                  <Switch.HiddenInput />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </HStack>
-
-              <HStack justify="space-between">
-                <Text fontSize="sm">Highlight Notes</Text>
-                <Switch.Root checked={highlightNotes} onCheckedChange={(details) => {
-                  setHighlightNotes(details.checked);
-                  toaster.create({ type: 'info', title: 'Note Highlighting', description: details.checked ? 'Enabled note highlighting' : 'Disabled note highlighting' });
-                }}>
-                  <Switch.HiddenInput />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </HStack>
-
-              <HStack justify="space-between">
-                <Text fontSize="sm">Enable User Interaction</Text>
-                <Switch.Root checked={enableUserInteraction} onCheckedChange={(details) => {
-                  setEnableUserInteraction(details.checked);
-                  toaster.create({ type: 'info', title: 'User Interaction', description: details.checked ? 'Enabled user interaction' : 'Disabled user interaction' });
-                }}>
-                  <Switch.HiddenInput />
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
-              </HStack>
-            </VStack>
+                  <Box flex="1" overflowY="auto" h="full">
+                    {Object.entries(categoryGroups).map(([category, groups]) => (
+                      <Tabs.Content key={category} value={category}>
+                        <VStack align="stretch" gap={4}>
+                          {groups.map((group) => (
+                            <Accordion.Root key={group.title} collapsible defaultValue={[group.title]}>
+                              <Accordion.Item value={group.title}>
+                                <Accordion.ItemTrigger>
+                                  <Text fontWeight="semibold" fontSize="md">
+                                    {group.title.includes(' ▸ ') ? group.title.split(' ▸ ')[1] : group.title}
+                                  </Text>
+                                  <Accordion.ItemIndicator />
+                                </Accordion.ItemTrigger>
+                                <Accordion.ItemContent>
+                                  <VStack align="stretch" gap={3} p={2}>
+                                    {group.settings.map((setting, index) => (
+                                      <SettingsControl
+                                        key={`${group.title}-${index}`}
+                                        setting={setting}
+                                        context={context}
+                                      />
+                                    ))}
+                                  </VStack>
+                                </Accordion.ItemContent>
+                              </Accordion.Item>
+                            </Accordion.Root>
+                          ))}
+                        </VStack>
+                      </Tabs.Content>
+                    ))}
+                  </Box>
+                </HStack>
+              </Tabs.Root>
             </Drawer.Body>
             <Drawer.Footer>
-              <Button variant="outline">Cancel</Button>
-              <Button>Save</Button>
+              <HStack>
+                <Button variant="outline" onClick={onClose}>Close</Button>
+                <Button onClick={resetToDefaults}>Reset All</Button>
+              </HStack>
             </Drawer.Footer>
             <Drawer.CloseTrigger asChild>
               <CloseButton size="sm" />

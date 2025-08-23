@@ -25,8 +25,8 @@ export interface PlayerControlsProps {
   onPracticeModeToggle?: (practice: boolean) => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ 
-  api, 
+export const PlayerControls: React.FC<PlayerControlsProps> = ({
+  api,
   onOpenFileClick,
   isGameEnabled = false,
   isPracticeMode = false,
@@ -70,23 +70,23 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
   // Add event listeners for player readiness
   useAlphaTabEvent(api, 'playerReady', () => {
-    console.log('Player ready event fired');
+    // console.log('Player ready event fired');
     setIsReadyForPlayback(true);
   });
 
   useAlphaTabEvent(api, 'soundFontLoaded', () => {
-    console.log('SoundFont loaded event fired');
+    // console.log('SoundFont loaded event fired');
     setIsReadyForPlayback(true);
   });
 
-  useAlphaTabEvent(api, "playerStateChanged", (e) => {
-    console.log('Player state changed event fired', e);
-    console.log('Player state changed event fired string', JSON.stringify(e));
-  });
-  useAlphaTabEvent(api, "playerPositionChanged", (e) => {
-    console.log('Player position changed event fired', e);
-    console.log('Player position changed event fired string', JSON.stringify(e));
-  });
+  // useAlphaTabEvent(api, "playerStateChanged", (e) => {
+  //   console.log('Player state changed event fired', e);
+  //   console.log('Player state changed event fired string', JSON.stringify(e));
+  // });
+  // useAlphaTabEvent(api, "playerPositionChanged", (e) => {
+  //   console.log('Player position changed event fired', e);
+  //   console.log('Player position changed event fired string', JSON.stringify(e));
+  // });
 
 
 
@@ -96,7 +96,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       if (api) {
         const ready = api.isReadyForPlayback;
         const hasScore = api.score !== null;
-        console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
+        // console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
         if (hasScore && !baseTempoBpm) {
           try {
             const tempo = api.score?.tempo ?? null;
@@ -108,7 +108,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
         // Force enable controls if we have a score (even without full audio synthesis)
         if (hasScore) {
-          console.log('Score loaded - enabling controls for basic playback');
+          // console.log('Score loaded - enabling controls for basic playback');
           setIsReadyForPlayback(true);
         } else {
           setIsReadyForPlayback(ready);
@@ -254,7 +254,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           <HStack gap={2} align="center">
             <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
             <Editable.Root
-              value={speedMode === 'percentage' 
+              value={speedMode === 'percentage'
                 ? String(Math.round(playbackSpeed * 100))
                 : baseTempoBpm ? String(Math.round(baseTempoBpm * playbackSpeed)) : '120'
               }
@@ -302,7 +302,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           </Slider.Root>
           {baseTempoBpm && (
             <Text fontSize="xs" color="gray.500" textAlign="center">
-              {speedMode === 'percentage' 
+              {speedMode === 'percentage'
                 ? `${Math.round(baseTempoBpm * playbackSpeed)} BPM`
                 : `${Math.round(playbackSpeed * 100)}%`
               }

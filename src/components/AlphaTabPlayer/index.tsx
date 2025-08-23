@@ -18,6 +18,7 @@ import { MidiGameDrawer } from '../Midi/MidiGameDrawer';
 import { AlphaTabNoteHighlighter } from '../Midi/AlphaTabNoteHighlighter';
 import { MidiScoreDisplay } from '../Midi/MidiScoreDisplay';
 import { RhythmGame } from '../Midi/RhythmGame';
+import { debugLog } from '@/lib/debug';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
@@ -212,22 +213,31 @@ export const AlphaTabPlayer: React.FC = () => {
 
   // Add debug events for cursor and playback
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
-    console.log('Player state changed:', e);
+    debugLog.log('Player state changed:', e);
     const state = (e as unknown as { state: alphaTab.synth.PlayerState }).state;
     const isPlaying = state === alphaTab.synth.PlayerState.Playing;
+    
+    debugLog.log('🎵 Player state:', { 
+      isPlaying, 
+      gameEnabled: isGameEnabled, 
+      gameIsPlaying: gameState.isPlaying,
+      practiceMode: isPracticeMode
+    });
     
     // Auto-start/stop game when player starts/stops
     if (isGameEnabled && rhythmGameRef.current) {
       if (isPlaying && !gameState.isPlaying) {
+        debugLog.log('🎮 Auto-starting game from player state change');
         rhythmGameRef.current.startGame(isPracticeMode);
       } else if (!isPlaying && gameState.isPlaying) {
+        debugLog.log('🎮 Auto-stopping game from player state change');
         rhythmGameRef.current.stopGame();
       }
     }
   });
 
   useAlphaTabEvent(api, 'playerPositionChanged', (e) => {
-    console.log('Player position changed:', e);
+    debugLog.log('Player position changed:', e);
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {

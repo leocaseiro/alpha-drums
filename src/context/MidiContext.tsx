@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useMidiInputs, MidiMessage } from '@/hooks/useMidiInputs';
 import { useMidiOutputs } from '@/hooks/useMidiOutputs';
+import { debugLog } from '@/lib/debug';
 
 export interface MidiHistory {
   id: string;
@@ -104,7 +105,7 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
 
   // Handle MIDI messages (only from connected devices)
   const handleMidiMessage = useCallback((message: MidiMessage, deviceId: string) => {
-    console.log(`MIDI message from device ${deviceId}:`, message.type, message.note, message.velocity);
+    debugLog.log(`MIDI message from device ${deviceId}:`, message.type, message.note, message.velocity);
     
     const historyEntry: MidiHistory = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

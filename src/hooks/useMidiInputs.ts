@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { debugLog } from '@/lib/debug';
 
 export interface MidiInputDevice {
   id: string;
@@ -70,7 +71,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
     const message = parseMidiMessage(event.data, event.timeStamp);
     
     if (enableLogging) {
-      console.log(`MIDI Input [${deviceId}]:`, {
+      debugLog.log(`MIDI Input [${deviceId}]:`, {
         type: message.type,
         note: message.note,
         velocity: message.velocity,

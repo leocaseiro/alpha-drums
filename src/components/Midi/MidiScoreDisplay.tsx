@@ -15,6 +15,7 @@ import {
 interface GameState {
   isPlaying: boolean;
   isPracticeMode: boolean;
+  isSessionActive: boolean;
   score: number;
   streak: number;
   totalNotes: number;
@@ -53,6 +54,16 @@ export function MidiScoreDisplay({ gameState, isGameEnabled }: MidiScoreDisplayP
     );
   }
 
+  if (!gameState.isSessionActive) {
+    return (
+      <Box p={3} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
+        <Text fontSize="sm" textAlign="center" color="blue.700">
+          🎮 Hit play to start a new game session!
+        </Text>
+      </Box>
+    );
+  }
+
   return (
     <Box p={3} bg="gradient-to-r from-purple-50 to-blue-50" borderRadius="md" borderWidth="1px" borderColor="purple.200">
       <VStack align="stretch" gap={3}>
@@ -60,8 +71,8 @@ export function MidiScoreDisplay({ gameState, isGameEnabled }: MidiScoreDisplayP
           <Text fontSize="md" fontWeight="bold" color="purple.700">
             🎮 {gameState.isPracticeMode ? 'Practice Mode' : 'Score Mode'}
           </Text>
-          <Badge colorScheme={gameState.isPlaying ? 'green' : 'gray'} size="sm">
-            {gameState.isPlaying ? 'Playing' : 'Stopped'}
+          <Badge colorScheme={gameState.isPlaying ? 'green' : 'yellow'} size="sm">
+            {gameState.isPlaying ? 'Playing' : 'Paused'}
           </Badge>
         </HStack>
 

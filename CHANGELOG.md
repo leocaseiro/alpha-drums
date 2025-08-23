@@ -1,3 +1,15 @@
+## 1.6.0 (2025-08-23)
+
+* Merge pull request #13 from leocaseiro/chakra-ui ([9415a76](https://github.com/leocaseiro/alpha-drums/commit/9415a76)), closes [#13](https://github.com/leocaseiro/alpha-drums/issues/13)
+* feat(chakra): migration to chakra UI WIP ([8d93be4](https://github.com/leocaseiro/alpha-drums/commit/8d93be4))
+* feat(ui): able to display UI ([386cdf3](https://github.com/leocaseiro/alpha-drums/commit/386cdf3))
+* feat(ui): Chakra providers via client wrapper; toast + progress-circle; TrackItem to Chakra; setting ([ea9217f](https://github.com/leocaseiro/alpha-drums/commit/ea9217f))
+* feat(ui): install Chakra UI and wrap app with ChakraProvider + ColorModeScript ([420e380](https://github.com/leocaseiro/alpha-drums/commit/420e380))
+* feat(ui): multiple layout and ux improvements with Chakra components ([ca68840](https://github.com/leocaseiro/alpha-drums/commit/ca68840))
+* feat(ui): redesign Tracks with notation ([146896e](https://github.com/leocaseiro/alpha-drums/commit/146896e))
+* docs(license): switch to MPL-2.0, update LICENSE, package.json, README, PLAN ([15be050](https://github.com/leocaseiro/alpha-drums/commit/15be050))
+* fix(openFile): make sure openFile is always there to replace current song ([082803b](https://github.com/leocaseiro/alpha-drums/commit/082803b))
+
 ## 1.5.0 (2025-08-22)
 
 * Merge pull request #12 from leocaseiro/alphatab-integration ([12ebbc0](https://github.com/leocaseiro/alpha-drums/commit/12ebbc0)), closes [#12](https://github.com/leocaseiro/alpha-drums/issues/12)

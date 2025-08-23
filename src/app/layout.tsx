@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getAssetPath } from "@/lib/utils";
-import { ChakraProvider } from "@chakra-ui/react";
-import I18nSwitcher from "./I18nSwitcher";
-import { I18nProvider } from "./i18n";
-import { ColorModeScript } from "@chakra-ui/react";
+import Providers from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,13 +33,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ColorModeScript />
-        <ChakraProvider>
-          <I18nProvider>
-            <div style={{position:'fixed',top:8,right:8,zIndex:20}}><I18nSwitcher /></div>
-            {children}
-          </I18nProvider>
-        </ChakraProvider>
+        <Providers>
+          {children}
+        </Providers>
 
       </body>
     </html>

@@ -23,5 +23,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "playwright.config.ts", "tests"]
+  "exclude": ["node_modules", "playwright.config.ts", "tests", "src/__tests__"]
 }

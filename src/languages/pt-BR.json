@@ -27,6 +27,12 @@
     "export": "Exportar",
     "settings": "Configurações",
     "loadFile": "Carregue um arquivo Guitar Pro para começar a tocar",
-    "dragDropFile": "Arraste e solte um arquivo aqui ou clique para navegar"
+    "dragDropFile": "Arraste e solte um arquivo aqui ou clique para navegar",
+    "loading": "Carregando",
+    "renderingScore": "Renderizando partitura...",
+    "loaded": "Carregado",
+    "readyToPlay": "Pronto para tocar",
+    "error": "Erro",
+    "initializing": "O player está inicializando, tente novamente"
   }
 }

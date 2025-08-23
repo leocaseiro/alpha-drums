@@ -8,7 +8,7 @@ import styles from './PlayerControls.module.css';
 
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
-  onOpenFileClick: () => void;
+  onOpenFileClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick }) => {

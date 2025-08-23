@@ -36,13 +36,13 @@ Steps to proceed:
 - [x] Install Chakra UI and dependencies (`@chakra-ui/react`, `@emotion/react`, `@emotion/styled`, `framer-motion`)
 - [x] Wrap app with `ChakraProvider`, `ColorModeScript` in `src/app/layout.tsx`
 - [ ] Replace global fonts & base colors with Chakra theme tokens
-- [ ] Migrate loading overlay to Chakra `ProgressCircle`
-- [ ] Add `Toast` notifications for load, error, success
+- [x] Migrate loading overlay to Chakra `ProgressCircle`
+- [x] Add `Toast` notifications for load, error, success
 - [ ] Convert `PlayerControls` to Chakra components (Buttons, Sliders, Select, Stack)
 - [ ] Convert `TrackItem` to Chakra components (Card, ButtonGroup, Slider)
 - [ ] Replace CSS Modules with Chakra style props where feasible
 - [ ] Implement top Menubar with Chakra `Menu`/`ActionBar`
-- [ ] Implement Drawer/Sidebar for Settings (Features 2.e, 8-12)
+- [x] Implement Drawer/Sidebar for Settings (Features 2.e, 8-12)
 - [ ] Add Switch components for track visibility
 - [ ] Add Editable inputs for numeric controls with reset buttons
 - [ ] Make Tracks sidebar toggleable and resizable (use Chakra + CSS)
@@ -92,6 +92,7 @@ All the features should have a playwright test, and you should validate if the t
 - [ ] 27. for all slides, For the values, we should able to edit via https://chakra-ui.com/docs/components/editable, and they should have a reset button (when applicable), customised the icons.
 - [ ] 28. By default, we should only display the drums track ()
 - [ ] 29. we should have a way to show only track selected as well.
+- [ ] 30. we should have a playwright passing for every feature
 
 ## Midi Features https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API (new branch after UI changes)
 - [ ] 1. Implement a way to detect midi inputs (ref: https://github.com/sightread/sightread/blob/main/src/features/midi/index.tsx)

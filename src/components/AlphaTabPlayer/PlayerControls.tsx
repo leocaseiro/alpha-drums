@@ -220,10 +220,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                 setPlaybackSpeed(value / 100);
               }}
             >
-              <Editable.Preview fontSize="xs" minW="40px" />
-              <Editable.Input fontSize="xs" minW="40px" />
+              <Editable.Preview fontSize="xs" w="35px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="35px" textAlign="right" />
             </Editable.Root>
-            <Text fontSize="xs" color="gray.600">%</Text>
+            <Text fontSize="xs" color="gray.600" w="10px">%</Text>
             <IconButton 
               aria-label="Reset speed" 
               size="xs" 
@@ -256,10 +256,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                 setZoom(value);
               }}
             >
-              <Editable.Preview fontSize="xs" minW="40px" />
-              <Editable.Input fontSize="xs" minW="40px" />
+              <Editable.Preview fontSize="xs" w="35px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="35px" textAlign="right" />
             </Editable.Root>
-            <Text fontSize="xs" color="gray.600">%</Text>
+            <Text fontSize="xs" color="gray.600" w="10px">%</Text>
             <IconButton 
               aria-label="Reset zoom" 
               size="xs" 
@@ -303,10 +303,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   setMetronomeVolume(value / 100);
                 }}
               >
-                <Editable.Preview fontSize="xs" minW="30px" />
-                <Editable.Input fontSize="xs" minW="30px" />
+                <Editable.Preview fontSize="xs" w="25px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="25px" textAlign="right" />
               </Editable.Root>
-              <Text fontSize="xs">%</Text>
+              <Text fontSize="xs" w="8px">%</Text>
               <IconButton 
                 aria-label="Reset metronome volume" 
                 size="xs" 
@@ -336,10 +336,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   setCountInVolume(value / 100);
                 }}
               >
-                <Editable.Preview fontSize="xs" minW="30px" />
-                <Editable.Input fontSize="xs" minW="30px" />
+                <Editable.Preview fontSize="xs" w="25px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="25px" textAlign="right" />
               </Editable.Root>
-              <Text fontSize="xs">%</Text>
+              <Text fontSize="xs" w="8px">%</Text>
               <IconButton 
                 aria-label="Reset count-in volume" 
                 size="xs" 

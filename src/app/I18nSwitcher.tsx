@@ -18,6 +18,7 @@ export default function I18nSwitcher() {
       value={[lang]} 
       onValueChange={(details) => setLang(details.value[0])}
       size="sm"
+      positioning={{ placement: "bottom-end" }}
     >
       <Select.Trigger minW="100px">
         <Select.ValueText placeholder="Language" />

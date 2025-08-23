@@ -68,7 +68,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
       </HStack>
 
       <HStack gap={2}>
-        <MenuRoot>
+        <MenuRoot positioning={{ placement: "bottom-start" }}>
           <MenuTrigger asChild>
             <Button variant="outline" size="sm">
               📁 File
@@ -95,7 +95,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           </MenuContent>
         </MenuRoot>
 
-        <MenuRoot>
+        <MenuRoot positioning={{ placement: "bottom-start" }}>
           <MenuTrigger asChild>
             <Button variant="outline" size="sm">
               👁️ View

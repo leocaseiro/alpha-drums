@@ -217,7 +217,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
             value={[volume]} 
             onValueChange={(details) => setVolume(details.value[0])} 
             flex="1"
-            minW="80px"
+            minW="60px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -233,10 +233,10 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               setVolume((value / 100) * 16);
             }}
           >
-            <Editable.Preview fontSize="sm" minW="30px" textAlign="center" />
-            <Editable.Input fontSize="sm" minW="30px" textAlign="center" />
+            <Editable.Preview fontSize="xs" w="25px" textAlign="right" />
+            <Editable.Input fontSize="xs" w="25px" textAlign="right" />
           </Editable.Root>
-          <Text fontSize="sm" flexShrink={0}>%</Text>
+          <Text fontSize="xs" flexShrink={0} w="8px">%</Text>
           <IconButton 
             aria-label="Reset volume" 
             size="xs" 

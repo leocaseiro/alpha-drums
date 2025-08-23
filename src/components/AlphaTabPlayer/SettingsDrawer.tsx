@@ -29,6 +29,12 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
   const [rhythmMode, setRhythmMode] = React.useState<number>(api?.settings.notation.rhythmMode ?? alphaTab.TabRhythmMode.Automatic);
   const [continuousScroll, setContinuousScroll] = React.useState<boolean>((api?.settings.player.scrollMode ?? alphaTab.ScrollMode.Continuous) === alphaTab.ScrollMode.Continuous);
+  
+  // Player interaction and cursor settings
+  const [showCursors, setShowCursors] = React.useState<boolean>(api?.settings.player.enableCursor ?? true);
+  const [animatedBeatCursor, setAnimatedBeatCursor] = React.useState<boolean>(api?.settings.player.enableAnimatedBeatCursor ?? false);
+  const [highlightNotes, setHighlightNotes] = React.useState<boolean>(api?.settings.player.enableElementHighlighting ?? false);
+  const [enableUserInteraction, setEnableUserInteraction] = React.useState<boolean>(api?.settings.player.enableUserInteraction ?? true);
 
   const apply = React.useCallback(() => {
     if (!api) return;
@@ -37,9 +43,23 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
     api.settings.notation.rhythmMode = rhythmMode as alphaTab.TabRhythmMode;
     api.settings.player.scrollMode = continuousScroll ? alphaTab.ScrollMode.Continuous : alphaTab.ScrollMode.OffScreen;
+    
+    // Apply cursor and interaction settings
+    api.settings.player.enableCursor = showCursors;
+    api.settings.player.enableAnimatedBeatCursor = animatedBeatCursor;
+    api.settings.player.enableElementHighlighting = highlightNotes;
+    api.settings.player.enableUserInteraction = enableUserInteraction;
+    
+    console.log('Applied player settings:', {
+      enableCursor: api.settings.player.enableCursor,
+      enableAnimatedBeatCursor: api.settings.player.enableAnimatedBeatCursor,
+      enableElementHighlighting: api.settings.player.enableElementHighlighting,
+      enableUserInteraction: api.settings.player.enableUserInteraction
+    });
+    
     api.updateSettings();
     api.render();
-  }, [api, scale, layout, rhythmMode, continuousScroll]);
+  }, [api, scale, layout, rhythmMode, continuousScroll, showCursors, animatedBeatCursor, highlightNotes, enableUserInteraction]);
 
   const layoutModes = createListCollection({
     items: [
@@ -80,7 +100,7 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
         <Drawer.Positioner>
           <Drawer.Content>
             <Drawer.Header>
-              <Drawer.Title>Drawer Title</Drawer.Title>
+              <Drawer.Title>Player Settings</Drawer.Title>
             </Drawer.Header>
             <Drawer.Body>
               <VStack align="stretch" gap={4}>
@@ -145,6 +165,60 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
                 <Switch.Root checked={continuousScroll} onCheckedChange={(details) => {
                   setContinuousScroll(details.checked);
                   toaster.create({ type: 'info', title: 'Scroll Mode', description: details.checked ? 'Enabled continuous scroll' : 'Disabled continuous scroll' });
+                }}>
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+
+              <Text fontSize="md" fontWeight="semibold" mt={4} mb={2}>Player & Cursor</Text>
+              
+              <HStack justify="space-between">
+                <Text fontSize="sm">Show Cursors</Text>
+                <Switch.Root checked={showCursors} onCheckedChange={(details) => {
+                  setShowCursors(details.checked);
+                  toaster.create({ type: 'info', title: 'Cursor Display', description: details.checked ? 'Enabled cursor display' : 'Disabled cursor display' });
+                }}>
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+
+              <HStack justify="space-between">
+                <Text fontSize="sm">Animated Beat Cursor</Text>
+                <Switch.Root checked={animatedBeatCursor} onCheckedChange={(details) => {
+                  setAnimatedBeatCursor(details.checked);
+                  toaster.create({ type: 'info', title: 'Beat Cursor', description: details.checked ? 'Enabled animated beat cursor' : 'Disabled animated beat cursor' });
+                }}>
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+
+              <HStack justify="space-between">
+                <Text fontSize="sm">Highlight Notes</Text>
+                <Switch.Root checked={highlightNotes} onCheckedChange={(details) => {
+                  setHighlightNotes(details.checked);
+                  toaster.create({ type: 'info', title: 'Note Highlighting', description: details.checked ? 'Enabled note highlighting' : 'Disabled note highlighting' });
+                }}>
+                  <Switch.HiddenInput />
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+
+              <HStack justify="space-between">
+                <Text fontSize="sm">Enable User Interaction</Text>
+                <Switch.Root checked={enableUserInteraction} onCheckedChange={(details) => {
+                  setEnableUserInteraction(details.checked);
+                  toaster.create({ type: 'info', title: 'User Interaction', description: details.checked ? 'Enabled user interaction' : 'Disabled user interaction' });
                 }}>
                   <Switch.HiddenInput />
                   <Switch.Control>

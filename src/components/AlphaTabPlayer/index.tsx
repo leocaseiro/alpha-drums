@@ -30,6 +30,9 @@ export const AlphaTabPlayer: React.FC = () => {
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.player.enablePlayer = true;
     settings.player.enableCursor = true;
+    settings.player.enableAnimatedBeatCursor = false;
+    settings.player.enableElementHighlighting = false;
+    settings.player.enableUserInteraction = true;
 
     // Display configuration
     settings.display.scale = 0.8;
@@ -43,6 +46,9 @@ export const AlphaTabPlayer: React.FC = () => {
       playerMode: settings.player.playerMode,
       useWorkers: settings.core.useWorkers,
       enableCursor: settings.player.enableCursor,
+      enableAnimatedBeatCursor: settings.player.enableAnimatedBeatCursor,
+      enableElementHighlighting: settings.player.enableElementHighlighting,
+      enableUserInteraction: settings.player.enableUserInteraction,
       scrollMode: settings.player.scrollMode
     });
   }, []);

@@ -32,8 +32,8 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
   
   // Player interaction and cursor settings
   const [showCursors, setShowCursors] = React.useState<boolean>(api?.settings.player.enableCursor ?? true);
-  const [animatedBeatCursor, setAnimatedBeatCursor] = React.useState<boolean>(api?.settings.player.enableAnimatedBeatCursor ?? false);
-  const [highlightNotes, setHighlightNotes] = React.useState<boolean>(api?.settings.player.enableElementHighlighting ?? false);
+  const [animatedBeatCursor, setAnimatedBeatCursor] = React.useState<boolean>(api?.settings.player.enableAnimatedBeatCursor ?? true);
+  const [highlightNotes, setHighlightNotes] = React.useState<boolean>(api?.settings.player.enableElementHighlighting ?? true);
   const [enableUserInteraction, setEnableUserInteraction] = React.useState<boolean>(api?.settings.player.enableUserInteraction ?? true);
 
   const apply = React.useCallback(() => {

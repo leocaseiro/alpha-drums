@@ -24,14 +24,14 @@ export const AlphaTabPlayer: React.FC = () => {
   const viewPortRef = React.useRef<HTMLDivElement>(null);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
-    // Player configuration - use a mode that works without full synthesis
-    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback
-    settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Avoid worklet requirements in dev
+    // Player configuration - use a mode that works with cursors
+    settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback  
+    settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Use script processor for compatibility
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.player.enablePlayer = true;
     settings.player.enableCursor = true;
-    settings.player.enableAnimatedBeatCursor = false;
-    settings.player.enableElementHighlighting = false;
+    settings.player.enableAnimatedBeatCursor = true;
+    settings.player.enableElementHighlighting = true;
     settings.player.enableUserInteraction = true;
 
     // Display configuration
@@ -66,19 +66,41 @@ export const AlphaTabPlayer: React.FC = () => {
         api.settings.player.enableCursor = true;
         api.settings.player.enablePlayer = true;
         api.settings.player.enableUserInteraction = true;
-        
+        console.log('api', api);
+
         console.log('Updated player settings:', {
           scrollElement: !!api.settings.player.scrollElement,
           scrollMode: api.settings.player.scrollMode,
           enableCursor: api.settings.player.enableCursor,
           enablePlayer: api.settings.player.enablePlayer,
-          playerMode: api.settings.player.playerMode
+          playerMode: api.settings.player.playerMode,
+          enableAnimatedBeatCursor: api.settings.player.enableAnimatedBeatCursor,
+          enableElementHighlighting: api.settings.player.enableElementHighlighting
         });
-        
+
         api.updateSettings();
         // Force a render to apply the new settings
         if (api.score) {
           api.render();
+          
+          // Additional attempt to ensure cursor is visible
+          setTimeout(() => {
+            try {
+              console.log('Attempting additional cursor setup...');
+              const container = viewPortRef.current;
+              if (container) {
+                // Check if cursor elements exist
+                const cursorElements = container.querySelectorAll('.at-cursor-bar, .at-cursor-beat');
+                console.log('Found cursor elements:', cursorElements.length);
+                
+                // Force cursor visibility
+                api.settings.player.enableCursor = true;
+                api.updateSettings();
+              }
+            } catch (error) {
+              console.log('Additional cursor setup failed:', error);
+            }
+          }, 1000);
         }
       } catch (error) {
         console.error('Error configuring scroll element:', error);
@@ -131,7 +153,7 @@ export const AlphaTabPlayer: React.FC = () => {
     setTimeout(() => {
       setIsLoading(false);
       setLoadingProgress(0);
-      
+
       // Try to activate the player after render is complete
       if (api && api.player) {
         try {

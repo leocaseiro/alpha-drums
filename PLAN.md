@@ -108,7 +108,7 @@ All the features should have a playwright test, and you should validate if the t
   - [ ] a. the user can select to practice or play score
   - [ ] b. when user click in play score, we should start the song, and also detect if the midi inputs are played correctly
   - [ ] c. we should score streak, accuracy, perfect, early, late, miss, etc and display in percentage, as well as 5 stars.
-  - [ ] d. we should use the alphatab colors to detect when user pressed the right note in the right time as a visual feedback using the PercussionNoteHeadGlyph.paint from alphatab https://github.com/CoderLine/alphaTab/blob/main/src/rendering/glyphs/PercussionNoteHeadGlyph.ts#L24-L46
+  - [ ] d. we should use the alphatab colors to detect when user pressed the right note in the right time as a visual feedback using the PercussionNoteHeadGlyph.paint from alphatab https://github.com/CoderLine/alphaTab/blob/main/src/rendering/glyphs/PercussionNoteHeadGlyph.ts#L24-L46 and https://www.alphatab.net/docs/guides/coloring
   - [ ] e. if the user miss the note (not played in the time, or too late), we should red, and add black cross (x)
   - [ ] f. for every correct note, we should also wrap the notehead with a green circle.
   - [ ] g. for every extra note (played extra notes), we should display as a cross.

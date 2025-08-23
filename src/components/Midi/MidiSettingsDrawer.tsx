@@ -44,9 +44,11 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
 
   const handleInputToggle = (deviceId: string, connected: boolean) => {
     console.log(`Toggle input device ${deviceId}: ${connected ? 'disconnect' : 'connect'}`);
+    const device = inputDevices.find(d => d.id === deviceId);
+    const deviceName = device?.name || 'Unknown Device';
     
     if (connected) {
-      // Disconnect
+      // Disconnect device
       const success = disconnectInput(deviceId);
       console.log('Disconnect result:', success);
       updateSettings({
@@ -55,10 +57,10 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
       toaster.create({
         type: 'info',
         title: 'MIDI Input',
-        description: 'Disconnected from input device'
+        description: `Disconnected from ${deviceName}`
       });
     } else {
-      // Connect
+      // Connect device (multiple devices can be connected simultaneously)
       const success = connectInput(deviceId);
       console.log('Connect result:', success);
       updateSettings({
@@ -67,33 +69,39 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
       toaster.create({
         type: 'success',
         title: 'MIDI Input',
-        description: 'Connected to input device'
+        description: `Connected to ${deviceName}`
       });
     }
   };
 
   const handleOutputToggle = (deviceId: string, connected: boolean) => {
+    console.log(`Toggle output device ${deviceId}: ${connected ? 'disconnect' : 'connect'}`);
+    const device = outputDevices.find(d => d.id === deviceId);
+    const deviceName = device?.name || 'Unknown Device';
+    
     if (connected) {
-      // Disconnect
-      disconnectOutput(deviceId);
+      // Disconnect device
+      const success = disconnectOutput(deviceId);
+      console.log('Disconnect result:', success);
       updateSettings({
         selectedOutputs: new Set([...settings.selectedOutputs].filter(id => id !== deviceId))
       });
       toaster.create({
         type: 'info',
         title: 'MIDI Output',
-        description: 'Disconnected from output device'
+        description: `Disconnected from ${deviceName}`
       });
     } else {
-      // Connect
-      connectOutput(deviceId);
+      // Connect device (multiple devices can be connected simultaneously)
+      const success = connectOutput(deviceId);
+      console.log('Connect result:', success);
       updateSettings({
         selectedOutputs: new Set([...settings.selectedOutputs, deviceId])
       });
       toaster.create({
         type: 'success',
         title: 'MIDI Output',
-        description: 'Connected to output device'
+        description: `Connected to ${deviceName}`
       });
     }
   };

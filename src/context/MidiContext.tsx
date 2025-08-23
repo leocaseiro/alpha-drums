@@ -220,16 +220,26 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     });
   }, [outputDevices, settings.selectedOutputs, settings.autoConnectOutputs, connectedOutputs, connectOutput]);
 
-  // Auto-connect to single devices when auto-connect is enabled
+  // Auto-connect to single devices when auto-connect is enabled and no devices are currently connected
   useEffect(() => {
-    if (settings.autoConnectInputs && inputDevices.length === 1) {
+    if (settings.autoConnectInputs && inputDevices.length === 1 && connectedInputs.size === 0) {
       const device = inputDevices[0];
-      if (device.state === 'connected' && !connectedInputs.has(device.id)) {
+      if (device.state === 'connected') {
         console.log('Auto-connecting to single input device:', device.name);
         connectInput(device.id);
       }
     }
   }, [inputDevices, settings.autoConnectInputs, connectedInputs, connectInput]);
+
+  useEffect(() => {
+    if (settings.autoConnectOutputs && outputDevices.length === 1 && connectedOutputs.size === 0) {
+      const device = outputDevices[0];
+      if (device.state === 'connected') {
+        console.log('Auto-connecting to single output device:', device.name);
+        connectOutput(device.id);
+      }
+    }
+  }, [outputDevices, settings.autoConnectOutputs, connectedOutputs, connectOutput]);
 
   const contextValue: MidiContextValue = {
     // Inputs

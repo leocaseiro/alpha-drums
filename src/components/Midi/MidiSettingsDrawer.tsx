@@ -46,13 +46,14 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
     console.log(`Toggle input device ${deviceId}: ${connected ? 'disconnect' : 'connect'}`);
     console.log('Current connected inputs:', Array.from(connectedInputs));
     console.log('Current selected inputs in settings:', Array.from(settings.selectedInputs));
+    
     const device = inputDevices.find(d => d.id === deviceId);
     const deviceName = device?.name || 'Unknown Device';
     
     if (connected) {
       // Disconnect device
-      const success = disconnectInput(deviceId);
-      console.log('Disconnect result:', success);
+      console.log('Disconnecting device...');
+      disconnectInput(deviceId);
       updateSettings({
         selectedInputs: new Set([...settings.selectedInputs].filter(id => id !== deviceId))
       });
@@ -62,9 +63,9 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
         description: `Disconnected from ${deviceName}`
       });
     } else {
-      // Connect device (multiple devices can be connected simultaneously)
-      const success = connectInput(deviceId);
-      console.log('Connect result:', success);
+      // Connect device
+      console.log('Connecting device...');
+      connectInput(deviceId);
       updateSettings({
         selectedInputs: new Set([...settings.selectedInputs, deviceId])
       });
@@ -74,6 +75,11 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
         description: `Connected to ${deviceName}`
       });
     }
+    
+    // Log final state after toggle
+    setTimeout(() => {
+      console.log('After toggle - connected:', connectedInputs.has(deviceId), 'selected:', settings.selectedInputs.has(deviceId));
+    }, 100);
   };
 
   const handleOutputToggle = (deviceId: string, connected: boolean) => {
@@ -83,8 +89,7 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
     
     if (connected) {
       // Disconnect device
-      const success = disconnectOutput(deviceId);
-      console.log('Disconnect result:', success);
+      disconnectOutput(deviceId);
       updateSettings({
         selectedOutputs: new Set([...settings.selectedOutputs].filter(id => id !== deviceId))
       });
@@ -94,9 +99,8 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
         description: `Disconnected from ${deviceName}`
       });
     } else {
-      // Connect device (multiple devices can be connected simultaneously)
-      const success = connectOutput(deviceId);
-      console.log('Connect result:', success);
+      // Connect device
+      connectOutput(deviceId);
       updateSettings({
         selectedOutputs: new Set([...settings.selectedOutputs, deviceId])
       });

@@ -195,20 +195,50 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     );
   }, [inputDevices]);
 
-  // Disable auto-reconnect for now to prevent loops - users can manually reconnect
-  // TODO: Implement safer auto-reconnect logic later
-  /*
+  // Restore connections from settings on page load (one-time only)
+  const hasRestoredRef = React.useRef(false);
+  
   useEffect(() => {
-    // Auto-reconnect logic disabled due to infinite loop issues
-  }, []);
-  */
+    if (hasRestoredRef.current || inputDevices.length === 0) return;
+    
+    // Only restore if we have devices and haven't restored yet
+    let restored = false;
+    inputDevices.forEach(device => {
+      if (settings.selectedInputs.has(device.id) && 
+          device.state === 'connected' && 
+          !connectedInputs.has(device.id)) {
+        console.log('Restoring connection to input device:', device.name);
+        connectInput(device.id);
+        restored = true;
+      }
+    });
+    
+    if (restored || inputDevices.length > 0) {
+      hasRestoredRef.current = true;
+    }
+  }, [inputDevices, settings.selectedInputs, connectedInputs, connectInput]);
 
-  // Disable auto-reconnect for outputs too
-  /*
+  // Restore output connections too
+  const hasRestoredOutputsRef = React.useRef(false);
+  
   useEffect(() => {
-    // Auto-reconnect logic disabled due to infinite loop issues
-  }, []);
-  */
+    if (hasRestoredOutputsRef.current || outputDevices.length === 0) return;
+    
+    let restored = false;
+    outputDevices.forEach(device => {
+      if (settings.selectedOutputs.has(device.id) && 
+          device.state === 'connected' && 
+          !connectedOutputs.has(device.id)) {
+        console.log('Restoring connection to output device:', device.name);
+        connectOutput(device.id);
+        restored = true;
+      }
+    });
+    
+    if (restored || outputDevices.length > 0) {
+      hasRestoredOutputsRef.current = true;
+    }
+  }, [outputDevices, settings.selectedOutputs, connectedOutputs, connectOutput]);
 
   // Simplified single device auto-connect (only when explicitly no selections exist)
   const hasAutoConnectedRef = React.useRef(false);

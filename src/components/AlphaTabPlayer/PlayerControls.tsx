@@ -17,10 +17,9 @@ import {
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
   onOpenFileClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onOpenSettings?: () => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick, onOpenSettings }) => {
+export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick }) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
@@ -34,7 +33,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
   const [metronomeVolume, setMetronomeVolume] = useState(1);
   const [countInVolume, setCountInVolume] = useState(1);
   const [zoom, setZoom] = useState(100);
-  const [layoutMode, setLayoutMode] = useState<alphaTab.LayoutMode>(alphaTab.LayoutMode.Page);
 
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
     setIsPlaying((e as unknown as { state: alphaTab.synth.PlayerState }).state === alphaTab.synth.PlayerState.Playing);
@@ -134,13 +132,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     }
   }, [api, zoom]);
 
-  useEffect(() => {
-    if (api) {
-      api.settings.display.layoutMode = layoutMode;
-      api.updateSettings();
-      api.render();
-    }
-  }, [api, layoutMode]);
 
   const formatDuration = (milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -204,30 +195,31 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
 
       <HStack align="center" gap={4}>
         <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} disabled={!isReadyForPlayback}>
-          ⏹️
+          ⏹︎
         </IconButton>
-        <Button onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
-          {isPlaying ? t('player.pause') : t('player.play')}
-        </Button>
+        <IconButton aria-label={isPlaying ? t('player.pause') : t('player.play')} onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
+          {isPlaying ? `⏸︎` : `▶︎`}
+        </IconButton>
 
         <VStack minW="180px" gap={1} align="stretch">
           <HStack gap={2} align="center">
             <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
-            <Editable.Root 
-              value={String(Math.round(playbackSpeed * 100))} 
+            <Editable.Root
+              value={String(Math.round(playbackSpeed * 100))}
               onValueChange={(details) => {
                 const value = Math.max(25, Math.min(200, Number(details.value) || 100));
                 setPlaybackSpeed(value / 100);
               }}
+              w="30px"
             >
-              <Editable.Preview fontSize="xs" w="35px" textAlign="right" />
-              <Editable.Input fontSize="xs" w="35px" textAlign="right" />
+              <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="30px" textAlign="right" />
             </Editable.Root>
             <Text fontSize="xs" color="gray.600" w="10px">%</Text>
-            <IconButton 
-              aria-label="Reset speed" 
-              size="xs" 
-              variant="ghost" 
+            <IconButton
+              aria-label="Reset speed"
+              size="xs"
+              variant="ghost"
               onClick={() => setPlaybackSpeed(1)}
             >
               🔄
@@ -249,21 +241,22 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <VStack minW="180px" gap={1} align="stretch">
           <HStack gap={2} align="center">
             <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}:</Text>
-            <Editable.Root 
-              value={String(zoom)} 
+            <Editable.Root
+              value={String(zoom)}
               onValueChange={(details) => {
                 const value = Math.max(25, Math.min(200, Number(details.value) || 100));
                 setZoom(value);
               }}
+              w="30px"
             >
-              <Editable.Preview fontSize="xs" w="35px" textAlign="right" />
-              <Editable.Input fontSize="xs" w="35px" textAlign="right" />
+              <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="30px" textAlign="right" />
             </Editable.Root>
             <Text fontSize="xs" color="gray.600" w="10px">%</Text>
-            <IconButton 
-              aria-label="Reset zoom" 
-              size="xs" 
-              variant="ghost" 
+            <IconButton
+              aria-label="Reset zoom"
+              size="xs"
+              variant="ghost"
               onClick={() => setZoom(100)}
             >
               🔄
@@ -281,7 +274,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
       <HStack gap={3} wrap="wrap">
         <input type="file" accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx" onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
         <label htmlFor="file-input" title={t('player.openFile')}>
-          <Button as="span">🔍</Button>
+          <Button as="span">📁</Button>
         </label>
 
         <Button variant={isLooping ? 'solid' : 'outline'} colorScheme="blue" onClick={() => setIsLooping(!isLooping)} disabled={!isReadyForPlayback}>🔁 {t('player.loop')}</Button>
@@ -296,21 +289,22 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Editable.Root 
-                value={String(Math.round(metronomeVolume * 100))} 
+              <Editable.Root
+                value={String(Math.round(metronomeVolume * 100))}
                 onValueChange={(details) => {
                   const value = Math.max(0, Math.min(100, Number(details.value) || 100));
                   setMetronomeVolume(value / 100);
                 }}
+                w="30px"
               >
-                <Editable.Preview fontSize="xs" w="25px" textAlign="right" />
-                <Editable.Input fontSize="xs" w="25px" textAlign="right" />
+                <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="30px" textAlign="right" />
               </Editable.Root>
               <Text fontSize="xs" w="8px">%</Text>
-              <IconButton 
-                aria-label="Reset metronome volume" 
-                size="xs" 
-                variant="ghost" 
+              <IconButton
+                aria-label="Reset metronome volume"
+                size="xs"
+                variant="ghost"
                 onClick={() => setMetronomeVolume(1)}
               >
                 🔄
@@ -329,35 +323,28 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Editable.Root 
-                value={String(Math.round(countInVolume * 100))} 
+              <Editable.Root
+                value={String(Math.round(countInVolume * 100))}
                 onValueChange={(details) => {
                   const value = Math.max(0, Math.min(100, Number(details.value) || 100));
                   setCountInVolume(value / 100);
                 }}
+                w="30px"
               >
-                <Editable.Preview fontSize="xs" w="25px" textAlign="right" />
-                <Editable.Input fontSize="xs" w="25px" textAlign="right" />
+                <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="30px" textAlign="right" />
               </Editable.Root>
               <Text fontSize="xs" w="8px">%</Text>
-              <IconButton 
-                aria-label="Reset count-in volume" 
-                size="xs" 
-                variant="ghost" 
+              <IconButton
+                aria-label="Reset count-in volume"
+                size="xs"
+                variant="ghost"
                 onClick={() => setCountInVolume(1)}
               >
                 🔄
               </IconButton>
             </HStack>
           )}
-        </HStack>
-
-        <HStack>
-          <Text fontSize="sm">📄 {t('player.layout')}:</Text>
-        </HStack>
-
-        <HStack>
-          {onOpenSettings && <Button onClick={onOpenSettings}>⚙️ Settings</Button>}
         </HStack>
       </HStack>
     </VStack>

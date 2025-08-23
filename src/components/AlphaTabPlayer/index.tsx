@@ -30,12 +30,12 @@ export const AlphaTabPlayer: React.FC = () => {
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.player.enablePlayer = true;
     settings.player.enableCursor = true;
-    
+
     // Display configuration
     settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
     settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
-    
+
     // Default to showing rhythm on tabs
     settings.notation.rhythmMode = alphaTab.TabRhythmMode.Automatic;
 
@@ -180,7 +180,7 @@ export const AlphaTabPlayer: React.FC = () => {
 
   return (
     <Flex direction="column" w="full" h="100vh" position="relative">
-      <MenuBar 
+      <MenuBar
         api={api ?? undefined}
         score={score}
         onOpenFile={triggerFileInput}
@@ -200,7 +200,7 @@ export const AlphaTabPlayer: React.FC = () => {
               </AbsoluteCenter>
             </ProgressCircle.Root>
             <Text fontSize="md" color="white" textAlign="center">
-              {loadingProgress < 30 ? t('player.loading') : 
+              {loadingProgress < 30 ? t('player.loading') :
                loadingProgress < 60 ? 'Processing score...' :
                loadingProgress < 100 ? 'Rendering notation...' :
                'Almost ready!'}
@@ -293,7 +293,7 @@ export const AlphaTabPlayer: React.FC = () => {
         </Box>
       </Flex>
 
-      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} onOpenSettings={() => setSettingsOpen(true)} />}
+      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
       <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
     </Flex>
   );

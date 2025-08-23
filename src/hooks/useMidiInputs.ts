@@ -151,24 +151,16 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
 
   // Disconnect all devices
   const disconnectAll = useCallback(() => {
-    // Use the current state directly to avoid dependency issues
-    setConnectedDevices(currentConnected => {
-      currentConnected.forEach(deviceId => {
-        const device = devices.find(d => d.id === deviceId);
-        if (device) {
-          try {
-            device.input.onmidimessage = null;
-            if (enableLogging) {
-              console.log(`Disconnected from MIDI device: ${device.name}`);
-            }
-          } catch (err) {
-            console.error('Failed to disconnect from MIDI device:', err);
-          }
-        }
+    if (midiAccess) {
+      midiAccess.inputs.forEach(input => {
+        input.onmidimessage = null;
       });
-      return new Set(); // Clear all connections
-    });
-  }, [devices, enableLogging]);
+    }
+    setConnectedDevices(new Set());
+    if (enableLogging) {
+      console.log('Disconnected all MIDI input devices.');
+    }
+  }, [midiAccess, enableLogging]);
 
   // Initialize MIDI
   useEffect(() => {
@@ -185,10 +177,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
         setMidiAccess(access);
         setIsSupported(true);
 
-        // Set up state change listeners (define inline to avoid stale closure)
-        access.onstatechange = (event) => {
-          console.log('MIDI state changed:', event);
-          // Force refresh devices when state changes
+        const refreshDevicesInternal = () => {
           const deviceList: MidiInputDevice[] = [];
           
           access.inputs.forEach((input) => {
@@ -205,8 +194,32 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
           setDevices(deviceList);
         };
 
+        // This handler will re-scan devices and update the 'connected' set for any unplugged devices
+        access.onstatechange = () => {
+          console.log('MIDI input state change detected. Refreshing device list.');
+          refreshDevicesInternal();
+
+          // Clean up connected devices that have been physically removed
+          setConnectedDevices(prevConnected => {
+            const currentInputIds = new Set();
+            access.inputs.forEach(input => currentInputIds.add(input.id));
+            
+            const nextConnected = new Set(prevConnected);
+            let wasChanged = false;
+            
+            for (const deviceId of nextConnected) {
+              if (!currentInputIds.has(deviceId)) {
+                nextConnected.delete(deviceId);
+                wasChanged = true;
+              }
+            }
+            
+            return wasChanged ? nextConnected : prevConnected;
+          });
+        };
+
         // Initial devices scan
-        refreshDevices();
+        refreshDevicesInternal();
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to initialize MIDI';
         setError(errorMessage);
@@ -218,24 +231,18 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
     };
 
     initMidi();
-  }, []);
-
-  // Update devices when midiAccess changes
-  useEffect(() => {
-    if (midiAccess) {
-      refreshDevices();
-    }
-  }, [midiAccess, refreshDevices]);
-
-  // Auto-connect logic (separate from refreshDevices to avoid loops)
-  useEffect(() => {
-    if (autoConnect && devices.length === 1) {
-      const device = devices[0];
-      if (device.state === 'connected' && !connectedDevices.has(device.id)) {
-        connectDevice(device.id);
+    
+    return () => {
+      if (midiAccess) {
+        midiAccess.onstatechange = null;
       }
     }
-  }, [devices, autoConnect, connectedDevices, connectDevice]);
+  }, []);
+
+
+
+  // Auto-connect logic is now handled by MidiContext to avoid circular dependencies
+  // and allow for more complex logic based on user settings.
 
   // Cleanup on unmount
   useEffect(() => {

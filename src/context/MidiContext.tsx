@@ -195,79 +195,175 @@ export function MidiProvider({ children, maxHistorySize: initialMaxHistorySize =
     );
   }, [inputDevices]);
 
-  // Restore connections from settings on page load (one-time only)
-  const hasRestoredRef = React.useRef(false);
-  
-  useEffect(() => {
-    if (hasRestoredRef.current || inputDevices.length === 0) return;
-    
-    // Only restore if we have devices and haven't restored yet
-    let restored = false;
-    inputDevices.forEach(device => {
-      if (settings.selectedInputs.has(device.id) && 
-          device.state === 'connected' && 
-          !connectedInputs.has(device.id)) {
-        console.log('Restoring connection to input device:', device.name);
-        connectInput(device.id);
-        restored = true;
+  // Helper function to load manually disconnected devices from localStorage
+  const loadManuallyDisconnectedInputs = (): Set<string> => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('alpha-drums-manually-disconnected-inputs');
+        if (saved) {
+          return new Set<string>(JSON.parse(saved));
+        }
+      } catch (error) {
+        console.warn('Failed to load manually disconnected inputs from localStorage:', error);
       }
-    });
-    
-    if (restored || inputDevices.length > 0) {
-      hasRestoredRef.current = true;
     }
-  }, [inputDevices, settings.selectedInputs, connectedInputs, connectInput]);
+    return new Set<string>();
+  };
 
-  // Restore output connections too
-  const hasRestoredOutputsRef = React.useRef(false);
-  
-  useEffect(() => {
-    if (hasRestoredOutputsRef.current || outputDevices.length === 0) return;
-    
-    let restored = false;
-    outputDevices.forEach(device => {
-      if (settings.selectedOutputs.has(device.id) && 
-          device.state === 'connected' && 
-          !connectedOutputs.has(device.id)) {
-        console.log('Restoring connection to output device:', device.name);
-        connectOutput(device.id);
-        restored = true;
+  // Restore connections from settings on initial load or when devices change.
+  const hasRestoredInputsRef = React.useRef(false);
+  const manuallyDisconnectedInputsRef = React.useRef(loadManuallyDisconnectedInputs());
+
+  // Helper functions to persist manually disconnected devices
+  const saveManuallyDisconnectedInputs = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(
+          'alpha-drums-manually-disconnected-inputs', 
+          JSON.stringify(Array.from(manuallyDisconnectedInputsRef.current))
+        );
+      } catch (error) {
+        console.warn('Failed to save manually disconnected inputs to localStorage:', error);
       }
-    });
-    
-    if (restored || outputDevices.length > 0) {
+    }
+  }, []);
+
+  // Clean up manually disconnected devices that are no longer available
+  useEffect(() => {
+    const currentDeviceIds = new Set(inputDevices.map(d => d.id));
+    const manuallyDisconnected = manuallyDisconnectedInputsRef.current;
+    let needsSave = false;
+
+    for (const deviceId of manuallyDisconnected) {
+      if (!currentDeviceIds.has(deviceId)) {
+        manuallyDisconnected.delete(deviceId);
+        needsSave = true;
+      }
+    }
+
+    if (needsSave) {
+      saveManuallyDisconnectedInputs();
+    }
+  }, [inputDevices, saveManuallyDisconnectedInputs]);
+  useEffect(() => {
+    // Only run restore logic once per page load, or if the number of devices changes.
+    if (hasRestoredInputsRef.current && inputDevices.length > 0) return;
+
+    const devicesToRestore = inputDevices.filter(
+      device => settings.selectedInputs.has(device.id) && device.state === 'connected'
+    );
+
+    if (devicesToRestore.length > 0) {
+      console.log('Restoring input connections from settings...');
+      devicesToRestore.forEach(device => {
+        if (!connectedInputs.has(device.id)) {
+          console.log(`Restoring input: ${device.name}`);
+          connectInput(device.id);
+        }
+      });
+    }
+
+    if (inputDevices.length > 0) {
+      hasRestoredInputsRef.current = true;
+    }
+  }, [inputDevices, settings.selectedInputs, connectInput, connectedInputs]);
+
+  const hasRestoredOutputsRef = React.useRef(false);
+  useEffect(() => {
+    if (hasRestoredOutputsRef.current && outputDevices.length > 0) return;
+
+    const devicesToRestore = outputDevices.filter(
+      device => settings.selectedOutputs.has(device.id) && device.state === 'connected'
+    );
+
+    if (devicesToRestore.length > 0) {
+      console.log('Restoring output connections from settings...');
+      devicesToRestore.forEach(device => {
+        if (!connectedOutputs.has(device.id)) {
+          console.log(`Restoring output: ${device.name}`);
+          connectOutput(device.id);
+        }
+      });
+    }
+
+    if (outputDevices.length > 0) {
       hasRestoredOutputsRef.current = true;
     }
-  }, [outputDevices, settings.selectedOutputs, connectedOutputs, connectOutput]);
+  }, [outputDevices, settings.selectedOutputs, connectOutput, connectedOutputs]);
 
-  // Simplified single device auto-connect (only when explicitly no selections exist)
-  const hasAutoConnectedRef = React.useRef(false);
-  
+
+  // Auto-connect new devices if the setting is enabled.
   useEffect(() => {
-    if (hasAutoConnectedRef.current) return; // Only auto-connect once per session
-    
-    if (settings.autoConnectInputs && 
-        inputDevices.length === 1 && 
-        connectedInputs.size === 0 && 
-        settings.selectedInputs.size === 0) {
-      const device = inputDevices[0];
-      if (device.state === 'connected') {
-        console.log('Auto-connecting to single input device:', device.name);
+    if (!settings.autoConnectInputs) return;
+
+    // Only auto-connect devices that are truly new (not previously connected or manually disconnected)
+    const newlyConnected = inputDevices.filter(
+      device => device.state === 'connected' && 
+                !connectedInputs.has(device.id) && 
+                !settings.selectedInputs.has(device.id) &&
+                !manuallyDisconnectedInputsRef.current.has(device.id) &&
+                hasRestoredInputsRef.current // Only auto-connect after initial restore
+    );
+
+    if (newlyConnected.length > 0) {
+      console.log('Auto-connecting new input devices...');
+      newlyConnected.forEach(device => {
+        console.log(`Auto-connecting input: ${device.name}`);
         connectInput(device.id);
         updateSettings({
-          selectedInputs: new Set([device.id])
+          selectedInputs: new Set([...settings.selectedInputs, device.id])
         });
-        hasAutoConnectedRef.current = true;
-      }
+      });
     }
-  }, [inputDevices, settings.autoConnectInputs, settings.selectedInputs, connectedInputs, connectInput, updateSettings]);
+  }, [inputDevices, settings.autoConnectInputs, connectedInputs, settings.selectedInputs, connectInput, updateSettings]);
+
+  // Auto-connect new output devices
+  useEffect(() => {
+    if (!settings.autoConnectOutputs) return;
+
+    const newlyConnected = outputDevices.filter(
+      device => device.state === 'connected' && !connectedOutputs.has(device.id) && !settings.selectedOutputs.has(device.id)
+    );
+
+    if (newlyConnected.length > 0) {
+      console.log('Auto-connecting new output devices...');
+      newlyConnected.forEach(device => {
+        console.log(`Auto-connecting output: ${device.name}`);
+        connectOutput(device.id);
+        updateSettings({
+          selectedOutputs: new Set([...settings.selectedOutputs, device.id])
+        });
+      });
+    }
+  }, [outputDevices, settings.autoConnectOutputs, connectedOutputs, settings.selectedOutputs, connectOutput, updateSettings]);
+
+  // Wrapper functions to track manual disconnections
+  const connectInputWrapper = useCallback((deviceId: string) => {
+    const result = connectInput(deviceId);
+    if (result) {
+      // Remove from manually disconnected list when manually connected
+      manuallyDisconnectedInputsRef.current.delete(deviceId);
+      saveManuallyDisconnectedInputs();
+    }
+    return result;
+  }, [connectInput, saveManuallyDisconnectedInputs]);
+
+  const disconnectInputWrapper = useCallback((deviceId: string) => {
+    const result = disconnectInput(deviceId);
+    if (result) {
+      // Add to manually disconnected list when manually disconnected
+      manuallyDisconnectedInputsRef.current.add(deviceId);
+      saveManuallyDisconnectedInputs();
+    }
+    return result;
+  }, [disconnectInput, saveManuallyDisconnectedInputs]);
 
   const contextValue: MidiContextValue = {
     // Inputs
     inputDevices,
     connectedInputs,
-    connectInput,
-    disconnectInput,
+    connectInput: connectInputWrapper,
+    disconnectInput: disconnectInputWrapper,
     disconnectAllInputs,
     refreshInputs,
 

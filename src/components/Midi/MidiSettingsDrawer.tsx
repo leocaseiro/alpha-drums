@@ -238,7 +238,7 @@ export function MidiSettingsDrawer({ isOpen, onClose }: MidiSettingsDrawerProps)
                   ) : (
                     <VStack align="stretch" gap={2}>
                       {inputDevices.map((device) => {
-                        const isConnected = connectedInputs.has(device.id);
+                        const isConnected = settings.selectedInputs.has(device.id);
                         console.log(`Device ${device.name} (${device.id}): connected=${isConnected}, state=${device.state}`);
                         return (
                           <Box

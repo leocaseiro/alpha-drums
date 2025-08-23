@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HStack, Button, Text, MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuSeparator } from '@chakra-ui/react';
+import { HStack, Button, Text, MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuSeparator, MenuPositioner, Portal } from '@chakra-ui/react';
 import { useI18n } from '@/app/i18n';
 import * as alphaTab from '@coderline/alphatab';
 import I18nSwitcher from '@/app/I18nSwitcher';
@@ -74,25 +74,29 @@ export const MenuBar: React.FC<MenuBarProps> = ({
               📁 File
             </Button>
           </MenuTrigger>
-          <MenuContent>
-            <MenuItem value="open" onClick={onOpenFile}>
-              🔍 Open File
-            </MenuItem>
-            <MenuSeparator />
-            <MenuItem value="export-gp" onClick={() => handleExport('gp')} disabled={!score}>
-              💾 Export as Guitar Pro
-            </MenuItem>
-            <MenuItem value="export-midi" onClick={() => handleExport('midi')} disabled={!score}>
-              🎵 Export as MIDI
-            </MenuItem>
-            <MenuItem value="export-xml" onClick={() => handleExport('xml')} disabled={!score}>
-              📄 Export as MusicXML
-            </MenuItem>
-            <MenuSeparator />
-            <MenuItem value="print" onClick={() => handleExport('print')} disabled={!score}>
-              🖨️ Print
-            </MenuItem>
-          </MenuContent>
+          <Portal>
+            <MenuPositioner>
+              <MenuContent>
+                <MenuItem value="open" onClick={onOpenFile}>
+                  🔍 Open File
+                </MenuItem>
+                <MenuSeparator />
+                <MenuItem value="export-gp" onClick={() => handleExport('gp')} disabled={!score}>
+                  💾 Export as Guitar Pro
+                </MenuItem>
+                <MenuItem value="export-midi" onClick={() => handleExport('midi')} disabled={!score}>
+                  🎵 Export as MIDI
+                </MenuItem>
+                <MenuItem value="export-xml" onClick={() => handleExport('xml')} disabled={!score}>
+                  📄 Export as MusicXML
+                </MenuItem>
+                <MenuSeparator />
+                <MenuItem value="print" onClick={() => handleExport('print')} disabled={!score}>
+                  🖨️ Print
+                </MenuItem>
+              </MenuContent>
+            </MenuPositioner>
+          </Portal>
         </MenuRoot>
 
         <MenuRoot positioning={{ placement: "bottom-start" }}>
@@ -101,11 +105,15 @@ export const MenuBar: React.FC<MenuBarProps> = ({
               👁️ View
             </Button>
           </MenuTrigger>
-          <MenuContent>
-            <MenuItem value="toggle-tracks" onClick={onToggleTrackSidebar}>
-              🎸 Toggle Tracks Sidebar
-            </MenuItem>
-          </MenuContent>
+          <Portal>
+            <MenuPositioner>
+              <MenuContent>
+                <MenuItem value="toggle-tracks" onClick={onToggleTrackSidebar}>
+                  🎸 Toggle Tracks Sidebar
+                </MenuItem>
+              </MenuContent>
+            </MenuPositioner>
+          </Portal>
         </MenuRoot>
 
         <Button variant="outline" size="sm" onClick={onOpenSettings}>

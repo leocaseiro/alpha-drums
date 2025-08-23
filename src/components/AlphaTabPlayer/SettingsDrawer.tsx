@@ -3,21 +3,17 @@
 import React from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import {
+  Button,
   Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerCloseButton,
   VStack,
   HStack,
   Text,
   Select,
   Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
   Switch,
+  CloseButton,
+  Portal,
+  createListCollection,
 } from '@chakra-ui/react';
 
 export interface SettingsDrawerProps {
@@ -44,59 +40,141 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
     api.render();
   }, [api, scale, layout, staveProfile, rhythmMode, continuousScroll]);
 
+  const layoutModes = createListCollection({
+    items: [
+      { label: "Page", value: alphaTab.LayoutMode.Page },
+      { label: "Horizontal", value: alphaTab.LayoutMode.Horizontal },
+    ],
+  })
+
+  const staveProfiles = createListCollection({
+    items: [
+      { label: "Score", value: alphaTab.StaveProfile.Score },
+      { label: "Tab", value: alphaTab.StaveProfile.Tab },
+      { label: "Score + Tab", value: alphaTab.StaveProfile.ScoreTab },
+    ],
+  })
+
+  const rhythmModes = createListCollection({
+    items: [
+      { label: "Automatic", value: alphaTab.TabRhythmMode.Automatic },
+      { label: "Hide", value: alphaTab.TabRhythmMode.Hidden },
+    ],
+  })
+
+  // const scrollModes = createListCollection({
+  //   items: [
+  //     { label: "Continuous", value: alphaTab.ScrollMode.Continuous },
+  //     { label: "Page", value: alphaTab.ScrollMode.Page },
+  //   ],
+  // })
+
+  // const playerModes = createListCollection({
+  //   items: [
+  //     { label: "Enabled Synthesizer", value: alphaTab.PlayerMode.EnabledSynthesizer },
+  //     { label: "Disabled Synthesizer", value: alphaTab.PlayerMode.DisabledSynthesizer },
+  //   ],
+  // })
+
   React.useEffect(() => { apply(); }, [apply]);
 
   return (
-    <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerCloseButton />
-        <DrawerHeader>Settings</DrawerHeader>
-        <DrawerBody>
-          <VStack align="stretch" spacing={4}>
-            <VStack align="stretch" spacing={2}>
-              <Text fontSize="sm">Scale: {Math.round(scale * 100)}%</Text>
-              <Slider min={0.5} max={2} step={0.05} value={scale} onChange={setScale}>
-                <SliderTrack><SliderFilledTrack /></SliderTrack>
-                <SliderThumb />
-              </Slider>
-            </VStack>
+    <Drawer.Root open={isOpen} onOpenChange={onClose}>
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content>
+            <Drawer.Header>
+              <Drawer.Title>Drawer Title</Drawer.Title>
+            </Drawer.Header>
+            <Drawer.Body>
+              <VStack align="stretch" gap={4}>
+              <VStack align="stretch" gap={2}>
+                <Text fontSize="sm">Scale: {Math.round(scale * 100)}%</Text>
+                <Slider.Root min={0.5} max={2} step={0.05} value={[scale]} onValueChange={(e) => setScale(e.value[0])}>
+                  <Slider.Track>
+                    <Slider.Range />
+                  </Slider.Track>
+                  <Slider.Thumb index={0}>
+                    <Slider.DraggingIndicator />
+                    <Slider.HiddenInput />
+                  </Slider.Thumb>
+                </Slider.Root>
+              </VStack>
 
-            <VStack align="stretch" spacing={2}>
-              <Text fontSize="sm">Layout</Text>
-              <Select value={layout} onChange={(e) => setLayout(Number(e.target.value))}>
-                <option value={alphaTab.LayoutMode.Page}>Page</option>
-                <option value={alphaTab.LayoutMode.Horizontal}>Horizontal</option>
-              </Select>
-            </VStack>
+              <VStack align="stretch" gap={2}>
+                <Text fontSize="sm">Layout</Text>
+                <Select.Root collection={layoutModes} value={[layout.toString()]} onValueChange={(e) => setLayout(Number(e.value[0]))}>
+                  <Select.Trigger>
+                    <Select.ValueText />
+                  </Select.Trigger>
+                  <Select.Content>
+                  {layoutModes.items.map((layoutMode) => (
+                    <Select.Item item={layoutMode} key={layoutMode.value}>
+                      {layoutMode.label}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+                </Select.Root>
+              </VStack>
 
-            <VStack align="stretch" spacing={2}>
-              <Text fontSize="sm">Stave Profile</Text>
-              <Select value={staveProfile} onChange={(e) => setStaveProfile(Number(e.target.value))}>
-                <option value={alphaTab.StaveProfile.Score}>Score</option>
-                <option value={alphaTab.StaveProfile.Tab}>Tab</option>
-                <option value={alphaTab.StaveProfile.ScoreTab}>Score + Tab</option>
-              </Select>
-            </VStack>
+              <VStack align="stretch" gap={2}>
+                <Text fontSize="sm">Stave Profile</Text>
+                <Select.Root collection={staveProfiles} value={[staveProfile.toString()]} onValueChange={(e) => setStaveProfile(Number(e.value[0]))}>
+                  <Select.Trigger>
+                    <Select.ValueText />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {staveProfiles.items.map((staveProfile) => (
+                      <Select.Item item={staveProfile} key={staveProfile.value}>
+                        {staveProfile.label}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </VStack>
 
-            <VStack align="stretch" spacing={2}>
-              <Text fontSize="sm">Tab Rhythm Mode</Text>
-              <Select value={rhythmMode} onChange={(e) => setRhythmMode(Number(e.target.value))}>
-                <option value={alphaTab.TabRhythmMode.Hide}>Hide</option>
-                <option value={alphaTab.TabRhythmMode.Show}>Show</option>
-                <option value={alphaTab.TabRhythmMode.Automatic}>Automatic</option>
-              </Select>
-            </VStack>
+              <VStack align="stretch" gap={2}>
+                <Text fontSize="sm">Tab Rhythm Mode</Text>
+                <Select.Root collection={rhythmModes} value={[rhythmMode.toString()]} onValueChange={(e) => setRhythmMode(Number(e.value[0]))}>
+                  <Select.Trigger>
+                    <Select.ValueText />
+                  </Select.Trigger>
+                  <Select.Content>
+                    {rhythmModes.items.map((rhythmMode) => (
+                      <Select.Item item={rhythmMode} key={rhythmMode.value}>
+                        {rhythmMode.label}
+                        <Select.ItemIndicator />
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </VStack>
 
-            <HStack justify="space-between">
-              <Text fontSize="sm">Continuous Scroll</Text>
-              <Switch isChecked={continuousScroll} onChange={(e) => setContinuousScroll(e.target.checked)} />
-            </HStack>
-          </VStack>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+              <HStack justify="space-between">
+                <Text fontSize="sm">Continuous Scroll</Text>
+                <Switch.Root checked={continuousScroll} onCheckedChange={(e) => setContinuousScroll(e.checked)}>
+                <Switch.HiddenInput />
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+                <Switch.Label />
+              </Switch.Root>
+              </HStack>
+            </VStack>
+            </Drawer.Body>
+            <Drawer.Footer>
+              <Button variant="outline">Cancel</Button>
+              <Button>Save</Button>
+            </Drawer.Footer>
+            <Drawer.CloseTrigger asChild>
+              <CloseButton size="sm" />
+            </Drawer.CloseTrigger>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   );
 }
-
-

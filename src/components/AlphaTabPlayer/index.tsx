@@ -188,7 +188,7 @@ export const AlphaTabPlayer: React.FC = () => {
 
       <div className={styles.content}>
         {score && (
-          <div className={styles.sidebar}>
+          <div className={styles.sidebar} style={{ resize: 'horizontal', overflow: 'auto' }}>
             <h3 className={styles.sidebarTitle}>{t('player.tracks')}</h3>
             <div className={styles.trackList}>
               {score.tracks.map((track) => (
@@ -208,7 +208,7 @@ export const AlphaTabPlayer: React.FC = () => {
       </div>
 
       {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} />}
-      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api} />
+      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
     </div>
   );
 };

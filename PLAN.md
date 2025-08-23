@@ -38,12 +38,12 @@ Steps to proceed:
 - [ ] Replace global fonts & base colors with Chakra theme tokens
 - [x] Migrate loading overlay to Chakra `ProgressCircle`
 - [x] Add `Toast` notifications for load, error, success
-- [ ] Convert `PlayerControls` to Chakra components (Buttons, Sliders, Select, Stack)
-- [ ] Convert `TrackItem` to Chakra components (Card, ButtonGroup, Slider)
+- [x] Convert `PlayerControls` to Chakra components (Buttons, Sliders, Select, Stack)
+- [x] Convert `TrackItem` to Chakra components (Card, ButtonGroup, Slider)
 - [ ] Replace CSS Modules with Chakra style props where feasible
 - [ ] Implement top Menubar with Chakra `Menu`/`ActionBar`
 - [x] Implement Drawer/Sidebar for Settings (Features 2.e, 8-12)
-- [ ] Add Switch components for track visibility
+- [x] Add Switch components for track visibility
 - [ ] Add Editable inputs for numeric controls with reset buttons
 - [ ] Make Tracks sidebar toggleable and resizable (use Chakra + CSS)
 - [ ] Replace export action UI with Chakra `ActionBar`

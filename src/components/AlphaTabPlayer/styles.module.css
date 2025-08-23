@@ -136,6 +136,7 @@
   background: white;
   border: 1px solid #ddd;
   position: relative;
+  scroll-behavior: smooth;
 }
 
 .footerBar {

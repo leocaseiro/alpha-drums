@@ -41,6 +41,10 @@ A web-based guitar tab player built with Next.js and AlphaTab. Load Guitar Pro f
 - ESLint and Prettier integration
 
 ## Local Development
+## UI
+
+Built with [Chakra UI](https://chakra-ui.com/docs/components). The app is wrapped in `ChakraProvider` and uses Chakra components (e.g., `ProgressCircle`, `Toast`, `Button`, `Slider`). Customize theme in the provider as needed.
+
 
 ```sh
 yarn install
@@ -85,3 +89,7 @@ yarn dev
 ---
 
 See PLAN.md for task status and roadmap.
+
+## License
+
+This project is licensed under the Mozilla Public License 2.0 (MPL-2.0). See the `LICENSE` file for details. You can use this in private or proprietary projects; if you distribute the software, any changes to MPL-licensed files must be shared under MPL-2.0.

@@ -7,29 +7,39 @@ import { useI18n } from '@/app/i18n';
 import { TrackItem } from './TrackItem';
 import { PlayerControls } from './PlayerControls';
 import styles from './styles.module.css';
+import { AbsoluteCenter, Box, Center, Text } from '@chakra-ui/react';
+import { toaster } from '@/app/toaster';
+import { ProgressCircle } from '@chakra-ui/react';
+import { SettingsDrawer } from './SettingsDrawer';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false); // Start as false - only show when actually loading
   const [score, setScore] = useState<alphaTab.model.Score>();
   const [selectedTracks, setSelectedTracks] = useState(new Map<number, alphaTab.model.Track>());
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works without full synthesis
     settings.player.playerMode = alphaTab.PlayerMode.EnabledSynthesizer; // Force synth playback
     settings.player.outputMode = alphaTab.PlayerOutputMode.WebAudioScriptProcessor; // Avoid worklet requirements in dev
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
-
+    settings.player.enablePlayer = true;
+    settings.player.enableCursor = true;
+    
     // Display configuration
     settings.display.scale = 0.8;
     settings.display.layoutMode = alphaTab.LayoutMode.Page;
     settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
+    
     // Default to showing rhythm on tabs
     settings.notation.rhythmMode = alphaTab.TabRhythmMode.Automatic;
 
     console.log('Player settings configured:', {
       playerMode: settings.player.playerMode,
-      useWorkers: settings.core.useWorkers
+      useWorkers: settings.core.useWorkers,
+      enableCursor: settings.player.enableCursor,
+      scrollMode: settings.player.scrollMode
     });
   }, []);
 
@@ -56,6 +66,7 @@ export const AlphaTabPlayer: React.FC = () => {
     console.log('Score loaded event fired', loadedScore);
     setIsLoading(true); // Start loading when score is loaded and rendering begins
     setScore(loadedScore as alphaTab.model.Score);
+    toaster.create({ type: 'success', title: t('player.loaded'), description: t('player.readyToPlay') });
   });
 
   useAlphaTabEvent(api, 'renderStarted', () => {
@@ -74,13 +85,15 @@ export const AlphaTabPlayer: React.FC = () => {
   useAlphaTabEvent(api, 'renderFinished', () => {
     console.log('Render finished event fired');
     setIsLoading(false);
-    // Remove the api.render() call that was causing the infinite loop
+    // Don't show toast on every render, only on initial load
   });
 
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input event fired');
     const file = event.target.files?.[0];
     if (file && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is selected
+      // toaster.create({ type: 'info', title: t('player.loading'), description: file.name });
       setScore(undefined); // Clear previous score
       openFile(api, file);
 
@@ -91,7 +104,7 @@ export const AlphaTabPlayer: React.FC = () => {
       }, 10000); // 10 seconds timeout
     } else if (file && (!api || !isApiReady)) {
       console.error('AlphaTab API not ready yet');
-      alert('Player is still initializing, please wait a moment and try again.');
+      toaster.create({ type: 'error', title: t('player.error'), description: t('player.initializing') });
     }
   };
 
@@ -124,22 +137,31 @@ export const AlphaTabPlayer: React.FC = () => {
     const files = e.dataTransfer.files;
     if (files.length === 1 && api && isApiReady) {
       setIsLoading(true); // Show loading immediately when file is dropped
+      toaster.create({ type: 'info', title: t('player.loading'), description: files[0].name });
       setScore(undefined); // Clear previous score
       openFile(api, files[0]);
     } else if (files.length === 1 && (!api || !isApiReady)) {
       console.error('AlphaTab API not ready yet');
-      alert('Player is still initializing, please wait a moment and try again.');
+      toaster.create({ type: 'error', title: t('player.error'), description: t('player.initializing') });
     }
   };
 
   return (
     <div className={styles.container}>
       {isLoading && (
-        <div className={styles.overlay}>
-          <div className={styles.overlayContent}>
-            <div className={styles.spinner}>Loading...</div>
-          </div>
-        </div>
+        <Box position="absolute" inset={0} bg="blackAlpha.700" zIndex={1000}>
+          <Center w="full" h="full" flexDirection="column" color="white" gap={3}>
+            <ProgressCircle.Root value={80} size="md">
+            <ProgressCircle.Circle>
+              <ProgressCircle.Track />
+              <ProgressCircle.Range />
+            </ProgressCircle.Circle>
+            <AbsoluteCenter>
+              <ProgressCircle.ValueText />
+            </AbsoluteCenter>
+            </ProgressCircle.Root>
+          </Center>
+        </Box>
       )}
 
       {(
@@ -173,7 +195,7 @@ export const AlphaTabPlayer: React.FC = () => {
 
       <div className={styles.content}>
         {score && (
-          <div className={styles.sidebar}>
+          <div className={styles.sidebar} style={{ resize: 'horizontal', overflow: 'auto' }}>
             <h3 className={styles.sidebarTitle}>{t('player.tracks')}</h3>
             <div className={styles.trackList}>
               {score.tracks.map((track) => (
@@ -192,18 +214,8 @@ export const AlphaTabPlayer: React.FC = () => {
         <div className={styles.alphaTab} ref={element} />
       </div>
 
-      {/* Persistent open file button even when a score is loaded */}
-      <div className={styles.footerBar}>
-        <label
-          htmlFor="file-input"
-          className={`${styles.fileButton} ${!isApiReady ? styles.disabled : ''}`}
-          title={!isApiReady ? 'Initializing player...' : t('player.openFile')}
-        >
-          {!isApiReady ? 'Initializing...' : t('player.openFile')}
-        </label>
-      </div>
-
-      {api && score && <PlayerControls api={api} />}
+      {api && score && <PlayerControls api={api} onOpenFileClick={handleFileInput} onOpenSettings={() => setSettingsOpen(true)} />}
+      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} api={api ?? undefined} />
     </div>
   );
 };

@@ -14,9 +14,10 @@ import {
   Switch,
 } from '@chakra-ui/react';
 import { useMidi } from '@/context/MidiContext';
+import { useAlphaTabEvent } from '@/lib/alphatab-utils';
 import * as alphaTab from '@coderline/alphatab';
 import { scoreStorage, SessionScore } from '@/lib/scoreStorage';
-import { toaster } from '@/app/toaster';
+// import { toaster } from '@/app/toaster';
 import { debugLog } from '@/lib/debug';
 
 interface GameState {
@@ -41,7 +42,8 @@ interface ExpectedNote {
   id: string;
   note: number;
   startTime: number;
-  endTime: number;
+  startUnit?: 'tick' | 'ms';
+  startTick?: number;
   isHit: boolean;
   hitType?: 'perfect' | 'good' | 'early' | 'late' | 'miss';
   hitTime?: number;
@@ -53,6 +55,9 @@ interface RhythmGameProps {
   onGameStateChange?: (state: GameState) => void;
   practiceMode?: boolean;
   hideUI?: boolean;
+  visibleTracks?: alphaTab.model.Track[];
+  onExpectedNotesChange?: (notes: Array<Pick<ExpectedNote, 'id' | 'note' | 'startTime'>>) => void;
+  showDebug?: boolean;
 }
 
 const TIMING_WINDOWS = {
@@ -74,7 +79,7 @@ const SCORE_VALUES = {
 export const RhythmGame = React.forwardRef<
   { startGame: (practice: boolean) => void; stopGame: () => void },
   RhythmGameProps
->(({ api, score, onGameStateChange, practiceMode = false, hideUI = false }, ref) => {
+>(({ api, score, onGameStateChange, practiceMode = false, hideUI = false, visibleTracks, onExpectedNotesChange, showDebug = false }, ref) => {
   const { history } = useMidi();
   const [gameState, setGameState] = useState<GameState>({
     isPlaying: false,
@@ -96,10 +101,19 @@ export const RhythmGame = React.forwardRef<
 
   const [expectedNotes, setExpectedNotes] = useState<ExpectedNote[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const [playbackNowMs, setPlaybackNowMs] = useState(0);
   const [recentScores, setRecentScores] = useState<SessionScore[]>([]);
   const gameStartTimeRef = useRef<number>(0);
   const lastProcessedMessageRef = useRef<string>('');
   const sessionStartTimeRef = useRef<number>(0);
+  const tracksKey = React.useMemo(() =>
+    (visibleTracks && visibleTracks.length > 0)
+      ? visibleTracks.map(t => `${t.index}:${t.name}`).join('|')
+      : 'all',
+    [visibleTracks]
+  );
+  const playbackTimeMsRef = useRef<number>(0);
+  const msPerTickRef = useRef<number>(0);
 
   // Notify parent of game state changes
   useEffect(() => {
@@ -115,7 +129,7 @@ export const RhythmGame = React.forwardRef<
   const calculateStats = useCallback((state: GameState) => {
     const totalProcessed = state.hitNotes + state.missedNotes;
     const accuracy = totalProcessed > 0 ? (state.hitNotes / totalProcessed) * 100 : 0;
-    
+
     let stars = 0;
     if (accuracy >= 95) stars = 5;
     else if (accuracy >= 85) stars = 4;
@@ -131,12 +145,12 @@ export const RhythmGame = React.forwardRef<
     if (!score || !api) return;
 
     const notes: ExpectedNote[] = [];
-    
+
     try {
       console.log('📊 FULL SCORE ANALYSIS:');
       console.log('Score object:', score);
       console.log('Score tracks:', score.tracks);
-      
+
       // Detailed track analysis
       score.tracks.forEach((track, trackIndex) => {
         console.log(`\n🎵 Track ${trackIndex}: "${track.name}"`, {
@@ -159,7 +173,7 @@ export const RhythmGame = React.forwardRef<
         const hasPercussion = track.staves.some(s => s.isPercussion);
         if (hasPercussion) {
           console.log(`🥁 DRUM TRACK FOUND: "${track.name}"`);
-          
+
           track.staves.forEach((stave, staveIndex) => {
             if (stave.isPercussion) {
               console.log(`  📋 Percussion Stave ${staveIndex}:`, {
@@ -178,9 +192,7 @@ export const RhythmGame = React.forwardRef<
                       noteDetails: beat.notes.map(note => ({
                         realValue: note.realValue,
                         fret: note.fret,
-                        string: note.string,
-                        isRest: note.isRest,
-                        isDead: note.isDead
+                        string: note.string
                       }))
                     }))
                   }))
@@ -191,8 +203,10 @@ export const RhythmGame = React.forwardRef<
         }
       });
 
-      // Find all percussion tracks
-      const drumTracks = score.tracks.filter(track => 
+      // Prefer currently visible tracks; fallback to all tracks
+      const tracksToProcess = (visibleTracks && visibleTracks.length > 0) ? visibleTracks : score.tracks;
+      // Find all percussion tracks within the chosen set
+      const drumTracks = tracksToProcess.filter(track =>
         track.staves.some(stave => stave.isPercussion)
       );
 
@@ -203,50 +217,48 @@ export const RhythmGame = React.forwardRef<
       });
 
       console.log('\n🎵 STARTING NOTE EXTRACTION...');
-      
+
       drumTracks.forEach((track, trackIndex) => {
         console.log(`\n📋 Processing drum track ${trackIndex}: "${track.name}"`);
-        
+
         track.staves.forEach((stave, staveIndex) => {
           if (stave.isPercussion) {
             console.log(`  🎼 Processing percussion stave ${staveIndex} with ${stave.bars.length} bars`);
-            
+
             stave.bars.forEach((bar, barIndex) => {
               if (barIndex < 5) { // Only log first 5 bars to avoid spam
                 console.log(`    📊 Bar ${barIndex}: ${bar.voices.length} voices`);
               }
-              
+
               bar.voices.forEach((voice, voiceIndex) => {
                 if (barIndex < 5) {
                   console.log(`      🗣️ Voice ${voiceIndex}: ${voice.beats.length} beats`);
                 }
-                
+
                 voice.beats.forEach((beat, beatIndex) => {
                   if (beat.notes && beat.notes.length > 0) {
                     if (barIndex < 3 && beatIndex < 3) { // Only log first few for debugging
                       console.log(`        🎵 Beat ${beatIndex}: ${beat.notes.length} notes, playbackStart: ${beat.absolutePlaybackStart}`);
                     }
-                    
+
                     beat.notes.forEach((note, noteIndex) => {
                       if (barIndex < 3 && beatIndex < 3) {
                         console.log(`          🎶 Note ${noteIndex}:`, {
                           realValue: note.realValue,
                           fret: note.fret,
-                          string: note.string,
-                          isRest: note.isRest
+                          string: note.string
                         });
                       }
-                      
+
                       // For percussion, check if it's a real note (has a value)
                       if (note.realValue > 0) {
-                        // Convert AlphaTab ticks to milliseconds using tempo
-                        // AlphaTab uses ticks, need to convert to real time
-                        const startTimeMs = (beat.absolutePlaybackStart || 0) / 1000; // Convert to seconds
+                        // Treat absolutePlaybackStart as ticks and convert later using msPerTick
+                        const startTick = (beat.absolutePlaybackStart || 0);
                         const noteId = `${trackIndex}-${staveIndex}-${barIndex}-${voiceIndex}-${beatIndex}-${noteIndex}`;
-                        
+
                         // Map guitar pro percussion to MIDI notes (GM Drum Kit)
                         let midiNote = note.realValue;
-                        
+
                         // Common guitar pro to MIDI percussion mapping
                         const percussionMap: { [key: number]: number } = {
                           // Guitar Pro -> MIDI Note
@@ -260,22 +272,23 @@ export const RhythmGame = React.forwardRef<
                           48: 43, // High tom -> MIDI 43
                           50: 45, // High tom 2 -> MIDI 45
                         };
-                        
+
                         // Use mapping if available, otherwise use original value
                         midiNote = percussionMap[note.realValue] || note.realValue;
-                        
-                        const expectedNote = {
+
+                        const expectedNote: ExpectedNote = {
                           id: noteId,
                           note: midiNote,
-                          startTime: startTimeMs,
-                          endTime: startTimeMs + TIMING_WINDOWS.late / 1000,
+                          startTime: startTick,
+                          startUnit: 'tick',
+                          startTick: startTick,
                           isHit: false,
                         };
-                        
+
                         notes.push(expectedNote);
-                        
+
                         if (notes.length <= 5) { // Log first few extracted notes
-                          console.log(`          ✅ EXTRACTED NOTE: originalValue=${note.realValue} -> midiNote=${midiNote}, startTime=${startTimeMs.toFixed(3)}s`);
+                          console.log(`          ✅ EXTRACTED NOTE: originalValue=${note.realValue} -> midiNote=${midiNote}, startTick=${startTick}`);
                         }
                       }
                     });
@@ -289,10 +302,11 @@ export const RhythmGame = React.forwardRef<
 
       console.log('🎼 Note Extraction Results:', {
         extractedNotes: notes.length,
-        sampleNotes: notes.slice(0, 5).map(n => ({ 
-          note: n.note, 
-          startTime: n.startTime.toFixed(3),
-          id: n.id 
+        sampleNotes: notes.slice(0, 5).map(n => ({
+          note: n.note,
+          startRaw: n.startTime,
+          unit: n.startUnit || 'ms',
+          id: n.id
         })),
         drumTracksProcessed: drumTracks.length
       });
@@ -306,19 +320,34 @@ export const RhythmGame = React.forwardRef<
       const dummyNotes: ExpectedNote[] = Array.from({ length: 10 }, (_, i) => ({
         id: `dummy-${i}`,
         note: 36 + (i % 4), // Vary between kick(36), snare(38), hihat(42), crash(49)
-        startTime: i * 2, // Every 2 seconds
-        endTime: i * 2 + TIMING_WINDOWS.late / 1000,
+        startTime: i * 2000, // Every 2 seconds (ms)
+        startUnit: 'ms',
         isHit: false,
       }));
       setExpectedNotes(dummyNotes);
+      onExpectedNotesChange?.(dummyNotes.map(n => ({ id: n.id, note: n.note, startTime: n.startTime })));
       setGameState(prev => ({ ...prev, totalNotes: dummyNotes.length }));
-      
+
       console.log('🧪 Created dummy notes:', dummyNotes.slice(0, 3));
     } else {
-      setExpectedNotes(notes.sort((a, b) => a.startTime - b.startTime));
+      const sorted = notes.sort((a, b) => a.startTime - b.startTime);
+      setExpectedNotes(sorted);
+      // Convert to ms if already have msPerTick
+      const toMs = (n: ExpectedNote) => (n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime);
+      onExpectedNotesChange?.(sorted.map(n => ({ id: n.id, note: n.note, startTime: toMs(n) })));
       setGameState(prev => ({ ...prev, totalNotes: notes.length }));
     }
-  }, [score, api]);
+  }, [score, api, tracksKey, visibleTracks, onExpectedNotesChange]);
+
+  // Track AlphaTab playback time (ms) and ms-per-tick
+  useAlphaTabEvent(api ?? null, 'playerPositionChanged', (e) => {
+    const args = e as unknown as { currentTime?: number; currentTick?: number };
+    if (typeof args.currentTime === 'number') playbackTimeMsRef.current = args.currentTime;
+    if (typeof args.currentTime === 'number' && typeof args.currentTick === 'number' && args.currentTick > 0) {
+      const mpt = args.currentTime / args.currentTick;
+      if (mpt > 0 && Number.isFinite(mpt)) msPerTickRef.current = mpt;
+    }
+  });
 
   // Initialize score storage and load recent scores
   useEffect(() => {
@@ -337,8 +366,8 @@ export const RhythmGame = React.forwardRef<
 
   // Process MIDI input during gameplay
   useEffect(() => {
-    // Always log MIDI messages to debug
-    if (history.length > 0) {
+    // Reduce log noise: only log when game is playing
+    if (history.length > 0 && gameState.isPlaying) {
       console.log('🎹 MIDI message received:', {
         historyLength: history.length,
         latestMessage: history[0],
@@ -346,61 +375,64 @@ export const RhythmGame = React.forwardRef<
         isSessionActive: gameState.isSessionActive
       });
     }
-    
+
     if (!gameState.isPlaying || history.length === 0) return;
 
     const latestMessage = history[0];
-    
+
     // Avoid processing the same message twice
     if (latestMessage.id === lastProcessedMessageRef.current) return;
     lastProcessedMessageRef.current = latestMessage.id;
 
     if (latestMessage.message.type === 'noteOn' && latestMessage.message.note !== undefined) {
-      const hitTime = (latestMessage.timestamp - gameStartTimeRef.current) / 1000; // Convert to seconds
+      const hitTimeMs = playbackTimeMsRef.current || (latestMessage.timestamp - gameStartTimeRef.current);
       const hitNote = latestMessage.message.note;
 
-      debugLog.log('Processing MIDI hit:', { 
-        hitNote, 
-        hitTime: hitTime.toFixed(3), 
+      debugLog.log('Processing MIDI hit:', {
+        hitNote,
+        hitTimeMs,
         expectedNotesCount: expectedNotes.length,
         gameIsPlaying: gameState.isPlaying,
         gameStartTime: gameStartTimeRef.current
       });
 
       // Find possible matching notes first
-      const possibleNotes = expectedNotes.filter(note => 
-        !note.isHit && 
+      const possibleNotes = expectedNotes.filter(note =>
+        !note.isHit &&
         note.note === hitNote &&
-        hitTime >= (note.startTime - TIMING_WINDOWS.early / 1000) &&
-        hitTime <= (note.startTime + TIMING_WINDOWS.late / 1000)
+        hitTimeMs >= ((note.startUnit === 'tick' ? note.startTime * (msPerTickRef.current || 0) : note.startTime) - TIMING_WINDOWS.early) &&
+        hitTimeMs <= ((note.startUnit === 'tick' ? note.startTime * (msPerTickRef.current || 0) : note.startTime) + TIMING_WINDOWS.late)
       );
 
       // Proper note matching and timing detection
       if (gameState.isPlaying) {
-        console.log('🎮 Processing hit during gameplay:', { hitNote, hitTime });
+        console.log('🎮 Processing hit during gameplay:', { hitNote, hitTimeMs });
         let hitProcessed = false;
-        
+
         // Check if this note matches any expected notes within timing windows
         if (possibleNotes.length > 0) {
           // Find the closest expected note
           const closestNote = possibleNotes.reduce((closest, current) => {
-            const closestDiff = Math.abs(closest.startTime - hitTime);
-            const currentDiff = Math.abs(current.startTime - hitTime);
+            const closestStart = (closest.startUnit === 'tick' ? closest.startTime * (msPerTickRef.current || 0) : closest.startTime);
+            const currentStart = (current.startUnit === 'tick' ? current.startTime * (msPerTickRef.current || 0) : current.startTime);
+            const closestDiff = Math.abs(closestStart - hitTimeMs);
+            const currentDiff = Math.abs(currentStart - hitTimeMs);
             return currentDiff < closestDiff ? current : closest;
           });
 
           // Determine hit quality based on timing accuracy
-          const timeDiff = Math.abs(closestNote.startTime - hitTime);
+          const closestStartMs = (closestNote.startUnit === 'tick' ? closestNote.startTime * (msPerTickRef.current || 0) : closestNote.startTime);
+          const timeDiff = Math.abs(closestStartMs - hitTimeMs);
           let hitType: ExpectedNote['hitType'];
           let points = 0;
 
-          if (timeDiff <= TIMING_WINDOWS.perfect / 1000) {
+          if (timeDiff <= TIMING_WINDOWS.perfect) {
             hitType = 'perfect';
             points = SCORE_VALUES.perfect;
-          } else if (timeDiff <= TIMING_WINDOWS.good / 1000) {
+          } else if (timeDiff <= TIMING_WINDOWS.good) {
             hitType = 'good';
             points = SCORE_VALUES.good;
-          } else if (hitTime < closestNote.startTime) {
+          } else if (hitTimeMs < closestStartMs) {
             hitType = 'early';
             points = SCORE_VALUES.early;
           } else {
@@ -411,7 +443,7 @@ export const RhythmGame = React.forwardRef<
           // Mark the note as hit
           closestNote.isHit = true;
           closestNote.hitType = hitType;
-          closestNote.hitTime = hitTime;
+          closestNote.hitTime = hitTimeMs;
 
           // Update game state
           setGameState(prev => {
@@ -430,50 +462,66 @@ export const RhythmGame = React.forwardRef<
             return { ...newState, accuracy, stars };
           });
 
-          debugLog.log('✅ CORRECT NOTE!', { 
-            hitNote, 
-            expectedNote: closestNote.note, 
-            hitType, 
-            points, 
-            timeDiff: timeDiff.toFixed(3) + 's',
-            timing: `Expected: ${closestNote.startTime.toFixed(3)}s, Hit: ${hitTime.toFixed(3)}s`
+          debugLog.log('✅ CORRECT NOTE!', {
+            hitNote,
+            expectedNote: closestNote.note,
+            hitType,
+            points,
+            timeDiffMs: Math.round(timeDiff) + 'ms',
+            timing: `Expected: ${Math.round(closestStartMs)}ms, Hit: ${Math.round(hitTimeMs)}ms`
           });
 
           hitProcessed = true;
         }
 
-        // If no matching note found, still award some points for debugging
+        // If no matching note found, count as misplaced/extra with detailed reason
         if (!hitProcessed) {
-          // For debugging: award points for any MIDI input
+          // Find nearest expected for diagnostics
+          const nearest = expectedNotes
+            .filter(n => !n.isHit)
+            .reduce<{ n?: ExpectedNote; diff: number }>((acc, n) => {
+              const s = (n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime);
+              const d = Math.abs(s - hitTimeMs);
+              if (!acc.n || d < acc.diff) return { n, diff: d };
+              return acc;
+            }, { n: undefined, diff: Number.POSITIVE_INFINITY });
+
           setGameState(prev => {
             const newState = {
               ...prev,
-              score: prev.score + 25, // Basic points for any hit
+              score: prev.score + SCORE_VALUES.extra,
               extraNotes: prev.extraNotes + 1,
-              hitNotes: prev.hitNotes + 1, // Count as hit for debugging
+              streak: 0,
             };
-
             const { accuracy, stars } = calculateStats(newState);
             return { ...newState, accuracy, stars };
           });
 
-          console.log('🔧 DEBUG: Basic scoring applied', { 
-            hitNote, 
-            points: 25,
-            newScore: gameState.score + 25
+          debugLog.log('❌ MISPLACED NOTE', {
+            hitNote,
+            hitTimeMs: Math.round(hitTimeMs),
+            msPerTick: msPerTickRef.current,
+            nearestExpected: nearest.n ? {
+              note: nearest.n.note,
+              expectedMs: Math.round(nearest.n.startUnit === 'tick' ? nearest.n.startTime * (msPerTickRef.current || 0) : nearest.n.startTime),
+              diffMs: Math.round(nearest.diff)
+            } : null
           });
         }
       }
     }
-  }, [history, gameState.isPlaying, expectedNotes, calculateStats]);
+  }, [history, gameState.isPlaying, gameState.isSessionActive, expectedNotes, calculateStats, api]);
 
   // Check for missed notes (notes that passed their timing window without being hit)
   useEffect(() => {
     if (!gameState.isPlaying) return;
 
-    const currentGameTime = (Date.now() - gameStartTimeRef.current) / 1000;
-    const missedNotes = expectedNotes.filter(note => 
-      !note.isHit && currentGameTime > (note.startTime + TIMING_WINDOWS.late / 1000)
+    // Avoid miss checks until msPerTick is known if we have tick-based notes
+    if (msPerTickRef.current === 0 && expectedNotes.some(n => n.startUnit === 'tick')) return;
+
+    const currentGameTime = playbackTimeMsRef.current;
+    const missedNotes = expectedNotes.filter(note =>
+      !note.isHit && currentGameTime > (((note.startUnit === 'tick' ? note.startTime * (msPerTickRef.current || 0) : note.startTime)) + TIMING_WINDOWS.late)
     );
 
     if (missedNotes.length > 0) {
@@ -493,42 +541,30 @@ export const RhythmGame = React.forwardRef<
         return { ...newState, accuracy, stars };
       });
 
-      debugLog.log('😞 MISSED NOTES!', { 
-        count: missedNotes.length, 
-        currentGameTime: currentGameTime.toFixed(3) + 's',
-        missedNotes: missedNotes.map(n => ({ note: n.note, expectedTime: n.startTime.toFixed(3) + 's' }))
+      debugLog.log('😞 MISSED NOTES!', {
+        count: missedNotes.length,
+        currentGameTimeMs: Math.round(currentGameTime) + 'ms',
+        missedNotes: missedNotes.map(n => ({ note: n.note, expectedTimeMs: Math.round((n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime)) + 'ms' }))
       });
 
       setExpectedNotes([...expectedNotes]);
     }
-  }, [currentTime, gameState.isPlaying, expectedNotes, calculateStats, gameStartTimeRef]);
+  }, [currentTime, gameState.isPlaying, expectedNotes, calculateStats, gameStartTimeRef, api]);
 
   // Update current time when playing
   useEffect(() => {
     if (!gameState.isPlaying) return;
 
     const interval = setInterval(() => {
-      if (api?.player) {
-        try {
-          // Try to get current playback position
-          const position = api.player.playbackRange?.startTick || 0;
-          setCurrentTime(position);
-        } catch (error) {
-          // Fallback to elapsed time since game start
-          const elapsed = Date.now() - gameStartTimeRef.current;
-          setCurrentTime(elapsed);
-        }
-      } else {
-        // Fallback timing when no player
-        const elapsed = Date.now() - gameStartTimeRef.current;
-        setCurrentTime(elapsed);
-      }
+      const nowMs = playbackTimeMsRef.current || (Date.now() - gameStartTimeRef.current);
+      setCurrentTime(nowMs);
+      setPlaybackNowMs(nowMs);
     }, 50); // Update every 50ms
 
     return () => clearInterval(interval);
   }, [gameState.isPlaying, api]);
 
-  const startGame = (practiceMode = false) => {
+  const startGame = useCallback((practiceMode = false) => {
     if (!api || !score) {
       debugLog.warn('Cannot start game: missing API or score');
       return;
@@ -537,13 +573,13 @@ export const RhythmGame = React.forwardRef<
     gameStartTimeRef.current = Date.now();
     sessionStartTimeRef.current = Date.now();
     lastProcessedMessageRef.current = '';
-    
+
     debugLog.log('🎮 Starting rhythm game:', {
       practiceMode,
       expectedNotes: expectedNotes.length,
       gameStartTime: gameStartTimeRef.current
     });
-    
+
     // Reset all notes
     expectedNotes.forEach(note => {
       note.isHit = false;
@@ -574,67 +610,17 @@ export const RhythmGame = React.forwardRef<
 
     // Start playback
     api.player?.play();
-  };
+  }, [api, score, expectedNotes]);
 
-  const stopGame = async () => {
+  const stopGame = useCallback(async () => {
     // Only pause playback, keep session active so score stays visible
     setGameState(prev => ({ ...prev, isPlaying: false }));
     api?.player?.pause();
-    
+
     debugLog.log('🎮 Game paused, keeping session active');
-  };
+  }, [api]);
 
-  const endGameSession = async () => {
-    const finalState = { ...gameState, isPlaying: false, isSessionActive: false };
-    setGameState(finalState);
-
-    // Save score if it's not practice mode and has some progress
-    if (!finalState.isPracticeMode && (finalState.hitNotes > 0 || finalState.missedNotes > 0) && score) {
-      try {
-        const duration = Date.now() - sessionStartTimeRef.current;
-        const maxStreak = finalState.streak; // In a real implementation, you'd track max streak separately
-        
-        const sessionScore: Omit<SessionScore, 'id'> = {
-          songName: score.title || 'Unknown Song',
-          songHash: `song_${score.title}_${score.tracks.length}`, // Simple hash for demo
-          timestamp: Date.now(),
-          duration,
-          gameMode: 'score',
-          totalScore: finalState.score,
-          accuracy: finalState.accuracy,
-          stars: finalState.stars,
-          totalNotes: finalState.totalNotes,
-          hitNotes: finalState.hitNotes,
-          perfectHits: finalState.perfectHits,
-          goodHits: finalState.goodHits,
-          earlyHits: finalState.earlyHits,
-          lateHits: finalState.lateHits,
-          missedNotes: finalState.missedNotes,
-          extraNotes: finalState.extraNotes,
-          maxStreak,
-        };
-
-        await scoreStorage.saveScore(sessionScore);
-        
-        // Refresh recent scores
-        const recent = await scoreStorage.getRecentScores(5);
-        setRecentScores(recent);
-
-        toaster.create({
-          type: 'success',
-          title: 'Score Saved!',
-          description: `${finalState.accuracy.toFixed(1)}% accuracy, ${finalState.stars} stars`,
-        });
-      } catch (error) {
-        console.warn('Failed to save score:', error);
-        toaster.create({
-          type: 'warning',
-          title: 'Score not saved',
-          description: 'Your score could not be saved to storage',
-        });
-      }
-    }
-  };
+  // Removed unused endGameSession (we keep session active until user stops or song ends)
 
   const renderStars = (stars: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -652,7 +638,7 @@ export const RhythmGame = React.forwardRef<
     stopGame: () => {
       stopGame();
     }
-  }), []);
+  }), [startGame, stopGame]);
 
   if (!api || !score) {
     if (hideUI) return null;
@@ -665,14 +651,36 @@ export const RhythmGame = React.forwardRef<
     );
   }
 
-  if (hideUI) {
-    // Return null for hidden mode - the game logic still runs via effects
+  if (hideUI && !showDebug) {
+    // Return null for hidden mode when no debug requested
     return null;
   }
 
   return (
     <Box p={4} bg="gradient-to-br from-purple-900 to-blue-900" color="white" borderRadius="lg">
       <VStack align="stretch" gap={4}>
+        {showDebug && (
+          <Box p={2} bg="blackAlpha.500" borderRadius="md">
+            <Text fontSize="sm" fontWeight="bold">Debug: Upcoming Expected Notes (next 3s)</Text>
+            <VStack align="stretch" gap={1} maxH="150px" overflowY="auto">
+              {expectedNotes.map((n) => n).filter(n => {
+                const s = (n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime);
+                return !n.isHit && s >= playbackNowMs && s <= playbackNowMs + 3000;
+              }).slice(0, 20).map(n => (
+                <HStack key={n.id} justify="space-between">
+                  <Text fontSize="xs">Note {n.note}</Text>
+                  <Text fontSize="xs" opacity={0.8}>{Math.round(((n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime)) - playbackNowMs)} ms</Text>
+                </HStack>
+              ))}
+              {expectedNotes.filter(n => {
+                const s = (n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime);
+                return !n.isHit && s >= playbackNowMs && s <= playbackNowMs + 3000;
+              }).length === 0 && (
+                <Text fontSize="xs" opacity={0.7}>No upcoming notes</Text>
+              )}
+            </VStack>
+          </Box>
+        )}
         <HStack justify="space-between" align="center">
           <Text fontSize="xl" fontWeight="bold">🎮 Rhythm Game</Text>
           <HStack>
@@ -696,17 +704,17 @@ export const RhythmGame = React.forwardRef<
             <Text fontSize="sm" opacity={0.8}>Score</Text>
             <Text fontSize="2xl" fontWeight="bold">{gameState.score}</Text>
           </Card.Root>
-          
+
           <Card.Root p={3} bg="whiteAlpha.100">
             <Text fontSize="sm" opacity={0.8}>Accuracy</Text>
             <Text fontSize="xl" fontWeight="bold">{gameState.accuracy.toFixed(1)}%</Text>
           </Card.Root>
-          
+
           <Card.Root p={3} bg="whiteAlpha.100">
             <Text fontSize="sm" opacity={0.8}>Streak</Text>
             <Text fontSize="xl" fontWeight="bold">{gameState.streak}</Text>
           </Card.Root>
-          
+
           <Card.Root p={3} bg="whiteAlpha.100">
             <Text fontSize="sm" opacity={0.8}>Stars</Text>
             <HStack>{renderStars(gameState.stars)}</HStack>

@@ -37,6 +37,7 @@ export const AlphaTabPlayer: React.FC = () => {
   const [gameState, setGameState] = useState({
     isPlaying: false,
     isPracticeMode: false,
+    isSessionActive: false,
     score: 0,
     streak: 0,
     totalNotes: 0,
@@ -52,6 +53,7 @@ export const AlphaTabPlayer: React.FC = () => {
   });
   const rhythmGameRef = React.useRef<{ startGame: (practice: boolean) => void; stopGame: () => void } | null>(null);
   const viewPortRef = React.useRef<HTMLDivElement>(null);
+  const visibleTracksArray = React.useMemo(() => Array.from(selectedTracks.values()), [selectedTracks]);
 
   const settingsSetup = useCallback((settings: alphaTab.Settings) => {
     // Player configuration - use a mode that works with cursors
@@ -170,10 +172,10 @@ export const AlphaTabPlayer: React.FC = () => {
     if (api && api.tracks) {
       const trackMap = new Map<number, alphaTab.model.Track>();
       // Find percussion tracks (drums) first
-      const drumTracks = api.tracks.filter((track) => 
+      const drumTracks = api.tracks.filter((track) =>
         track.staves.some((stave) => stave.isPercussion)
       );
-      
+
       if (drumTracks.length > 0) {
         // Default to drums only
         drumTracks.forEach((track) => {
@@ -216,14 +218,14 @@ export const AlphaTabPlayer: React.FC = () => {
     debugLog.log('Player state changed:', e);
     const state = (e as unknown as { state: alphaTab.synth.PlayerState }).state;
     const isPlaying = state === alphaTab.synth.PlayerState.Playing;
-    
-    debugLog.log('🎵 Player state:', { 
-      isPlaying, 
-      gameEnabled: isGameEnabled, 
+
+    debugLog.log('🎵 Player state:', {
+      isPlaying,
+      gameEnabled: isGameEnabled,
       gameIsPlaying: gameState.isPlaying,
       practiceMode: isPracticeMode
     });
-    
+
     // Auto-start/stop game when player starts/stops
     if (isGameEnabled && rhythmGameRef.current) {
       if (isPlaying && !gameState.isPlaying) {
@@ -319,10 +321,10 @@ export const AlphaTabPlayer: React.FC = () => {
   const handleShowDrumsOnly = () => {
     if (score) {
       setSingleTrackMode(null);
-      const drumTracks = score.tracks.filter((track) => 
+      const drumTracks = score.tracks.filter((track) =>
         track.staves.some((stave) => stave.isPercussion)
       );
-      
+
       if (drumTracks.length > 0) {
         const drumTracksMap = new Map<number, alphaTab.model.Track>();
         drumTracks.forEach((track) => {
@@ -510,16 +512,19 @@ export const AlphaTabPlayer: React.FC = () => {
           <Box w="full" h="auto" minH="500px" ref={element} />
           {/* MIDI Note Highlighter - only active when score is loaded */}
           {api && score && <AlphaTabNoteHighlighter api={api} enabled={isGameEnabled} />}
-          
+
           {/* Hidden Rhythm Game Logic - only when game is enabled */}
           {api && score && isGameEnabled && (
-            <RhythmGame 
-              api={api} 
-              score={score} 
+            <RhythmGame
+              api={api}
+              score={score}
               ref={rhythmGameRef}
               onGameStateChange={setGameState}
               practiceMode={isPracticeMode}
               hideUI={true}
+              visibleTracks={visibleTracksArray}
+              // Toggle this to true to see upcoming expected notes window while debugging
+              showDebug={false}
             />
           )}
         </Box>
@@ -533,9 +538,9 @@ export const AlphaTabPlayer: React.FC = () => {
               <MidiScoreDisplay gameState={gameState} isGameEnabled={isGameEnabled} />
             </Box>
           )}
-          
-          <PlayerControls 
-            api={api} 
+
+          <PlayerControls
+            api={api}
             onOpenFileClick={handleFileInput}
             isGameEnabled={isGameEnabled}
             isPracticeMode={isPracticeMode}

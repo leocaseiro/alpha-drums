@@ -54,7 +54,7 @@ export function MidiScoreDisplay({ gameState, isGameEnabled }: MidiScoreDisplayP
     );
   }
 
-  if (!gameState.isSessionActive) {
+  if (gameState.isPracticeMode) {
     return (
       <Box p={3} bg="blue.50" borderRadius="md" borderWidth="1px" borderColor="blue.200">
         <Text fontSize="sm" textAlign="center" color="blue.700">
@@ -84,21 +84,21 @@ export function MidiScoreDisplay({ gameState, isGameEnabled }: MidiScoreDisplayP
               {gameState.score}
             </Text>
           </Card.Root>
-          
+
           <Card.Root p={2} bg="white" size="sm">
             <Text fontSize="xs" opacity={0.8} textAlign="center">Accuracy</Text>
             <Text fontSize="lg" fontWeight="bold" textAlign="center" color="blue.600">
               {gameState.accuracy.toFixed(1)}%
             </Text>
           </Card.Root>
-          
+
           <Card.Root p={2} bg="white" size="sm">
             <Text fontSize="xs" opacity={0.8} textAlign="center">Streak</Text>
             <Text fontSize="lg" fontWeight="bold" textAlign="center" color="green.600">
               {gameState.streak}
             </Text>
           </Card.Root>
-          
+
           <Card.Root p={2} bg="white" size="sm">
             <Text fontSize="xs" opacity={0.8} textAlign="center">Stars</Text>
             <HStack justify="center" gap={0}>
@@ -149,6 +149,10 @@ export function MidiScoreDisplay({ gameState, isGameEnabled }: MidiScoreDisplayP
           <VStack gap={0}>
             <Badge colorScheme="red" size="xs">Miss</Badge>
             <Text fontWeight="bold">{gameState.missedNotes}</Text>
+          </VStack>
+          <VStack gap={0}>
+            <Badge colorScheme="gray" size="xs">Misplaced</Badge>
+            <Text fontWeight="bold">{gameState.extraNotes}</Text>
           </VStack>
         </HStack>
       </VStack>

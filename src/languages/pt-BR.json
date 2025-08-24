@@ -9,6 +9,8 @@
     "metronome": "Metrônomo",
     "countIn": "Contagem",
     "speed": "Velocidade",
+    "bpm": "BPM",
+    "percentage": "%",
     "zoom": "Zoom",
     "tracks": "Faixas",
     "volume": "Volume",
@@ -33,6 +35,7 @@
     "loaded": "Carregado",
     "readyToPlay": "Pronto para tocar",
     "error": "Erro",
-    "initializing": "O player está inicializando, tente novamente"
+    "initializing": "O player está inicializando, tente novamente",
+    "toggleSpeedMode": "Alternar modo de velocidade"
   }
 }

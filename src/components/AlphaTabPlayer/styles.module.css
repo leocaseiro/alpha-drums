@@ -128,15 +128,58 @@
   flex-direction: column;
 }
 
-.alphaTab {
+.viewport {
   flex: 1;
   overflow: auto;
-  min-height: 500px;
-  height: 500px;
   background: white;
   border: 1px solid #ddd;
   position: relative;
   scroll-behavior: smooth;
+}
+
+.alphaTab {
+  width: 100%;
+  height: auto;
+  min-height: 500px;
+}
+
+/* alphaTab cursor styles - make very visible for debugging */
+.alphaTab :global(.at-cursor-bar) {
+  background: rgba(255, 0, 0, 0.8) !important;
+  position: absolute !important;
+  z-index: 9999 !important;
+  min-width: 2px !important;
+  min-height: 50px !important;
+  pointer-events: none !important;
+}
+
+.alphaTab :global(.at-cursor-beat) {
+  background: rgba(0, 255, 0, 0.8) !important;
+  position: absolute !important;
+  z-index: 10000 !important;
+  min-width: 3px !important;
+  min-height: 30px !important;
+  pointer-events: none !important;
+}
+
+.alphaTab :global(.at-highlight) {
+  fill: rgba(255, 255, 0, 0.3) !important;
+  stroke: rgba(255, 0, 0, 1) !important;
+  stroke-width: 2px !important;
+}
+
+/* Ensure alphaTab cursors are visible */
+.alphaTab :global([data-cursor]) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Generic cursor selectors */
+.alphaTab :global(.cursor) {
+  background: red !important;
+  position: absolute !important;
+  z-index: 10000 !important;
 }
 
 .footerBar {

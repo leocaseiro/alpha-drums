@@ -1,26 +1,27 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* AlphaTab default UI styles (cursors, selection) */
+.at-cursor-bar {
+  position: absolute;
+  background: rgba(255, 242, 0, 0.25);
+  pointer-events: none;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.at-cursor-beat {
+  position: absolute;
+  background: rgba(64, 64, 255, 0.75);
+  width: 3px;
+  pointer-events: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.at-selection,
+.at-selection div {
+  position: absolute;
+  background: rgba(64, 64, 255, 0.1);
+  pointer-events: none;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Ensure overlay elements appear above notation */
+.at-cursor-bar,
+.at-cursor-beat,
+.at-selection {
+  z-index: 10000;
 }

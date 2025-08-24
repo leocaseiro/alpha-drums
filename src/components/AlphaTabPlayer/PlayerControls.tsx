@@ -11,15 +11,28 @@ import {
   Text,
   Slider,
   IconButton,
+  Editable,
+  Switch,
+  Badge,
 } from '@chakra-ui/react';
 
 export interface PlayerControlsProps {
   api: alphaTab.AlphaTabApi;
   onOpenFileClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onOpenSettings?: () => void;
+  isGameEnabled?: boolean;
+  isPracticeMode?: boolean;
+  onGameToggle?: (enabled: boolean) => void;
+  onPracticeModeToggle?: (practice: boolean) => void;
 }
 
-export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileClick, onOpenSettings }) => {
+export const PlayerControls: React.FC<PlayerControlsProps> = ({
+  api,
+  onOpenFileClick,
+  isGameEnabled = false,
+  isPracticeMode = false,
+  onGameToggle,
+  onPracticeModeToggle
+}) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReadyForPlayback, setIsReadyForPlayback] = useState(false);
@@ -30,10 +43,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
   const [endTime, setEndTime] = useState(1);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [baseTempoBpm, setBaseTempoBpm] = useState<number | null>(null);
+  const [speedMode, setSpeedMode] = useState<'percentage' | 'bpm'>('percentage');
   const [metronomeVolume, setMetronomeVolume] = useState(1);
   const [countInVolume, setCountInVolume] = useState(1);
   const [zoom, setZoom] = useState(100);
-  const [layoutMode, setLayoutMode] = useState<alphaTab.LayoutMode>(alphaTab.LayoutMode.Page);
 
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
     setIsPlaying((e as unknown as { state: alphaTab.synth.PlayerState }).state === alphaTab.synth.PlayerState.Playing);
@@ -57,23 +70,23 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
 
   // Add event listeners for player readiness
   useAlphaTabEvent(api, 'playerReady', () => {
-    console.log('Player ready event fired');
+    // console.log('Player ready event fired');
     setIsReadyForPlayback(true);
   });
 
   useAlphaTabEvent(api, 'soundFontLoaded', () => {
-    console.log('SoundFont loaded event fired');
+    // console.log('SoundFont loaded event fired');
     setIsReadyForPlayback(true);
   });
 
-  useAlphaTabEvent(api, "playerStateChanged", (e) => {
-    console.log('Player state changed event fired', e);
-    console.log('Player state changed event fired string', JSON.stringify(e));
-  });
-  useAlphaTabEvent(api, "playerPositionChanged", (e) => {
-    console.log('Player position changed event fired', e);
-    console.log('Player position changed event fired string', JSON.stringify(e));
-  });
+  // useAlphaTabEvent(api, "playerStateChanged", (e) => {
+  //   console.log('Player state changed event fired', e);
+  //   console.log('Player state changed event fired string', JSON.stringify(e));
+  // });
+  // useAlphaTabEvent(api, "playerPositionChanged", (e) => {
+  //   console.log('Player position changed event fired', e);
+  //   console.log('Player position changed event fired string', JSON.stringify(e));
+  // });
 
 
 
@@ -83,7 +96,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
       if (api) {
         const ready = api.isReadyForPlayback;
         const hasScore = api.score !== null;
-        console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
+        // console.log('Checking readiness:', ready, 'Has score:', hasScore, 'Player mode:', api.settings?.player?.playerMode);
         if (hasScore && !baseTempoBpm) {
           try {
             const tempo = api.score?.tempo ?? null;
@@ -95,7 +108,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
 
         // Force enable controls if we have a score (even without full audio synthesis)
         if (hasScore) {
-          console.log('Score loaded - enabling controls for basic playback');
+          // console.log('Score loaded - enabling controls for basic playback');
           setIsReadyForPlayback(true);
         } else {
           setIsReadyForPlayback(ready);
@@ -133,13 +146,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     }
   }, [api, zoom]);
 
-  useEffect(() => {
-    if (api) {
-      api.settings.display.layoutMode = layoutMode;
-      api.updateSettings();
-      api.render();
-    }
-  }, [api, layoutMode]);
 
   const formatDuration = (milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -148,10 +154,15 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const percentage = Number(e.target.value) / 100;
+  const handleSeek = (details: { value: number[] }) => {
+    if (!api || !isReadyForPlayback) return;
+    const percentage = details.value[0] / 100;
     const newTime = endTime * percentage;
-    api.tickPosition = newTime;
+    try {
+      api.tickPosition = newTime;
+    } catch (error) {
+      console.error('Seek failed:', error);
+    }
   };
 
   // Keyboard controls
@@ -178,27 +189,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
     return () => window.removeEventListener('keydown', onKey);
   }, [api]);
 
-  const handleExport = (format: 'gp' | 'midi') => {
-    if (!api.score) return;
 
-    try {
-      if (format === 'gp') {
-        // Export functionality temporarily disabled due to type issues
-        console.log('Export functionality would be implemented here');
-        alert('Export functionality coming soon!');
-      }
-    } catch (error) {
-      console.error('Export failed:', error);
-    }
-  };
-
-  const handlePrint = () => {
-    try {
-      api.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-    }
-  };
 
   return (
     <VStack bg="gray.50" borderTopWidth="1px" borderColor="gray.200" p={4} gap={4} align="stretch">
@@ -206,7 +197,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
         <Text fontFamily="mono" fontSize="sm" color="gray.600" minW="120px">
           {formatDuration(currentTime)} / {formatDuration(endTime)}
         </Text>
-        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={(details) => handleSeek({ target: { value: String(details.value[0]) } } as unknown as React.ChangeEvent<HTMLInputElement>)} flex="1">
+        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={handleSeek} flex="1">
           <Slider.Control>
             <Slider.Track>
               <Slider.Range />
@@ -218,24 +209,131 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
 
       <HStack align="center" gap={4}>
         <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} disabled={!isReadyForPlayback}>
-          ⏹️
+          ⏹︎
         </IconButton>
-        <Button onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} isDisabled={!isReadyForPlayback} colorScheme="green">
-          {isPlaying ? t('player.pause') : t('player.play')}
-        </Button>
+        <IconButton aria-label={isPlaying ? t('player.pause') : t('player.play')} onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
+          {isPlaying ? `⏸︎` : `▶︎`}
+        </IconButton>
+
+        {/* Game Mode Controls */}
+        <VStack gap={1} align="center" minW="120px">
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">🎮 Game:</Text>
+            <Switch.Root
+              checked={isGameEnabled}
+              onCheckedChange={(details) => onGameToggle?.(details.checked)}
+              size="sm"
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </HStack>
+          {isGameEnabled && (
+            <HStack gap={2} align="center">
+              <Text fontSize="xs" color="gray.600">Mode:</Text>
+              <Switch.Root
+                checked={isPracticeMode}
+                onCheckedChange={(details) => onPracticeModeToggle?.(details.checked)}
+                size="sm"
+              >
+                <Switch.HiddenInput />
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Root>
+              <Badge colorScheme={isPracticeMode ? 'blue' : 'purple'} size="sm">
+                {isPracticeMode ? 'Practice' : 'Score'}
+              </Badge>
+            </HStack>
+          )}
+        </VStack>
 
         <VStack minW="180px" gap={1} align="stretch">
-          <Text fontSize="xs" color="gray.600">{t('player.speed')}: {Math.round(playbackSpeed * 100)}%{baseTempoBpm ? ` • ${Math.round(baseTempoBpm * playbackSpeed)} BPM` : ''}</Text>
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
+            <Editable.Root
+              value={speedMode === 'percentage'
+                ? String(Math.round(playbackSpeed * 100))
+                : baseTempoBpm ? String(Math.round(baseTempoBpm * playbackSpeed)) : '120'
+              }
+              onValueChange={(details) => {
+                const inputValue = Number(details.value) || (speedMode === 'percentage' ? 100 : 120);
+                if (speedMode === 'percentage') {
+                  const value = Math.max(25, Math.min(200, inputValue));
+                  setPlaybackSpeed(value / 100);
+                } else {
+                  // BPM mode
+                  if (baseTempoBpm) {
+                    const newSpeed = Math.max(0.25, Math.min(2, inputValue / baseTempoBpm));
+                    setPlaybackSpeed(newSpeed);
+                  }
+                }
+              }}
+              w="40px"
+            >
+              <Editable.Preview fontSize="xs" w="40px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="40px" textAlign="right" />
+            </Editable.Root>
+            <IconButton
+              aria-label={t('player.toggleSpeedMode')}
+              size="xs"
+              variant="ghost"
+              onClick={() => setSpeedMode(speedMode === 'percentage' ? 'bpm' : 'percentage')}
+              w="20px"
+            >
+              {speedMode === 'percentage' ? t('player.percentage') : t('player.bpm')}
+            </IconButton>
+            <IconButton
+              aria-label="Reset speed"
+              size="xs"
+              variant="ghost"
+              onClick={() => setPlaybackSpeed(1)}
+            >
+              🔄
+            </IconButton>
+          </HStack>
           <Slider.Root min={0.25} max={2} step={0.05} value={[playbackSpeed]} onValueChange={(details) => setPlaybackSpeed(details.value[0])}>
             <Slider.Control>
               <Slider.Track><Slider.Range /></Slider.Track>
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
+          {baseTempoBpm && (
+            <Text fontSize="xs" color="gray.500" textAlign="center">
+              {speedMode === 'percentage'
+                ? `${Math.round(baseTempoBpm * playbackSpeed)} BPM`
+                : `${Math.round(playbackSpeed * 100)}%`
+              }
+            </Text>
+          )}
         </VStack>
 
         <VStack minW="180px" gap={1} align="stretch">
-          <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}: {zoom}%</Text>
+          <HStack gap={2} align="center">
+            <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}:</Text>
+            <Editable.Root
+              value={String(zoom)}
+              onValueChange={(details) => {
+                const value = Math.max(25, Math.min(200, Number(details.value) || 100));
+                setZoom(value);
+              }}
+              w="30px"
+            >
+              <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+              <Editable.Input fontSize="xs" w="30px" textAlign="right" />
+            </Editable.Root>
+            <Text fontSize="xs" color="gray.600" w="10px">%</Text>
+            <IconButton
+              aria-label="Reset zoom"
+              size="xs"
+              variant="ghost"
+              onClick={() => setZoom(100)}
+            >
+              🔄
+            </IconButton>
+          </HStack>
           <Slider.Root min={25} max={200} step={5} value={[zoom]} onValueChange={(details) => setZoom(details.value[0])}>
             <Slider.Control>
               <Slider.Track><Slider.Range /></Slider.Track>
@@ -248,7 +346,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
       <HStack gap={3} wrap="wrap">
         <input type="file" accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx" onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
         <label htmlFor="file-input" title={t('player.openFile')}>
-          <Button as="span">🔍</Button>
+          <Button as="span">📁</Button>
         </label>
 
         <Button variant={isLooping ? 'solid' : 'outline'} colorScheme="blue" onClick={() => setIsLooping(!isLooping)} disabled={!isReadyForPlayback}>🔁 {t('player.loop')}</Button>
@@ -257,13 +355,32 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           <Button variant={isMetronomeActive ? 'solid' : 'outline'} colorScheme="purple" onClick={() => setIsMetronomeActive(!isMetronomeActive)} disabled={!isReadyForPlayback}>🎼 {t('player.metronome')}</Button>
           {isMetronomeActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="80px">
+              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="100px">
                 <Slider.Control>
                   <Slider.Track><Slider.Range /></Slider.Track>
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Text fontSize="xs">{Math.round(metronomeVolume * 100)}%</Text>
+              <Editable.Root
+                value={String(Math.round(metronomeVolume * 100))}
+                onValueChange={(details) => {
+                  const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+                  setMetronomeVolume(value / 100);
+                }}
+                w="30px"
+              >
+                <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="30px" textAlign="right" />
+              </Editable.Root>
+              <Text fontSize="xs" w="8px">%</Text>
+              <IconButton
+                aria-label="Reset metronome volume"
+                size="xs"
+                variant="ghost"
+                onClick={() => setMetronomeVolume(1)}
+              >
+                🔄
+              </IconButton>
             </HStack>
           )}
         </HStack>
@@ -272,25 +389,34 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({ api, onOpenFileC
           <Button variant={isCountInActive ? 'solid' : 'outline'} colorScheme="orange" onClick={() => setIsCountInActive(!isCountInActive)} disabled={!isReadyForPlayback}>⏳ {t('player.countIn')}</Button>
           {isCountInActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="80px">
+              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="100px">
                 <Slider.Control>
                   <Slider.Track><Slider.Range /></Slider.Track>
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
-              <Text fontSize="xs">{Math.round(countInVolume * 100)}%</Text>
+              <Editable.Root
+                value={String(Math.round(countInVolume * 100))}
+                onValueChange={(details) => {
+                  const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+                  setCountInVolume(value / 100);
+                }}
+                w="30px"
+              >
+                <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+                <Editable.Input fontSize="xs" w="30px" textAlign="right" />
+              </Editable.Root>
+              <Text fontSize="xs" w="8px">%</Text>
+              <IconButton
+                aria-label="Reset count-in volume"
+                size="xs"
+                variant="ghost"
+                onClick={() => setCountInVolume(1)}
+              >
+                🔄
+              </IconButton>
             </HStack>
           )}
-        </HStack>
-
-        <HStack>
-          <Text fontSize="sm">📄 {t('player.layout')}:</Text>
-        </HStack>
-
-        <HStack>
-          <Button onClick={() => handleExport('gp')} disabled={!isReadyForPlayback}>💾 {t('player.export')}</Button>
-          <Button onClick={() => handlePrint()} disabled={!isReadyForPlayback}>🖨️ {t('player.print')}</Button>
-          {onOpenSettings && <Button onClick={onOpenSettings}>⚙️ Settings</Button>}
         </HStack>
       </HStack>
     </VStack>

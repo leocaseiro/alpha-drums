@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useI18n } from '@/app/i18n';
-import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup } from '@chakra-ui/react';
+import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup, Editable, IconButton } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { Tooltip } from '@/components/ui/Tooltip';
 
@@ -11,10 +11,12 @@ export interface TrackItemProps {
   api: alphaTab.AlphaTabApi;
   track: alphaTab.model.Track;
   isSelected: boolean;
+  isSingleTrackMode?: boolean;
   onToggleShow?: (track: alphaTab.model.Track) => void;
+  onShowOnlyTrack?: (track: alphaTab.model.Track) => void;
 }
 
-export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, onToggleShow }) => {
+export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, isSingleTrackMode, onToggleShow, onShowOnlyTrack }) => {
   const { t } = useI18n();
   const [isMute, setMute] = useState(track.playbackInfo.isMute);
   const [isSolo, setSolo] = useState(track.playbackInfo.isSolo);
@@ -44,7 +46,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
     if (api && track) {
       try {
         let newProfile = alphaTab.StaveProfile.Score; // Default fallback
-        
+
         if (showStandardNotation && showTablature) {
           newProfile = alphaTab.StaveProfile.ScoreTab;
         } else if (showStandardNotation) {
@@ -52,13 +54,13 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
         } else if (showTablature) {
           newProfile = alphaTab.StaveProfile.Tab;
         }
-        
+
         // Update slash and numbered notation on all staves of this track
         track.staves.forEach((stave) => {
           stave.showSlash = showSlash;
           stave.showNumbered = showNumbered;
         });
-        
+
         api.settings.display.staveProfile = newProfile;
         api.updateSettings();
         api.render();
@@ -87,12 +89,34 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
   };
 
   return (
-    <Box borderWidth="1px" borderRadius="md" p={3} mb={2} bg="white" _hover={{ shadow: 'sm', borderColor: 'teal.400' }} borderColor={isSelected ? 'teal.400' : 'gray.200'}>
+    <Box
+      borderWidth="1px"
+      borderRadius="md"
+      p={3}
+      mb={2}
+      bg="white"
+      _hover={{ shadow: 'sm', borderColor: 'teal.400' }}
+      borderColor={isSelected ? 'teal.400' : 'gray.200'}
+      w="full"
+    >
       <HStack gap={2} mb={2} align="center">
         <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
-        <Text flex="1" fontWeight="medium">{track.name}</Text>
+        <Text flex="1" fontWeight="medium" fontSize="sm" textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap">{track.name}</Text>
+        {onShowOnlyTrack && (
+          <Tooltip content={isSingleTrackMode ? 'Already in single track mode' : 'Show only this track'} showArrow>
+            <IconButton
+              aria-label="Show only this track"
+              size="xs"
+              variant="ghost"
+              onClick={() => onShowOnlyTrack(track)}
+              disabled={isSingleTrackMode}
+            >
+              🎯
+            </IconButton>
+          </Tooltip>
+        )}
       </HStack>
-      <VStack align="stretch" gap={2}>
+      <VStack align="stretch" gap={3} w="full">
         <HStack gap={4} justify="center">
           <Tooltip ids={{ trigger: `mute-${track.index}` }} content={isMute ? 'Unmute' : 'Mute'}>
             <Switch.Root ids={{ root: `mute-${track.index}` }} checked={!isMute} onCheckedChange={() => {
@@ -166,15 +190,15 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               </Button>
             </Tooltip>
             <Tooltip content="Toggle slash notation" showArrow>
-              <Button 
+              <Button
                 variant={showSlash ? 'surface' : 'outline'}
                 colorScheme="teal"
                 onClick={() => {
                   setShowSlash(!showSlash);
-                  toaster.create({ 
-                    type: 'info', 
-                    title: 'Notation Changed', 
-                    description: `Track "${track.name}" ${!showSlash ? 'enabled' : 'disabled'} slash notation` 
+                  toaster.create({
+                    type: 'info',
+                    title: 'Notation Changed',
+                    description: `Track "${track.name}" ${!showSlash ? 'enabled' : 'disabled'} slash notation`
                   });
                 }}
               >
@@ -182,15 +206,15 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               </Button>
             </Tooltip>
             <Tooltip content="Toggle numbers" showArrow>
-              <Button 
+              <Button
                 variant={showNumbered ? 'surface' : 'outline'}
                 colorScheme="teal"
                 onClick={() => {
                   setShowNumbered(!showNumbered);
-                  toaster.create({ 
-                    type: 'info', 
-                    title: 'Notation Changed', 
-                    description: `Track "${track.name}" ${!showNumbered ? 'enabled' : 'disabled'} numbers` 
+                  toaster.create({
+                    type: 'info',
+                    title: 'Notation Changed',
+                    description: `Track "${track.name}" ${!showNumbered ? 'enabled' : 'disabled'} numbers`
                   });
                 }}
               >
@@ -200,9 +224,16 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
           </ButtonGroup>
         </VStack>
 
-        <HStack>
-          <Text w="20px" textAlign="center">🔊</Text>
-          <Slider.Root min={0} max={16} value={[volume]} onValueChange={(details) => setVolume(details.value[0])} flex="1">
+        <HStack align="center" gap={2} w="full">
+          <Text w="20px" textAlign="center" flexShrink={0}>🔊</Text>
+          <Slider.Root
+            min={0}
+            max={16}
+            value={[volume]}
+            onValueChange={(details) => setVolume(details.value[0])}
+            flex="1"
+            minW="60px"
+          >
             <Slider.Control>
               <Slider.Track>
                 <Slider.Range />
@@ -210,7 +241,27 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, on
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
-          <Text w="40px" textAlign="center" fontSize="sm">{Math.round((volume / 16) * 100)}%</Text>
+          <Editable.Root
+            value={String(Math.round((volume / 16) * 100))}
+            onValueChange={(details) => {
+              const value = Math.max(0, Math.min(100, Number(details.value) || 100));
+              setVolume((value / 100) * 16);
+            }}
+            w="30px"
+          >
+            <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
+            <Editable.Input fontSize="xs" w="30px" textAlign="right" />
+          </Editable.Root>
+          <Text fontSize="xs" flexShrink={0} w="8px">%</Text>
+          <IconButton
+            aria-label="Reset volume"
+            size="xs"
+            variant="ghost"
+            onClick={() => setVolume(16)}
+            flexShrink={0}
+          >
+            🔄
+          </IconButton>
         </HStack>
       </VStack>
     </Box>

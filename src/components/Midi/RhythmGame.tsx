@@ -47,6 +47,7 @@ interface ExpectedNote {
   isHit: boolean;
   hitType?: 'perfect' | 'good' | 'early' | 'late' | 'miss';
   hitTime?: number;
+  modelNote?: alphaTab.model.Note;
 }
 
 interface RhythmGameProps {
@@ -114,6 +115,7 @@ export const RhythmGame = React.forwardRef<
   );
   const playbackTimeMsRef = useRef<number>(0);
   const msPerTickRef = useRef<number>(0);
+  const processedNoteIdsRef = useRef<Set<string>>(new Set());
 
   // Notify parent of game state changes
   useEffect(() => {
@@ -142,7 +144,7 @@ export const RhythmGame = React.forwardRef<
 
   // Extract expected notes from the score
   useEffect(() => {
-    if (!score || !api) return;
+    if (!score) return;
 
     const notes: ExpectedNote[] = [];
 
@@ -283,6 +285,7 @@ export const RhythmGame = React.forwardRef<
                           startUnit: 'tick',
                           startTick: startTick,
                           isHit: false,
+                          modelNote: note,
                         };
 
                         notes.push(expectedNote);
@@ -337,7 +340,7 @@ export const RhythmGame = React.forwardRef<
       onExpectedNotesChange?.(sorted.map(n => ({ id: n.id, note: n.note, startTime: toMs(n) })));
       setGameState(prev => ({ ...prev, totalNotes: notes.length }));
     }
-  }, [score, api, tracksKey, visibleTracks, onExpectedNotesChange]);
+  }, [score, tracksKey]);
 
   // Track AlphaTab playback time (ms) and ms-per-tick
   useAlphaTabEvent(api ?? null, 'playerPositionChanged', (e) => {
@@ -362,6 +365,37 @@ export const RhythmGame = React.forwardRef<
     };
 
     initStorage();
+  }, []);
+
+  // helper kept for future use
+  // const _getStartMs = (n: ExpectedNote) => (n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime);
+
+  const colorNote = useCallback((modelNote: alphaTab.model.Note | undefined, hex: string) => {
+    try {
+      if (!modelNote) return;
+      if (!modelNote.style) {
+        modelNote.style = new alphaTab.model.NoteStyle();
+      }
+      const color = alphaTab.model.Color.fromJson(hex);
+      modelNote.style.colors.set(alphaTab.model.NoteSubElement.StandardNotationNoteHead, color);
+      // Optionally also color slash note head if used
+      try { modelNote.style.colors.set(alphaTab.model.NoteSubElement.SlashNoteHead as unknown as number, color); } catch {}
+    } catch (e) {
+      console.warn('Failed to color note', e);
+    }
+  }, []);
+
+  // Reset any custom color applied to the given note
+  const resetNoteColor = useCallback((modelNote: alphaTab.model.Note | undefined) => {
+    try {
+      if (!modelNote) return;
+      if (modelNote.style && modelNote.style.colors) {
+        try { modelNote.style.colors.delete(alphaTab.model.NoteSubElement.StandardNotationNoteHead); } catch {}
+        try { modelNote.style.colors.delete(alphaTab.model.NoteSubElement.SlashNoteHead as unknown as number); } catch {}
+      }
+    } catch (e) {
+      console.warn('Failed to reset note color', e);
+    }
   }, []);
 
   // Process MIDI input during gameplay
@@ -444,6 +478,24 @@ export const RhythmGame = React.forwardRef<
           closestNote.isHit = true;
           closestNote.hitType = hitType;
           closestNote.hitTime = hitTimeMs;
+          processedNoteIdsRef.current.add(closestNote.id);
+
+          // Also mark same-time same-pitch duplicates as hit to prevent later miss recolor
+          const siblingWindow = TIMING_WINDOWS.late; // consider within the same late window
+          const siblings = expectedNotes.filter(n =>
+            !n.isHit && n !== closestNote && n.note === hitNote &&
+            Math.abs(((n.startUnit === 'tick' ? n.startTime * (msPerTickRef.current || 0) : n.startTime)) - closestStartMs) <= siblingWindow
+          );
+          for (const sib of siblings) {
+            sib.isHit = true;
+            sib.hitType = hitType;
+            sib.hitTime = hitTimeMs;
+            colorNote(sib.modelNote, '#22c55e');
+            processedNoteIdsRef.current.add(sib.id);
+          }
+
+          // Color the note green on correct hit
+          colorNote(closestNote.modelNote, '#22c55e');
 
           // Update game state
           setGameState(prev => {
@@ -461,6 +513,9 @@ export const RhythmGame = React.forwardRef<
             const { accuracy, stars } = calculateStats(newState);
             return { ...newState, accuracy, stars };
           });
+
+          // Re-render to apply style change
+          try { api?.render(); } catch {}
 
           debugLog.log('✅ CORRECT NOTE!', {
             hitNote,
@@ -510,7 +565,7 @@ export const RhythmGame = React.forwardRef<
         }
       }
     }
-  }, [history, gameState.isPlaying, gameState.isSessionActive, expectedNotes, calculateStats, api]);
+  }, [history, gameState.isPlaying, gameState.isSessionActive, expectedNotes, calculateStats, api, colorNote]);
 
   // Check for missed notes (notes that passed their timing window without being hit)
   useEffect(() => {
@@ -521,22 +576,30 @@ export const RhythmGame = React.forwardRef<
 
     const currentGameTime = playbackTimeMsRef.current;
     const missedNotes = expectedNotes.filter(note =>
-      !note.isHit && currentGameTime > (((note.startUnit === 'tick' ? note.startTime * (msPerTickRef.current || 0) : note.startTime)) + TIMING_WINDOWS.late)
+      !note.isHit &&
+      !processedNoteIdsRef.current.has(note.id) &&
+      currentGameTime > (((note.startUnit === 'tick' ? note.startTime * (msPerTickRef.current || 0) : note.startTime)) + TIMING_WINDOWS.late)
     );
 
     if (missedNotes.length > 0) {
       missedNotes.forEach(note => {
+        // skip if already hit (green)
+        if (note.isHit) return;
         note.isHit = true;
         note.hitType = 'miss';
+        // Color the note red on miss
+        colorNote(note.modelNote, '#ef4444');
+        processedNoteIdsRef.current.add(note.id);
       });
 
       setGameState(prev => {
+        const remaining = Math.max(0, prev.totalNotes - (prev.hitNotes + prev.missedNotes));
+        const toAdd = Math.min(missedNotes.length, remaining);
         const newState = {
           ...prev,
-          missedNotes: prev.missedNotes + missedNotes.length,
+          missedNotes: prev.missedNotes + toAdd,
           streak: 0, // Break streak on missed notes
         };
-
         const { accuracy, stars } = calculateStats(newState);
         return { ...newState, accuracy, stars };
       });
@@ -548,8 +611,11 @@ export const RhythmGame = React.forwardRef<
       });
 
       setExpectedNotes([...expectedNotes]);
+
+      // Re-render once after batch coloring
+      try { api?.render(); } catch {}
     }
-  }, [currentTime, gameState.isPlaying, expectedNotes, calculateStats, gameStartTimeRef, api]);
+  }, [currentTime, gameState.isPlaying, expectedNotes, calculateStats, gameStartTimeRef, api, colorNote]);
 
   // Update current time when playing
   useEffect(() => {
@@ -580,12 +646,14 @@ export const RhythmGame = React.forwardRef<
       gameStartTime: gameStartTimeRef.current
     });
 
-    // Reset all notes
+    // Reset all notes: clear hit flags and remove any previous coloring
     expectedNotes.forEach(note => {
       note.isHit = false;
       note.hitType = undefined;
       note.hitTime = undefined;
+      resetNoteColor(note.modelNote);
     });
+    processedNoteIdsRef.current.clear();
 
     const newGameState = {
       isPlaying: true,
@@ -608,9 +676,11 @@ export const RhythmGame = React.forwardRef<
     setGameState(newGameState);
     debugLog.log('Game state set to playing:', newGameState);
 
+    // Re-render score to reflect cleared colors, then start playback
+    try { api.render(); } catch {}
     // Start playback
     api.player?.play();
-  }, [api, score, expectedNotes]);
+  }, [api, score, expectedNotes, resetNoteColor]);
 
   const stopGame = useCallback(async () => {
     // Only pause playback, keep session active so score stays visible

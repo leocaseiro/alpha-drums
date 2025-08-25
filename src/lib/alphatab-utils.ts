@@ -30,19 +30,23 @@ export const openFile = (api: alphaTab.AlphaTabApi, file: File) => {
     return;
   }
 
+  console.log(`Reading file: ${file.name} (${file.size} bytes, type: ${file.type})`);
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const arrayBuffer = e.target?.result as ArrayBuffer;
     if (arrayBuffer) {
       try {
+        console.log(`Loading ${arrayBuffer.byteLength} bytes into AlphaTab`);
         api.load(arrayBuffer);
       } catch (error) {
-        console.error('Failed to load file:', error);
+        console.error('Failed to load file into AlphaTab:', error);
+        // The error will be caught by the 'error' event listener in the component
       }
     }
   };
-  reader.onerror = () => {
-    console.error('Failed to read file');
+  reader.onerror = (error) => {
+    console.error('Failed to read file:', error);
   };
   reader.readAsArrayBuffer(file);
 };

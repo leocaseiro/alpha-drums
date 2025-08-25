@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTabEvent } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
+import { getGuitarProAcceptForPlatform } from '@/lib/fileTypes';
 import {
   HStack,
   VStack,
@@ -344,7 +345,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </HStack>
 
       <HStack gap={3} wrap="wrap">
-        <input type="file" accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx" onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
+        <input type="file" accept={getGuitarProAcceptForPlatform()} onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
         <label htmlFor="file-input" title={t('player.openFile')}>
           <Button as="span">📁</Button>
         </label>

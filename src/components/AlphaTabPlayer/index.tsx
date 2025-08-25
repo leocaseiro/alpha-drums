@@ -19,6 +19,7 @@ import { AlphaTabNoteHighlighter } from '../Midi/AlphaTabNoteHighlighter';
 import { MidiScoreDisplay } from '../Midi/MidiScoreDisplay';
 import { RhythmGame } from '../Midi/RhythmGame';
 import { debugLog } from '@/lib/debug';
+import { isSupportedGuitarProFile, GUITAR_PRO_EXTENSIONS_DISPLAY, getGuitarProAcceptForPlatform, debugFileInfo, isMobilePlatform } from '@/lib/fileTypes';
 
 export const AlphaTabPlayer: React.FC = () => {
   const { t } = useI18n();
@@ -86,6 +87,7 @@ export const AlphaTabPlayer: React.FC = () => {
   }, []);
 
   const [api, element, isApiReady] = useAlphaTab(settingsSetup);
+  const [currentLoadingFile, setCurrentLoadingFile] = useState<File | null>(null);
 
   // Configure scrolling when API becomes ready
   React.useEffect(() => {
@@ -162,7 +164,44 @@ export const AlphaTabPlayer: React.FC = () => {
     setIsLoading(true); // Start loading when score is loaded and rendering begins
     setLoadingProgress(30); // File loaded
     setScore(loadedScore as alphaTab.model.Score);
+    setCurrentLoadingFile(null); // Clear the loading file reference
     toaster.create({ type: 'success', title: t('player.loaded'), description: t('player.readyToPlay') });
+  });
+
+  // Handle AlphaTab errors
+  useAlphaTabEvent(api, 'error', (errorEvent) => {
+    console.error('AlphaTab error:', errorEvent);
+    setIsLoading(false);
+    setLoadingProgress(0);
+
+    // If we were loading a file and it failed, show a helpful error message
+    if (currentLoadingFile) {
+      const fileInfo = debugFileInfo(currentLoadingFile);
+      console.log('Failed file info:', fileInfo);
+
+      // Show user-friendly error based on platform
+      if (isMobilePlatform()) {
+        toaster.create({
+          type: 'error',
+          title: 'Unsupported File Format',
+          description: `This file format is not supported. Please use Guitar Pro (.gp, .gp3, .gp4, .gp5, .gpx), MusicXML (.xml, .musicxml), or Capella/CapXML (.capx)`
+        });
+      } else {
+        toaster.create({
+          type: 'error',
+          title: t('player.error'),
+          description: `Unsupported file type. Allowed: ${GUITAR_PRO_EXTENSIONS_DISPLAY}`
+        });
+      }
+      setCurrentLoadingFile(null);
+    } else {
+      // Generic error
+      toaster.create({
+        type: 'error',
+        title: t('player.error'),
+        description: 'Failed to load the file. Please check the file format and try again.'
+      });
+    }
   });
 
   useAlphaTabEvent(api, 'renderStarted', () => {
@@ -245,10 +284,32 @@ export const AlphaTabPlayer: React.FC = () => {
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log('File input event fired');
     const file = event.target.files?.[0];
-    if (file && api && isApiReady) {
+
+    if (!file) return;
+
+    // On desktop, validate file type strictly
+    // On mobile, let most files through and let AlphaTab handle validation
+    if (!isMobilePlatform() && !isSupportedGuitarProFile(file)) {
+      console.log('File validation failed:', debugFileInfo(file));
+      toaster.create({ type: 'error', title: t('player.error'), description: `Unsupported file type. Allowed: ${GUITAR_PRO_EXTENSIONS_DISPLAY}` });
+      try { event.target.value = ''; } catch {}
+      return;
+    }
+
+    // On mobile, only reject obviously wrong files
+    if (isMobilePlatform() && !isSupportedGuitarProFile(file)) {
+      console.log('File validation failed (mobile):', debugFileInfo(file));
+      toaster.create({ type: 'error', title: 'Invalid File', description: 'This file type is clearly not a music file. Please select a Guitar Pro, MusicXML, or Capella/CapXML file.' });
+      try { event.target.value = ''; } catch {}
+      return;
+    }
+
+    if (api && isApiReady) {
+      setCurrentLoadingFile(file); // Store file reference for error handling
       setIsLoading(true); // Show loading immediately when file is selected
       setLoadingProgress(10); // File selected
       setScore(undefined); // Clear previous score
+      console.log('Loading file:', debugFileInfo(file));
       openFile(api, file);
 
       // Fallback timeout to hide loading overlay if events don't fire
@@ -256,8 +317,9 @@ export const AlphaTabPlayer: React.FC = () => {
         console.log('Fallback timeout - hiding loading overlay');
         setIsLoading(false);
         setLoadingProgress(0);
+        setCurrentLoadingFile(null);
       }, 10000); // 10 seconds timeout
-    } else if (file && (!api || !isApiReady)) {
+    } else {
       console.error('AlphaTab API not ready yet');
       toaster.create({ type: 'error', title: t('player.error'), description: t('player.initializing') });
     }
@@ -351,13 +413,33 @@ export const AlphaTabPlayer: React.FC = () => {
     e.stopPropagation();
     e.preventDefault();
     const files = e.dataTransfer.files;
-    if (files.length === 1 && api && isApiReady) {
+
+    if (files.length !== 1) return;
+
+    const file = files[0];
+
+    // Apply same validation logic as file input
+    if (!isMobilePlatform() && !isSupportedGuitarProFile(file)) {
+      console.log('Drag & drop validation failed:', debugFileInfo(file));
+      toaster.create({ type: 'error', title: t('player.error'), description: `Unsupported file type. Allowed: ${GUITAR_PRO_EXTENSIONS_DISPLAY}` });
+      return;
+    }
+
+    if (isMobilePlatform() && !isSupportedGuitarProFile(file)) {
+      console.log('Drag & drop validation failed (mobile):', debugFileInfo(file));
+      toaster.create({ type: 'error', title: 'Invalid File', description: 'This file type is clearly not a music file. Please select a Guitar Pro, MusicXML, or Capella/CapXML file.' });
+      return;
+    }
+
+    if (api && isApiReady) {
+      setCurrentLoadingFile(file); // Store file reference for error handling
       setIsLoading(true); // Show loading immediately when file is dropped
       setLoadingProgress(10); // File selected
-      toaster.create({ type: 'info', title: t('player.loading'), description: files[0].name });
+      toaster.create({ type: 'info', title: t('player.loading'), description: file.name });
       setScore(undefined); // Clear previous score
-      openFile(api, files[0]);
-    } else if (files.length === 1 && (!api || !isApiReady)) {
+      console.log('Loading dropped file:', debugFileInfo(file));
+      openFile(api, file);
+    } else {
       console.error('AlphaTab API not ready yet');
       toaster.create({ type: 'error', title: t('player.error'), description: t('player.initializing') });
     }
@@ -420,7 +502,7 @@ export const AlphaTabPlayer: React.FC = () => {
             </Text>
             <input
               type="file"
-              accept=".gp,.gp3,.gp4,.gp5,.gpx,.musicxml,.mxml,.xml,.capx"
+              accept={getGuitarProAcceptForPlatform()}
               onChange={handleFileInput}
               style={{ display: 'none' }}
               id="file-input"

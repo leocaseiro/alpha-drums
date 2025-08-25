@@ -1,3 +1,10 @@
+## <small>1.7.1 (2025-08-25)</small>
+
+* Merge pull request #15 from leocaseiro/registry ([20f1cfa](https://github.com/leocaseiro/alpha-drums/commit/20f1cfa)), closes [#15](https://github.com/leocaseiro/alpha-drums/issues/15)
+* Merge pull request #16 from leocaseiro/iOS-gp-files ([63b1c8d](https://github.com/leocaseiro/alpha-drums/commit/63b1c8d)), closes [#16](https://github.com/leocaseiro/alpha-drums/issues/16)
+* fix(file): make sure works on iOS ([fff606c](https://github.com/leocaseiro/alpha-drums/commit/fff606c))
+* chore(npm): force public registry ([b089168](https://github.com/leocaseiro/alpha-drums/commit/b089168))
+
 ## 1.7.0 (2025-08-24)
 
 * Merge pull request #14 from leocaseiro/midi-input ([7acca06](https://github.com/leocaseiro/alpha-drums/commit/7acca06)), closes [#14](https://github.com/leocaseiro/alpha-drums/issues/14)

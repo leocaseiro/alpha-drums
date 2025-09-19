@@ -63,12 +63,12 @@ export const AlphaTabPlayer: React.FC = () => {
     settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
     settings.player.enablePlayer = true;
     settings.player.enableCursor = true;
-    settings.player.enableAnimatedBeatCursor = true;
+    settings.player.enableAnimatedBeatCursor = false; // Disable animation to fix positioning
     settings.player.enableElementHighlighting = true;
     settings.player.enableUserInteraction = true;
 
     // Display configuration
-    settings.display.scale = 0.8;
+    settings.display.scale = 1.0; // Reset scale to 1.0 to fix cursor positioning
     settings.display.layoutMode = alphaTab.LayoutMode.Horizontal;
     settings.display.staveProfile = alphaTab.StaveProfile.ScoreTab;
 
@@ -95,7 +95,7 @@ export const AlphaTabPlayer: React.FC = () => {
       try {
         console.log('Configuring scroll element for alphaTab');
         api.settings.player.scrollElement = viewPortRef.current;
-        api.settings.player.scrollOffsetY = -10;
+        api.settings.player.scrollOffsetY = 0; // Reset to 0 to fix cursor positioning
         api.settings.player.scrollMode = alphaTab.ScrollMode.Continuous;
         api.settings.player.enableCursor = true;
         api.settings.player.enablePlayer = true;

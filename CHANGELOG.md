@@ -1,3 +1,11 @@
+## 1.8.0 (2025-09-19)
+
+* Merge pull request #17 from leocaseiro/player-page ([f95cdea](https://github.com/leocaseiro/alpha-drums/commit/f95cdea)), closes [#17](https://github.com/leocaseiro/alpha-drums/issues/17)
+* Merge pull request #45 from leocaseiro/fix/track-selection ([f9f857d](https://github.com/leocaseiro/alpha-drums/commit/f9f857d)), closes [#45](https://github.com/leocaseiro/alpha-drums/issues/45)
+* fix(Cursor): position now is aligned corrected ([c15b0e5](https://github.com/leocaseiro/alpha-drums/commit/c15b0e5))
+* fix(TrackItem): make sure toggle TrackItem works as expected ([a1229b0](https://github.com/leocaseiro/alpha-drums/commit/a1229b0))
+* feat(player): set player as default page ([717ecaf](https://github.com/leocaseiro/alpha-drums/commit/717ecaf))
+
 ## <small>1.7.1 (2025-08-25)</small>
 
 * Merge pull request #15 from leocaseiro/registry ([20f1cfa](https://github.com/leocaseiro/alpha-drums/commit/20f1cfa)), closes [#15](https://github.com/leocaseiro/alpha-drums/issues/15)

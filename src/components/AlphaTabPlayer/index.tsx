@@ -333,21 +333,40 @@ export const AlphaTabPlayer: React.FC = () => {
   };
 
   const handleToggleTrack = (track: alphaTab.model.Track) => {
-    const newSelectedTracks = new Map(selectedTracks);
-
-    if (newSelectedTracks.has(track.index)) {
-      newSelectedTracks.delete(track.index);
-    } else {
-      newSelectedTracks.set(track.index, track);
-    }
-
-    setSelectedTracks(newSelectedTracks);
+    if (!api) return;
+    
     setSingleTrackMode(null); // Exit single track mode when toggling
 
-    // Update AlphaTab to render only selected tracks
-    if (newSelectedTracks.size > 0) {
-      api?.renderTracks(Array.from(newSelectedTracks.values()));
+    // Work with currently rendered tracks (api.tracks) instead of separate state
+    const currentTracks = api.tracks || [];
+    const isCurrentlyVisible = currentTracks.some(t => t.index === track.index);
+    
+    let newTracks: alphaTab.model.Track[];
+    
+    if (isCurrentlyVisible) {
+      // Remove track
+      newTracks = currentTracks.filter(t => t.index !== track.index);
+      if (newTracks.length === 0) {
+        // Don't allow removing all tracks
+        return;
+      }
+    } else {
+      // Add track
+      newTracks = [...currentTracks, track];
     }
+    
+    // Sort by index to maintain consistent order
+    newTracks.sort((a, b) => a.index - b.index);
+    
+    // Update our selectedTracks state to match
+    const newSelectedTracks = new Map<number, alphaTab.model.Track>();
+    newTracks.forEach((t) => {
+      newSelectedTracks.set(t.index, t);
+    });
+    setSelectedTracks(newSelectedTracks);
+    
+    // Render the tracks
+    api.renderTracks(newTracks);
   };
 
   const handleShowOnlyTrack = (track: alphaTab.model.Track) => {
@@ -571,7 +590,7 @@ export const AlphaTabPlayer: React.FC = () => {
                   key={track.index}
                   api={api!}
                   track={track}
-                  isSelected={selectedTracks.has(track.index)}
+                  isSelected={api!.tracks?.some(t => t.index === track.index) ?? false}
                   isSingleTrackMode={singleTrackMode?.index === track.index}
                   onToggleShow={handleToggleTrack}
                   onShowOnlyTrack={handleShowOnlyTrack}

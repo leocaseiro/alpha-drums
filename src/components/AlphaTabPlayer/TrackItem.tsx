@@ -6,6 +6,7 @@ import { useI18n } from '@/app/i18n';
 import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup, Editable, IconButton } from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { useEffectNoMount } from '@/hooks/useEffectNoMount';
 
 export interface TrackItemProps {
   api: alphaTab.AlphaTabApi;
@@ -26,17 +27,17 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
   const [showSlash, setShowSlash] = useState(false);
   const [showNumbered, setShowNumbered] = useState(false);
 
-  useEffect(() => {
+  useEffectNoMount(() => {
     track.playbackInfo.isMute = isMute;
     api.changeTrackMute([track], isMute);
   }, [api, track, isMute]);
 
-  useEffect(() => {
+  useEffectNoMount(() => {
     track.playbackInfo.isSolo = isSolo;
     api.changeTrackSolo([track], isSolo);
   }, [api, track, isSolo]);
 
-  useEffect(() => {
+  useEffectNoMount(() => {
     track.playbackInfo.volume = volume;
     api.changeTrackVolume([track], volume / 16); // normalize to 0-1
   }, [api, track, volume]);

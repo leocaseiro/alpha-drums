@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.25.0",
-    "@coderline/alphatab": "^1.6.1",
+    "@coderline/alphatab": "^1.6.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "framer-motion": "^12.23.12",

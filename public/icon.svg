@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Alpha Drums">
+  <defs>
+    <linearGradient id="hoop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9A3D" />
+      <stop offset="1" stop-color="#FF2D6F" />
+    </linearGradient>
+    <radialGradient id="head" cx="0.5" cy="0.42" r="0.7">
+      <stop offset="0" stop-color="#FCFAF4" />
+      <stop offset="1" stop-color="#E7E0D0" />
+    </radialGradient>
+    <linearGradient id="stick" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F0CE96" />
+      <stop offset="1" stop-color="#D9A65B" />
+    </linearGradient>
+  </defs>
+
+  <!-- full-bleed background (maskable-safe: motif sits within the centre ~68%) -->
+  <rect width="512" height="512" fill="#0B0B0F" />
+
+  <!-- crossed drumsticks behind the drum; tips poke out at the corners -->
+  <g stroke="url(#stick)" stroke-width="26" stroke-linecap="round">
+    <line x1="100" y1="100" x2="412" y2="412" />
+    <line x1="412" y1="100" x2="100" y2="412" />
+  </g>
+
+  <!-- drum shell / coloured hoop -->
+  <circle cx="256" cy="256" r="150" fill="url(#hoop)" />
+  <!-- drum head -->
+  <circle cx="256" cy="256" r="120" fill="url(#head)" />
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#00000022" stroke-width="6" />
+
+  <!-- tension lugs around the hoop -->
+  <g fill="#0B0B0F">
+    <circle cx="391" cy="256" r="8" />
+    <circle cx="351" cy="351" r="8" />
+    <circle cx="256" cy="391" r="8" />
+    <circle cx="161" cy="351" r="8" />
+    <circle cx="121" cy="256" r="8" />
+    <circle cx="161" cy="161" r="8" />
+    <circle cx="256" cy="121" r="8" />
+    <circle cx="351" cy="161" r="8" />
+  </g>
+
+  <!-- centre port hole -->
+  <circle cx="256" cy="256" r="30" fill="#15151A" />
+  <circle cx="256" cy="256" r="30" fill="none" stroke="#FFFFFF22" stroke-width="3" />
+</svg>

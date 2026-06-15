@@ -2,7 +2,6 @@ import * as alphaTab from '@coderline/alphatab';
 import { IEventEmitter, IEventEmitterOfT } from '@coderline/alphatab';
 import React from 'react';
 
-
 // Resolve basePath configured for GitHub Pages (from next.config.ts)
 const NEXT_PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
@@ -17,8 +16,12 @@ const resolvePublicUrl = (relativePath: string): string => {
 // Ensure AlphaTab resolves worker and font over HTTP (prevents file:// in dev)
 if (typeof window !== 'undefined') {
   try {
-    (alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }).Environment!.scriptFile = '/alphaTab.worker.mjs';
-    (alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }).Environment!.fontDirectory = '/font/';
+    (
+      alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }
+    ).Environment!.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
+    (
+      alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }
+    ).Environment!.fontDirectory = resolvePublicUrl('/font/');
   } catch {
     // ignore if not writable in this build
   }
@@ -83,16 +86,19 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
         scriptFile: settings.core.scriptFile,
         useWorkers: settings.core.useWorkers,
         soundFont: settings.player.soundFont,
-        basePath: NEXT_PUBLIC_BASE_PATH
+        basePath: NEXT_PUBLIC_BASE_PATH,
       });
 
       // Verify worker file is accessible
       if (typeof window !== 'undefined') {
         fetch(settings.core.scriptFile, { method: 'HEAD' })
-          .then(response => {
-            console.log('Worker file accessibility check:', response.status === 200 ? 'OK' : 'FAILED');
+          .then((response) => {
+            console.log(
+              'Worker file accessibility check:',
+              response.status === 200 ? 'OK' : 'FAILED',
+            );
           })
-          .catch(error => {
+          .catch((error) => {
             console.error('Worker file accessibility check failed:', error);
           });
       }
@@ -105,13 +111,17 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
         console.log('Creating AlphaTab API with settings:', {
           scriptFile: settings.core.scriptFile,
           useWorkers: settings.core.useWorkers,
-          fontDirectory: settings.core.fontDirectory
+          fontDirectory: settings.core.fontDirectory,
         });
 
         const alphaTabApi = new alphaTab.AlphaTabApi(elementRef.current, settings);
 
         // Ensure the worker path is correct after creation
-        if (alphaTabApi.settings && alphaTabApi.settings.core && alphaTabApi.settings.core.useWorkers) {
+        if (
+          alphaTabApi.settings &&
+          alphaTabApi.settings.core &&
+          alphaTabApi.settings.core.useWorkers
+        ) {
           alphaTabApi.settings.core.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
           console.log('Forced worker path to:', alphaTabApi.settings.core.scriptFile);
         }
@@ -133,10 +143,12 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
           console.log('AlphaTab initialized, checking API...');
 
           // Check if the API has the required methods and event system
-          if (alphaTabApi &&
-              typeof alphaTabApi.load === 'function' &&
-              alphaTabApi.scoreLoaded &&
-              typeof alphaTabApi.scoreLoaded.on === 'function') {
+          if (
+            alphaTabApi &&
+            typeof alphaTabApi.load === 'function' &&
+            alphaTabApi.scoreLoaded &&
+            typeof alphaTabApi.scoreLoaded.on === 'function'
+          ) {
             setApi(alphaTabApi);
             setIsReady(true);
             console.log('AlphaTab API is ready');
@@ -165,13 +177,16 @@ export const useAlphaTab = (settingsSetup?: (settings: alphaTab.Settings) => voi
 export const useAlphaTabEvent = (
   api: alphaTab.AlphaTabApi | null,
   event: string,
-  handler: (...args: unknown[]) => void
+  handler: (...args: unknown[]) => void,
 ) => {
   React.useEffect(() => {
     if (api) {
       try {
         // Use the proper AlphaTab event system with .on() method
-        const eventEmitter = api[event as keyof alphaTab.AlphaTabApi] as Partial<IEventEmitter> | Partial<IEventEmitterOfT<unknown>> | undefined;
+        const eventEmitter = api[event as keyof alphaTab.AlphaTabApi] as
+          | Partial<IEventEmitter>
+          | Partial<IEventEmitterOfT<unknown>>
+          | undefined;
         if (eventEmitter && typeof eventEmitter.on === 'function') {
           eventEmitter.on(handler);
           return () => {

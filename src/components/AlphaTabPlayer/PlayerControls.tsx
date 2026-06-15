@@ -5,6 +5,7 @@ import * as alphaTab from '@coderline/alphatab';
 import { useAlphaTabEvent } from '@/lib/alphatab-utils';
 import { useI18n } from '@/app/i18n';
 import { getGuitarProAcceptForPlatform } from '@/lib/fileTypes';
+import { getAssetPath } from '@/lib/utils';
 import {
   HStack,
   VStack,
@@ -32,7 +33,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   isGameEnabled = false,
   isPracticeMode = false,
   onGameToggle,
-  onPracticeModeToggle
+  onPracticeModeToggle,
 }) => {
   const { t } = useI18n();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -50,7 +51,10 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   const [zoom, setZoom] = useState(100);
 
   useAlphaTabEvent(api, 'playerStateChanged', (e) => {
-    setIsPlaying((e as unknown as { state: alphaTab.synth.PlayerState }).state === alphaTab.synth.PlayerState.Playing);
+    setIsPlaying(
+      (e as unknown as { state: alphaTab.synth.PlayerState }).state ===
+        alphaTab.synth.PlayerState.Playing,
+    );
   });
 
   useAlphaTabEvent(api, 'playerPositionChanged', (e) => {
@@ -88,8 +92,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   //   console.log('Player position changed event fired', e);
   //   console.log('Player position changed event fired string', JSON.stringify(e));
   // });
-
-
 
   // Check readiness and force enable if we have a score
   useEffect(() => {
@@ -147,7 +149,6 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     }
   }, [api, zoom]);
 
-
   const formatDuration = (milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -172,7 +173,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       if (!api) return;
       if (ev.key === ' ') {
         ev.preventDefault();
-        try { (api.player as unknown as { activate?: () => void })?.activate?.(); } catch {}
+        try {
+          (api.player as unknown as { activate?: () => void })?.activate?.();
+        } catch {}
         api.playPause();
       } else if (ev.key.toLowerCase() === 'l') {
         setIsLooping((v) => !v);
@@ -183,14 +186,14 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       } else if (ev.key === '-') {
         setPlaybackSpeed((s) => Math.max(0.25, Math.round((s - 0.05) * 20) / 20));
       } else if (ev.key.toLowerCase() === 's') {
-        try { api.stop(); } catch {}
+        try {
+          api.stop();
+        } catch {}
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [api]);
-
-
 
   return (
     <VStack bg="gray.50" borderTopWidth="1px" borderColor="gray.200" p={4} gap={4} align="stretch">
@@ -198,7 +201,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         <Text fontFamily="mono" fontSize="sm" color="gray.600" minW="120px">
           {formatDuration(currentTime)} / {formatDuration(endTime)}
         </Text>
-        <Slider.Root min={0} max={100} value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]} onValueChange={handleSeek} flex="1">
+        <Slider.Root
+          min={0}
+          max={100}
+          value={[endTime > 0 ? (currentTime / endTime) * 100 : 0]}
+          onValueChange={handleSeek}
+          flex="1"
+        >
           <Slider.Control>
             <Slider.Track>
               <Slider.Range />
@@ -209,17 +218,49 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </HStack>
 
       <HStack align="center" gap={4}>
-        <IconButton aria-label={t('player.stop')} onClick={() => { try { api.stop(); } catch { setIsPlaying(false); } }} disabled={!isReadyForPlayback}>
+        <IconButton
+          aria-label={t('player.stop')}
+          onClick={() => {
+            try {
+              api.stop();
+            } catch {
+              setIsPlaying(false);
+            }
+          }}
+          disabled={!isReadyForPlayback}
+        >
           ⏹︎
         </IconButton>
-        <IconButton aria-label={isPlaying ? t('player.pause') : t('player.play')} onClick={() => { try { (api.player as unknown as { activate?: () => void })?.activate?.(); if (!api.isReadyForPlayback) { try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf3', false); } catch {} try { api.loadSoundFontFromUrl('/soundfont/sonivox.sf2', false); } catch {} } api.playPause(); } catch { setIsPlaying(!isPlaying); } }} disabled={!isReadyForPlayback} colorScheme="green">
+        <IconButton
+          aria-label={isPlaying ? t('player.pause') : t('player.play')}
+          onClick={() => {
+            try {
+              (api.player as unknown as { activate?: () => void })?.activate?.();
+              if (!api.isReadyForPlayback) {
+                try {
+                  api.loadSoundFontFromUrl(getAssetPath('/soundfont/sonivox.sf3'), false);
+                } catch {}
+                try {
+                  api.loadSoundFontFromUrl(getAssetPath('/soundfont/sonivox.sf2'), false);
+                } catch {}
+              }
+              api.playPause();
+            } catch {
+              setIsPlaying(!isPlaying);
+            }
+          }}
+          disabled={!isReadyForPlayback}
+          colorScheme="green"
+        >
           {isPlaying ? `⏸︎` : `▶︎`}
         </IconButton>
 
         {/* Game Mode Controls */}
         <VStack gap={1} align="center" minW="120px">
           <HStack gap={2} align="center">
-            <Text fontSize="xs" color="gray.600">🎮 Game:</Text>
+            <Text fontSize="xs" color="gray.600">
+              🎮 Game:
+            </Text>
             <Switch.Root
               checked={isGameEnabled}
               onCheckedChange={(details) => onGameToggle?.(details.checked)}
@@ -233,7 +274,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           </HStack>
           {isGameEnabled && (
             <HStack gap={2} align="center">
-              <Text fontSize="xs" color="gray.600">Mode:</Text>
+              <Text fontSize="xs" color="gray.600">
+                Mode:
+              </Text>
               <Switch.Root
                 checked={isPracticeMode}
                 onCheckedChange={(details) => onPracticeModeToggle?.(details.checked)}
@@ -253,14 +296,20 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
         <VStack minW="180px" gap={1} align="stretch">
           <HStack gap={2} align="center">
-            <Text fontSize="xs" color="gray.600">{t('player.speed')}:</Text>
+            <Text fontSize="xs" color="gray.600">
+              {t('player.speed')}:
+            </Text>
             <Editable.Root
-              value={speedMode === 'percentage'
-                ? String(Math.round(playbackSpeed * 100))
-                : baseTempoBpm ? String(Math.round(baseTempoBpm * playbackSpeed)) : '120'
+              value={
+                speedMode === 'percentage'
+                  ? String(Math.round(playbackSpeed * 100))
+                  : baseTempoBpm
+                    ? String(Math.round(baseTempoBpm * playbackSpeed))
+                    : '120'
               }
               onValueChange={(details) => {
-                const inputValue = Number(details.value) || (speedMode === 'percentage' ? 100 : 120);
+                const inputValue =
+                  Number(details.value) || (speedMode === 'percentage' ? 100 : 120);
                 if (speedMode === 'percentage') {
                   const value = Math.max(25, Math.min(200, inputValue));
                   setPlaybackSpeed(value / 100);
@@ -295,9 +344,17 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               🔄
             </IconButton>
           </HStack>
-          <Slider.Root min={0.25} max={2} step={0.05} value={[playbackSpeed]} onValueChange={(details) => setPlaybackSpeed(details.value[0])}>
+          <Slider.Root
+            min={0.25}
+            max={2}
+            step={0.05}
+            value={[playbackSpeed]}
+            onValueChange={(details) => setPlaybackSpeed(details.value[0])}
+          >
             <Slider.Control>
-              <Slider.Track><Slider.Range /></Slider.Track>
+              <Slider.Track>
+                <Slider.Range />
+              </Slider.Track>
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
@@ -305,15 +362,16 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <Text fontSize="xs" color="gray.500" textAlign="center">
               {speedMode === 'percentage'
                 ? `${Math.round(baseTempoBpm * playbackSpeed)} BPM`
-                : `${Math.round(playbackSpeed * 100)}%`
-              }
+                : `${Math.round(playbackSpeed * 100)}%`}
             </Text>
           )}
         </VStack>
 
         <VStack minW="180px" gap={1} align="stretch">
           <HStack gap={2} align="center">
-            <Text fontSize="xs" color="gray.600">🔍 {t('player.zoom')}:</Text>
+            <Text fontSize="xs" color="gray.600">
+              🔍 {t('player.zoom')}:
+            </Text>
             <Editable.Root
               value={String(zoom)}
               onValueChange={(details) => {
@@ -325,7 +383,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
               <Editable.Input fontSize="xs" w="30px" textAlign="right" />
             </Editable.Root>
-            <Text fontSize="xs" color="gray.600" w="10px">%</Text>
+            <Text fontSize="xs" color="gray.600" w="10px">
+              %
+            </Text>
             <IconButton
               aria-label="Reset zoom"
               size="xs"
@@ -335,9 +395,17 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
               🔄
             </IconButton>
           </HStack>
-          <Slider.Root min={25} max={200} step={5} value={[zoom]} onValueChange={(details) => setZoom(details.value[0])}>
+          <Slider.Root
+            min={25}
+            max={200}
+            step={5}
+            value={[zoom]}
+            onValueChange={(details) => setZoom(details.value[0])}
+          >
             <Slider.Control>
-              <Slider.Track><Slider.Range /></Slider.Track>
+              <Slider.Track>
+                <Slider.Range />
+              </Slider.Track>
               <Slider.Thumbs />
             </Slider.Control>
           </Slider.Root>
@@ -345,20 +413,49 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </HStack>
 
       <HStack gap={3} wrap="wrap">
-        <input type="file" accept={getGuitarProAcceptForPlatform()} onChange={onOpenFileClick} style={{ display: 'none' }} id="file-input" />
+        <input
+          type="file"
+          accept={getGuitarProAcceptForPlatform()}
+          onChange={onOpenFileClick}
+          style={{ display: 'none' }}
+          id="file-input"
+        />
         <label htmlFor="file-input" title={t('player.openFile')}>
           <Button as="span">📁</Button>
         </label>
 
-        <Button variant={isLooping ? 'solid' : 'outline'} colorScheme="blue" onClick={() => setIsLooping(!isLooping)} disabled={!isReadyForPlayback}>🔁 {t('player.loop')}</Button>
+        <Button
+          variant={isLooping ? 'solid' : 'outline'}
+          colorScheme="blue"
+          onClick={() => setIsLooping(!isLooping)}
+          disabled={!isReadyForPlayback}
+        >
+          🔁 {t('player.loop')}
+        </Button>
 
         <HStack>
-          <Button variant={isMetronomeActive ? 'solid' : 'outline'} colorScheme="purple" onClick={() => setIsMetronomeActive(!isMetronomeActive)} disabled={!isReadyForPlayback}>🎼 {t('player.metronome')}</Button>
+          <Button
+            variant={isMetronomeActive ? 'solid' : 'outline'}
+            colorScheme="purple"
+            onClick={() => setIsMetronomeActive(!isMetronomeActive)}
+            disabled={!isReadyForPlayback}
+          >
+            🎼 {t('player.metronome')}
+          </Button>
           {isMetronomeActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[metronomeVolume]} onValueChange={(details) => setMetronomeVolume(details.value[0])} w="100px">
+              <Slider.Root
+                min={0}
+                max={1}
+                step={0.1}
+                value={[metronomeVolume]}
+                onValueChange={(details) => setMetronomeVolume(details.value[0])}
+                w="100px"
+              >
                 <Slider.Control>
-                  <Slider.Track><Slider.Range /></Slider.Track>
+                  <Slider.Track>
+                    <Slider.Range />
+                  </Slider.Track>
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
@@ -373,7 +470,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                 <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
                 <Editable.Input fontSize="xs" w="30px" textAlign="right" />
               </Editable.Root>
-              <Text fontSize="xs" w="8px">%</Text>
+              <Text fontSize="xs" w="8px">
+                %
+              </Text>
               <IconButton
                 aria-label="Reset metronome volume"
                 size="xs"
@@ -387,12 +486,28 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         </HStack>
 
         <HStack>
-          <Button variant={isCountInActive ? 'solid' : 'outline'} colorScheme="orange" onClick={() => setIsCountInActive(!isCountInActive)} disabled={!isReadyForPlayback}>⏳ {t('player.countIn')}</Button>
+          <Button
+            variant={isCountInActive ? 'solid' : 'outline'}
+            colorScheme="orange"
+            onClick={() => setIsCountInActive(!isCountInActive)}
+            disabled={!isReadyForPlayback}
+          >
+            ⏳ {t('player.countIn')}
+          </Button>
           {isCountInActive && (
             <HStack>
-              <Slider.Root min={0} max={1} step={0.1} value={[countInVolume]} onValueChange={(details) => setCountInVolume(details.value[0])} w="100px">
+              <Slider.Root
+                min={0}
+                max={1}
+                step={0.1}
+                value={[countInVolume]}
+                onValueChange={(details) => setCountInVolume(details.value[0])}
+                w="100px"
+              >
                 <Slider.Control>
-                  <Slider.Track><Slider.Range /></Slider.Track>
+                  <Slider.Track>
+                    <Slider.Range />
+                  </Slider.Track>
                   <Slider.Thumbs />
                 </Slider.Control>
               </Slider.Root>
@@ -407,7 +522,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                 <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
                 <Editable.Input fontSize="xs" w="30px" textAlign="right" />
               </Editable.Root>
-              <Text fontSize="xs" w="8px">%</Text>
+              <Text fontSize="xs" w="8px">
+                %
+              </Text>
               <IconButton
                 aria-label="Reset count-in volume"
                 size="xs"

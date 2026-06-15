@@ -23,5 +23,8 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "playwright.config.ts", "tests", "src/__tests__"]
+  // src/app/sw.ts is excluded from the app typecheck: it uses the webworker lib
+  // (self: ServiceWorkerGlobalScope), which collides with the app-wide dom/Window
+  // typing. Serwist compiles it independently through its own webpack pass.
+  "exclude": ["node_modules", "playwright.config.ts", "tests", "src/__tests__", "src/app/sw.ts"]
 }

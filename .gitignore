@@ -6,6 +6,12 @@ node_modules/
 out/
 dist/
 build/
+*.tsbuildinfo
+
+# Serwist-generated service worker (emitted into public/ by withSerwist at build time)
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
 
 # system files
 .DS_Store

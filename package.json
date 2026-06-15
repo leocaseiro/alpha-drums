@@ -22,14 +22,12 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
-    "serwist": "serwist inject-manifest",
-    "serwist:dev": "serwist preview",
     "release": "semantic-release",
     "bump:patch": "yarn version --patch && yarn changelog",
     "bump:minor": "yarn version --minor && yarn changelog",
     "bump:major": "yarn version --major && yarn changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "deploy": "GITHUB_PAGES=true NEXT_PUBLIC_BASE_PATH=/alpha-drums yarn build && yarn serwist && gh-pages -d out"
+    "deploy": "GITHUB_PAGES=true NEXT_PUBLIC_BASE_PATH=/alpha-drums yarn build && gh-pages -d out"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.25.0",
@@ -50,7 +48,6 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.4",
     "@semantic-release/npm": "^12.0.2",
-    "@serwist/cli": "^9.0.3",
     "@serwist/next": "^9.0.3",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
@@ -77,6 +74,7 @@
     "playwright": "^1.55.0",
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
+    "serwist": "9.1.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

@@ -1,3 +1,10 @@
+## <small>1.9.1 (2026-06-15)</small>
+
+* Merge pull request #74 from leocaseiro/fix/bump-next-15.5.19 ([8c15aa9](https://github.com/leocaseiro/alpha-drums/commit/8c15aa9)), closes [#74](https://github.com/leocaseiro/alpha-drums/issues/74)
+* Merge pull request #75 from leocaseiro/ci/automerge-minor-label ([d113b19](https://github.com/leocaseiro/alpha-drums/commit/d113b19)), closes [#75](https://github.com/leocaseiro/alpha-drums/issues/75)
+* ci(auto-merge): match Dependabot's automerge-minor label ([47c4d7c](https://github.com/leocaseiro/alpha-drums/commit/47c4d7c))
+* fix(deps): bump next and eslint-config-next to 15.5.19 ([a01acc0](https://github.com/leocaseiro/alpha-drums/commit/a01acc0))
+
 ## 1.9.0 (2026-06-15)
 
 * Fix React Server Components CVE vulnerabilities ([ef11e82](https://github.com/leocaseiro/alpha-drums/commit/ef11e82))

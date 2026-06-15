@@ -5,7 +5,9 @@ const isGithubPages = process.env.GITHUB_PAGES === 'true';
 const basePath = isGithubPages ? '/alpha-drums' : '';
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  // Static HTML export only for GitHub Pages; on Vercel (and others) leave it
+  // undefined so the app runs as a server-rendered (SSR) Next.js app.
+  output: isGithubPages ? 'export' : undefined,
   trailingSlash: true,
   basePath,
   assetPrefix: basePath,

@@ -1,3 +1,13 @@
+## 1.9.0 (2026-06-15)
+
+* Fix React Server Components CVE vulnerabilities ([ef11e82](https://github.com/leocaseiro/alpha-drums/commit/ef11e82))
+* Merge pull request #73 from leocaseiro/vercel/react-server-components-cve-vu-i1ykxm ([4f73572](https://github.com/leocaseiro/alpha-drums/commit/4f73572)), closes [#73](https://github.com/leocaseiro/alpha-drums/issues/73)
+* fix(deps): repoint yarn.lock from Atlassian registry to npmjs.org ([96174a7](https://github.com/leocaseiro/alpha-drums/commit/96174a7))
+* fix(deps): sync yarn.lock with next 15.5.9 security patch ([b8dd770](https://github.com/leocaseiro/alpha-drums/commit/b8dd770))
+* ci(auto-merge): correct dead action ref to pascalgn/automerge-action ([3a731e5](https://github.com/leocaseiro/alpha-drums/commit/3a731e5))
+* ci(auto-merge): wire automerge-action via env vars and write perms ([e1f5926](https://github.com/leocaseiro/alpha-drums/commit/e1f5926))
+* feat(vercel): enable SSR by gating static export to GitHub Pages ([59f7077](https://github.com/leocaseiro/alpha-drums/commit/59f7077))
+
 ## 1.8.0 (2025-09-19)
 
 * Merge pull request #17 from leocaseiro/player-page ([f95cdea](https://github.com/leocaseiro/alpha-drums/commit/f95cdea)), closes [#17](https://github.com/leocaseiro/alpha-drums/issues/17)

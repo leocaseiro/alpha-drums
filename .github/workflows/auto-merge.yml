@@ -16,7 +16,7 @@ jobs:
     if: github.event.pull_request != null
     steps:
       - name: Auto-merge on approval and passing checks
-        uses: pascalgn/merge-action@v0.15.6
+        uses: pascalgn/automerge-action@v0.15.6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           merge_method: squash

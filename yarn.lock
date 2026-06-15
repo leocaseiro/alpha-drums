@@ -1826,11 +1826,6 @@
     serwist "9.1.1"
     zod "4.0.5"
 
-"@serwist/utils@9.5.11":
-  version "9.5.11"
-  resolved "https://registry.yarnpkg.com/@serwist/utils/-/utils-9.5.11.tgz#7c568888db8b243ecea715a6fc078e50a85f8c89"
-  integrity sha512-zqxmwuHqWA3OwN82Wo8gFZ9QBemygJP3cap5JWAOG4UyJZgUZfmBXAXj+IMaD4eKZ/6pqrxHHDZ9uSWZmJ1mXA==
-
 "@serwist/webpack-plugin@9.1.1":
   version "9.1.1"
   resolved "https://registry.npmjs.org/@serwist/webpack-plugin/-/webpack-plugin-9.1.1.tgz"
@@ -8602,14 +8597,6 @@ serwist@9.1.1:
   resolved "https://registry.npmjs.org/serwist/-/serwist-9.1.1.tgz"
   integrity sha512-DGwnsIOUmCNOMMsKzmZ9854iW0L0TNYN/E6AGUdEtDP2ZAOxQm32gIQPL9ZJCrs56eLMwXtfTmWjcgNEl+1Jng==
   dependencies:
-    idb "8.0.3"
-
-serwist@^9.0.3:
-  version "9.5.11"
-  resolved "https://registry.yarnpkg.com/serwist/-/serwist-9.5.11.tgz#c001ce820f9e4acae0ae832f792532c10e3eda55"
-  integrity sha512-Bq6uwJFd4ET60BWI77v3VbazKHv6k7lECOiiCFwKyBu/slaCn0GHJ5L5RfsuJUKrnbD9lYUCDo6sqaKRM5M2vA==
-  dependencies:
-    "@serwist/utils" "9.5.11"
     idb "8.0.3"
 
 set-function-length@^1.2.2:

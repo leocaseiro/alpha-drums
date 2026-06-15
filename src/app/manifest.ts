@@ -1,14 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { getAssetPath } from '@/lib/utils';
+import { THEME_COLOR } from '@/lib/theme';
 
 // Render to a static manifest.webmanifest at build time. Required for the
 // `output: 'export'` (GitHub Pages) build because this route reads the basePath
 // from the environment; the prefix is baked in at build time.
 export const dynamic = 'force-static';
-
-// Dark base shared by the icon background, the splash screen, and the browser
-// theme colour so the launch experience is seamless.
-const THEME_COLOR = '#0B0B0F';
 
 /**
  * Web app manifest, generated so every URL respects the deploy's basePath:

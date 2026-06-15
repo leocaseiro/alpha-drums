@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { getAssetPath } from '@/lib/utils';
+import { THEME_COLOR } from '@/lib/theme';
 import Providers from './providers';
 
 const geistSans = Geist({
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0B0B0F',
+  themeColor: THEME_COLOR,
 };
 
 export default function RootLayout({

@@ -22,11 +22,27 @@ import path from 'node:path';
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(dir, '..', 'public');
 const src = path.join(publicDir, 'icon.svg');
+// Keep in sync with THEME_COLOR in src/lib/theme.ts — this standalone build
+// script can't import the app's TS module.
 const bg = '#0B0B0F';
 
 const rsvg = (args) => execFileSync('rsvg-convert', args, { stdio: 'inherit' });
 const magick = (args) => execFileSync('magick', args, { stdio: 'inherit' });
 const out = (name) => path.join(publicDir, name);
+
+// Preflight: both rasterizers must be installed, or fail with a helpful hint.
+for (const [tool, hint] of [
+  ['rsvg-convert', 'librsvg'],
+  ['magick', 'imagemagick'],
+]) {
+  try {
+    execFileSync(tool, ['--version'], { stdio: 'ignore' });
+  } catch {
+    throw new Error(
+      `Required tool "${tool}" not found — install it (e.g. \`brew install ${hint}\`) and re-run.`,
+    );
+  }
+}
 
 // "any" icons — render the full-bleed source at the target size.
 for (const size of [192, 512]) {
@@ -38,34 +54,40 @@ for (const size of [192, 512]) {
 for (const size of [192, 512]) {
   const inner = Math.round(size * 0.8);
   const tmp = out(`.tmp-maskable-${size}.png`);
-  rsvg(['-w', String(inner), '-h', String(inner), src, '-o', tmp]);
-  magick([
-    '-size',
-    `${size}x${size}`,
-    `xc:${bg}`,
-    tmp,
-    '-gravity',
-    'center',
-    '-composite',
-    out(`icon-${size}-maskable.png`),
-  ]);
-  fs.unlinkSync(tmp);
+  try {
+    rsvg(['-w', String(inner), '-h', String(inner), src, '-o', tmp]);
+    magick([
+      '-size',
+      `${size}x${size}`,
+      `xc:${bg}`,
+      tmp,
+      '-gravity',
+      'center',
+      '-composite',
+      out(`icon-${size}-maskable.png`),
+    ]);
+  } finally {
+    if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+  }
 }
 
 // apple-touch-icon — 180x180, opaque (iOS renders alpha as black, so strip it).
 const appleTmp = out('.tmp-apple.png');
-rsvg(['-w', '180', '-h', '180', src, '-o', appleTmp]);
-magick([
-  appleTmp,
-  '-background',
-  bg,
-  '-flatten',
-  '-alpha',
-  'remove',
-  '-alpha',
-  'off',
-  out('apple-touch-icon.png'),
-]);
-fs.unlinkSync(appleTmp);
+try {
+  rsvg(['-w', '180', '-h', '180', src, '-o', appleTmp]);
+  magick([
+    appleTmp,
+    '-background',
+    bg,
+    '-flatten',
+    '-alpha',
+    'remove',
+    '-alpha',
+    'off',
+    out('apple-touch-icon.png'),
+  ]);
+} finally {
+  if (fs.existsSync(appleTmp)) fs.unlinkSync(appleTmp);
+}
 
 console.log('PWA icons generated in public/.');

@@ -21,7 +21,8 @@ const nextConfig: NextConfig = {
   webpack: (config, { isServer: _isServer }) => {
     // Integrate AlphaTab's WebPack plugin to fix worker/worklet resolution
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // Dynamic require so a missing optional plugin degrades gracefully via the catch.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { AlphaTabWebPackPlugin } = require('@coderline/alphatab/webpack');
       config.plugins = config.plugins || [];
       config.plugins.push(
@@ -58,8 +59,11 @@ const withSerwist = withSerwistInit({
   swDest: 'public/sw.js',
   // Cache extra routes as users navigate via next/link.
   cacheOnNavigation: true,
-  // Reload open clients once connectivity returns.
-  reloadOnOnline: true,
+  // Do NOT force a full page reload when connectivity returns. reloadOnOnline
+  // calls location.reload() on every 'online' event, which would wipe live
+  // playback/edit state on a flaky connection. The offline guarantee is the
+  // cached shell, not live sync, so a reconnect reload buys nothing here.
+  reloadOnOnline: false,
   // Only compile/register the SW in production builds. This keeps `next dev`
   // free of the webpack-based SW (and any Turbopack mismatch) and avoids
   // stale-cache confusion during development; PWA behavior is verified via
@@ -72,6 +76,10 @@ const withSerwist = withSerwistInit({
   // allowlist keeps the AlphaTab worker/worklet scripts, the PWA icons, and the
   // modern Bravura.woff2 (~185KB, used for notation); soundfonts and legacy
   // font formats are fetched + runtime-cached on demand (defaultCache).
+  //
+  // NOTE: anything in public/ NOT matched here is excluded from the precache.
+  // These are flat globs (no `**`), so they match the public/ root only — if you
+  // add a new shell-critical asset (or a public/icons/ subdir), extend this list.
   globPublicPatterns: ['*.mjs', '*.png', 'font/Bravura.woff2'],
   maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
 });

@@ -1,3 +1,12 @@
+## 1.10.0 (2026-06-15)
+
+* Merge pull request #81 from leocaseiro/claude/pedantic-noether-56160e ([7af1dea](https://github.com/leocaseiro/alpha-drums/commit/7af1dea)), closes [#81](https://github.com/leocaseiro/alpha-drums/issues/81)
+* fix(pwa): address code review findings ([eb95e13](https://github.com/leocaseiro/alpha-drums/commit/eb95e13))
+* docs(pwa): add implementation plan for installable offline PWA ([8707527](https://github.com/leocaseiro/alpha-drums/commit/8707527))
+* feat(pwa): add installable app icons (192/512, maskable, apple-touch) ([cf964bb](https://github.com/leocaseiro/alpha-drums/commit/cf964bb))
+* feat(pwa): basePath-aware web manifest and metadata ([e329bf6](https://github.com/leocaseiro/alpha-drums/commit/e329bf6)), closes [#0B0B0](https://github.com/leocaseiro/alpha-drums/issues/0B0B0)
+* feat(pwa): migrate service worker to @serwist/next ([b28bdd9](https://github.com/leocaseiro/alpha-drums/commit/b28bdd9))
+
 ## <small>1.9.1 (2026-06-15)</small>
 
 * Merge pull request #74 from leocaseiro/fix/bump-next-15.5.19 ([8c15aa9](https://github.com/leocaseiro/alpha-drums/commit/8c15aa9)), closes [#74](https://github.com/leocaseiro/alpha-drums/issues/74)

@@ -1,3 +1,18 @@
+## <small>1.10.3 (2026-06-16)</small>
+
+- fix(deps): patch js-yaml, tar, and postcss security advisories (#86) ([f091265](https://github.com/leocaseiro/alpha-drums/commit/f091265)), closes [#86](https://github.com/leocaseiro/alpha-drums/issues/86)
+- chore(deps): bump @babel/core from 7.28.3 to 7.29.7 (#84) ([5cd05f0](https://github.com/leocaseiro/alpha-drums/commit/5cd05f0)), closes [#84](https://github.com/leocaseiro/alpha-drums/issues/84)
+- chore(deps): bump @csstools/css-color-parser from 3.0.10 to 3.1.0 ([4382ae1](https://github.com/leocaseiro/alpha-drums/commit/4382ae1))
+- chore(deps): bump caniuse-lite from 1.0.30001736 to 1.0.30001799 (#66) ([5b6a5e5](https://github.com/leocaseiro/alpha-drums/commit/5b6a5e5)), closes [#66](https://github.com/leocaseiro/alpha-drums/issues/66)
+- chore(deps): bump electron-to-chromium from 1.5.207 to 1.5.372 (#72) ([5e40b66](https://github.com/leocaseiro/alpha-drums/commit/5e40b66)), closes [#72](https://github.com/leocaseiro/alpha-drums/issues/72)
+- chore(deps): bump fast-uri from 3.0.6 to 3.1.2 ([6cf9ecd](https://github.com/leocaseiro/alpha-drums/commit/6cf9ecd))
+- chore(deps): bump flatted from 3.3.3 to 3.4.2 (#85) ([00353ff](https://github.com/leocaseiro/alpha-drums/commit/00353ff)), closes [#85](https://github.com/leocaseiro/alpha-drums/issues/85)
+- chore(deps): bump handlebars from 4.7.8 to 4.7.9 (#76) ([651fa27](https://github.com/leocaseiro/alpha-drums/commit/651fa27)), closes [#76](https://github.com/leocaseiro/alpha-drums/issues/76)
+- chore(deps): bump ip-address from 10.0.1 to 10.2.0 (#80) ([80eb3e8](https://github.com/leocaseiro/alpha-drums/commit/80eb3e8)), closes [#80](https://github.com/leocaseiro/alpha-drums/issues/80)
+- chore(deps): bump lodash from 4.17.21 to 4.18.1 (#78) ([067b2b8](https://github.com/leocaseiro/alpha-drums/commit/067b2b8)), closes [#78](https://github.com/leocaseiro/alpha-drums/issues/78)
+- chore(deps): bump lodash-es from 4.17.21 to 4.18.1 (#79) ([954b821](https://github.com/leocaseiro/alpha-drums/commit/954b821)), closes [#79](https://github.com/leocaseiro/alpha-drums/issues/79)
+- chore(deps): bump magic-string from 0.30.17 to 0.30.21 (#70) ([f89698c](https://github.com/leocaseiro/alpha-drums/commit/f89698c)), closes [#70](https://github.com/leocaseiro/alpha-drums/issues/70)
+
 ## <small>1.10.2 (2026-06-16)</small>
 
 - chore(deps): bump @coderline/alphatab from 1.6.1 to 1.8.3 ([edd936f](https://github.com/leocaseiro/alpha-drums/commit/edd936f))

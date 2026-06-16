@@ -1,3 +1,8 @@
+## <small>1.10.2 (2026-06-16)</small>
+
+- chore(deps): bump @coderline/alphatab from 1.6.1 to 1.8.3 ([edd936f](https://github.com/leocaseiro/alpha-drums/commit/edd936f))
+- fix(alphatab): respect basePath for worker, font, and soundfont URLs ([c8c576a](https://github.com/leocaseiro/alpha-drums/commit/c8c576a))
+
 ## <small>1.10.1 (2026-06-15)</small>
 
 - fix(husky): migrate git hooks to husky v9 so commits are gated ([4df18e4](https://github.com/leocaseiro/alpha-drums/commit/4df18e4))

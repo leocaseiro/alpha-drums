@@ -199,27 +199,41 @@ export const useAlphaTabEvent = (
   event: string,
   handler: (...args: unknown[]) => void,
 ) => {
+  // Keep the latest handler in a ref so the subscription stays stable across
+  // renders. Handlers are defined inline at call sites, so their identity
+  // changes every render; depending on `handler` here would off()/on() the
+  // event on every render. AlphaTab's `scoreLoaded` emitter *replays* its
+  // current value to each new subscriber (fireOnRegister), so re-subscribing
+  // every render re-fired `scoreLoaded` repeatedly — which left the loading
+  // overlay stuck at 30% ("Processing score...") because the last replay reset
+  // isLoading=true after rendering had already finished. Subscribe once per
+  // (api, event) instead and always invoke the current handler via the ref.
+  const handlerRef = React.useRef(handler);
   React.useEffect(() => {
-    if (api) {
-      try {
-        // Use the proper AlphaTab event system with .on() method
-        const eventEmitter = api[event as keyof alphaTab.AlphaTabApi] as
-          | Partial<IEventEmitter>
-          | Partial<IEventEmitterOfT<unknown>>
-          | undefined;
-        if (eventEmitter && typeof eventEmitter.on === 'function') {
-          eventEmitter.on(handler);
-          return () => {
-            if (typeof eventEmitter.off === 'function') {
-              eventEmitter.off(handler);
-            }
-          };
-        } else {
-          console.warn(`Event ${event} not available or not properly initialized`);
-        }
-      } catch (error) {
-        console.error(`Failed to attach event handler for ${event}:`, error);
+    handlerRef.current = handler;
+  });
+
+  React.useEffect(() => {
+    if (!api) return;
+    try {
+      // Use the proper AlphaTab event system with .on() method
+      const eventEmitter = api[event as keyof alphaTab.AlphaTabApi] as
+        | Partial<IEventEmitter>
+        | Partial<IEventEmitterOfT<unknown>>
+        | undefined;
+      if (eventEmitter && typeof eventEmitter.on === 'function') {
+        const stableHandler = (...args: unknown[]) => handlerRef.current(...args);
+        eventEmitter.on(stableHandler);
+        return () => {
+          if (typeof eventEmitter.off === 'function') {
+            eventEmitter.off(stableHandler);
+          }
+        };
+      } else {
+        console.warn(`Event ${event} not available or not properly initialized`);
       }
+    } catch (error) {
+      console.error(`Failed to attach event handler for ${event}:`, error);
     }
-  }, [api, event, handler]);
+  }, [api, event]);
 };

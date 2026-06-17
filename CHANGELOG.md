@@ -1,3 +1,7 @@
+## <small>1.10.4 (2026-06-17)</small>
+
+- fix(alphatab): load web worker via webpack chunk (fixes file:// worker error + WebPack warning) (#87 ([f6aec4c](https://github.com/leocaseiro/alpha-drums/commit/f6aec4c)), closes [#87](https://github.com/leocaseiro/alpha-drums/issues/87)
+
 ## <small>1.10.3 (2026-06-16)</small>
 
 - fix(deps): patch js-yaml, tar, and postcss security advisories (#86) ([f091265](https://github.com/leocaseiro/alpha-drums/commit/f091265)), closes [#86](https://github.com/leocaseiro/alpha-drums/issues/86)

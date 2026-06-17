@@ -1,3 +1,7 @@
+## <small>1.10.5 (2026-06-17)</small>
+
+- fix(player): stop loading overlay sticking at 30% on file load (#88) ([04160c8](https://github.com/leocaseiro/alpha-drums/commit/04160c8)), closes [#88](https://github.com/leocaseiro/alpha-drums/issues/88)
+
 ## <small>1.10.4 (2026-06-17)</small>
 
 - fix(alphatab): load web worker via webpack chunk (fixes file:// worker error + WebPack warning) (#87 ([f6aec4c](https://github.com/leocaseiro/alpha-drums/commit/f6aec4c)), closes [#87](https://github.com/leocaseiro/alpha-drums/issues/87)

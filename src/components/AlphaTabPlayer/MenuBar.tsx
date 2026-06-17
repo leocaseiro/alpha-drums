@@ -1,8 +1,18 @@
 'use client';
 
 import React from 'react';
-import { HStack, Button, Text, MenuRoot, MenuTrigger, MenuContent, MenuItem, MenuSeparator, MenuPositioner, Portal } from '@chakra-ui/react';
-import { useI18n } from '@/app/i18n';
+import {
+  HStack,
+  Button,
+  Text,
+  MenuRoot,
+  MenuTrigger,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuPositioner,
+  Portal,
+} from '@chakra-ui/react';
 import * as alphaTab from '@coderline/alphatab';
 import I18nSwitcher from '@/app/I18nSwitcher';
 
@@ -17,18 +27,16 @@ export interface MenuBarProps {
   onOpenMidiGame?: () => void;
 }
 
-export const MenuBar: React.FC<MenuBarProps> = ({ 
-  api, 
-  score, 
-  onOpenFile, 
-  onOpenSettings, 
+export const MenuBar: React.FC<MenuBarProps> = ({
+  api,
+  score,
+  onOpenFile,
+  onOpenSettings,
   onToggleTrackSidebar,
   onOpenMidiSettings,
   onOpenMidiHistory,
-  onOpenMidiGame
+  onOpenMidiGame,
 }) => {
-  const { t } = useI18n();
-
   const handleExport = (format: 'gp' | 'midi' | 'xml' | 'print') => {
     if (!api || !score) return;
 
@@ -53,12 +61,12 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   };
 
   return (
-    <HStack 
-      bg="gray.50" 
-      borderBottomWidth="1px" 
-      borderColor="gray.200" 
-      px={4} 
-      py={2} 
+    <HStack
+      bg="gray.50"
+      borderBottomWidth="1px"
+      borderColor="gray.200"
+      px={4}
+      py={2}
       justify="space-between"
       align="center"
     >
@@ -74,7 +82,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
       </HStack>
 
       <HStack gap={2}>
-        <MenuRoot positioning={{ placement: "bottom-start" }}>
+        <MenuRoot positioning={{ placement: 'bottom-start' }}>
           <MenuTrigger asChild>
             <Button variant="outline" size="sm">
               📁 File
@@ -90,7 +98,11 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 <MenuItem value="export-gp" onClick={() => handleExport('gp')} disabled={!score}>
                   💾 Export as Guitar Pro
                 </MenuItem>
-                <MenuItem value="export-midi" onClick={() => handleExport('midi')} disabled={!score}>
+                <MenuItem
+                  value="export-midi"
+                  onClick={() => handleExport('midi')}
+                  disabled={!score}
+                >
                   🎵 Export as MIDI
                 </MenuItem>
                 <MenuItem value="export-xml" onClick={() => handleExport('xml')} disabled={!score}>
@@ -105,7 +117,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           </Portal>
         </MenuRoot>
 
-        <MenuRoot positioning={{ placement: "bottom-start" }}>
+        <MenuRoot positioning={{ placement: 'bottom-start' }}>
           <MenuTrigger asChild>
             <Button variant="outline" size="sm">
               👁️ View
@@ -122,7 +134,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           </Portal>
         </MenuRoot>
 
-        <MenuRoot positioning={{ placement: "bottom-start" }}>
+        <MenuRoot positioning={{ placement: 'bottom-start' }}>
           <MenuTrigger asChild>
             <Button variant="outline" size="sm">
               🎹 MIDI
@@ -131,10 +143,18 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           <Portal>
             <MenuPositioner>
               <MenuContent>
-                <MenuItem value="midi-settings" onClick={onOpenMidiSettings} disabled={!onOpenMidiSettings}>
+                <MenuItem
+                  value="midi-settings"
+                  onClick={onOpenMidiSettings}
+                  disabled={!onOpenMidiSettings}
+                >
                   ⚙️ MIDI Settings
                 </MenuItem>
-                <MenuItem value="midi-history" onClick={onOpenMidiHistory} disabled={!onOpenMidiHistory}>
+                <MenuItem
+                  value="midi-history"
+                  onClick={onOpenMidiHistory}
+                  disabled={!onOpenMidiHistory}
+                >
                   📝 MIDI History
                 </MenuItem>
                 <MenuItem value="midi-game" onClick={onOpenMidiGame} disabled={!onOpenMidiGame}>

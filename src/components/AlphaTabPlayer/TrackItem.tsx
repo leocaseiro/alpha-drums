@@ -2,8 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import * as alphaTab from '@coderline/alphatab';
-import { useI18n } from '@/app/i18n';
-import { Box, HStack, VStack, Text, Slider, Switch, Button, ButtonGroup, Editable, IconButton } from '@chakra-ui/react';
+import {
+  Box,
+  HStack,
+  VStack,
+  Text,
+  Slider,
+  Switch,
+  Button,
+  ButtonGroup,
+  Editable,
+  IconButton,
+} from '@chakra-ui/react';
 import { toaster } from '@/app/toaster';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { useEffectNoMount } from '@/hooks/useEffectNoMount';
@@ -17,8 +27,14 @@ export interface TrackItemProps {
   onShowOnlyTrack?: (track: alphaTab.model.Track) => void;
 }
 
-export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, isSingleTrackMode, onToggleShow, onShowOnlyTrack }) => {
-  const { t } = useI18n();
+export const TrackItem: React.FC<TrackItemProps> = ({
+  api,
+  track,
+  isSelected,
+  isSingleTrackMode,
+  onToggleShow,
+  onShowOnlyTrack,
+}) => {
   const [isMute, setMute] = useState(track.playbackInfo.isMute);
   const [isSolo, setSolo] = useState(track.playbackInfo.isSolo);
   const [volume, setVolume] = useState(track.playbackInfo.volume);
@@ -84,7 +100,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
       toaster.create({
         type: 'info',
         title: 'Track Visibility',
-        description: `Track "${track.name}" ${details.checked ? 'shown' : 'hidden'}`
+        description: `Track "${track.name}" ${details.checked ? 'shown' : 'hidden'}`,
       });
     }
   };
@@ -101,10 +117,24 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
       w="full"
     >
       <HStack gap={2} mb={2} align="center">
-        <Text fontSize="lg" w="24px" textAlign="center">{getTrackIcon()}</Text>
-        <Text flex="1" fontWeight="medium" fontSize="sm" textOverflow="ellipsis" overflow="hidden" whiteSpace="nowrap">{track.name}</Text>
+        <Text fontSize="lg" w="24px" textAlign="center">
+          {getTrackIcon()}
+        </Text>
+        <Text
+          flex="1"
+          fontWeight="medium"
+          fontSize="sm"
+          textOverflow="ellipsis"
+          overflow="hidden"
+          whiteSpace="nowrap"
+        >
+          {track.name}
+        </Text>
         {onShowOnlyTrack && (
-          <Tooltip content={isSingleTrackMode ? 'Already in single track mode' : 'Show only this track'} showArrow>
+          <Tooltip
+            content={isSingleTrackMode ? 'Already in single track mode' : 'Show only this track'}
+            showArrow
+          >
             <IconButton
               aria-label="Show only this track"
               size="xs"
@@ -120,10 +150,18 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
       <VStack align="stretch" gap={3} w="full">
         <HStack gap={4} justify="center">
           <Tooltip ids={{ trigger: `mute-${track.index}` }} content={isMute ? 'Unmute' : 'Mute'}>
-            <Switch.Root ids={{ root: `mute-${track.index}` }} checked={!isMute} onCheckedChange={() => {
-              setMute(v => !v);
-              toaster.create({ type: 'info', title: 'Track Mute', description: `Track "${track.name}" ${!isMute ? 'muted' : 'unmuted'}` });
-            }}>
+            <Switch.Root
+              ids={{ root: `mute-${track.index}` }}
+              checked={!isMute}
+              onCheckedChange={() => {
+                setMute((v) => !v);
+                toaster.create({
+                  type: 'info',
+                  title: 'Track Mute',
+                  description: `Track "${track.name}" ${!isMute ? 'muted' : 'unmuted'}`,
+                });
+              }}
+            >
               <Switch.HiddenInput />
               <Switch.Control>
                 <Switch.Indicator fallback={<span>🔇</span>}>
@@ -132,11 +170,22 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
               </Switch.Control>
             </Switch.Root>
           </Tooltip>
-          <Tooltip ids={{ trigger: `solo-${track.index}` }} content={isSolo ? 'Listen with all tracks' : 'Listen solo'}>
-            <Switch.Root ids={{ root: `solo-${track.index}` }} checked={isSolo} onCheckedChange={() => {
-              setSolo(v => !v);
-              toaster.create({ type: 'info', title: 'Track Solo', description: `Track "${track.name}" ${!isSolo ? 'soloed' : 'unsoloed'}` });
-            }}>
+          <Tooltip
+            ids={{ trigger: `solo-${track.index}` }}
+            content={isSolo ? 'Listen with all tracks' : 'Listen solo'}
+          >
+            <Switch.Root
+              ids={{ root: `solo-${track.index}` }}
+              checked={isSolo}
+              onCheckedChange={() => {
+                setSolo((v) => !v);
+                toaster.create({
+                  type: 'info',
+                  title: 'Track Solo',
+                  description: `Track "${track.name}" ${!isSolo ? 'soloed' : 'unsoloed'}`,
+                });
+              }}
+            >
               <Switch.HiddenInput />
               <Switch.Control>
                 <Switch.Indicator fallback={<span>📢</span>}>
@@ -145,8 +194,15 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
               </Switch.Control>
             </Switch.Root>
           </Tooltip>
-          <Tooltip ids={{ trigger: `show-${track.index}` }} content={isSelected ? 'Hide track' : 'Show track'}>
-            <Switch.Root ids={{ root: `show-${track.index}` }} checked={isSelected} onCheckedChange={handleShowToggle}>
+          <Tooltip
+            ids={{ trigger: `show-${track.index}` }}
+            content={isSelected ? 'Hide track' : 'Show track'}
+          >
+            <Switch.Root
+              ids={{ root: `show-${track.index}` }}
+              checked={isSelected}
+              onCheckedChange={handleShowToggle}
+            >
               <Switch.HiddenInput />
               <Switch.Control>
                 <Switch.Indicator fallback={<span>🫥</span>}>
@@ -167,7 +223,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
                   toaster.create({
                     type: 'info',
                     title: 'Notation Changed',
-                    description: `Track "${track.name}" ${!showStandardNotation ? 'enabled' : 'disabled'} standard notation`
+                    description: `Track "${track.name}" ${!showStandardNotation ? 'enabled' : 'disabled'} standard notation`,
                   });
                 }}
               >
@@ -183,7 +239,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
                   toaster.create({
                     type: 'info',
                     title: 'Notation Changed',
-                    description: `Track "${track.name}" ${!showTablature ? 'enabled' : 'disabled'} tablature`
+                    description: `Track "${track.name}" ${!showTablature ? 'enabled' : 'disabled'} tablature`,
                   });
                 }}
               >
@@ -199,7 +255,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
                   toaster.create({
                     type: 'info',
                     title: 'Notation Changed',
-                    description: `Track "${track.name}" ${!showSlash ? 'enabled' : 'disabled'} slash notation`
+                    description: `Track "${track.name}" ${!showSlash ? 'enabled' : 'disabled'} slash notation`,
                   });
                 }}
               >
@@ -215,7 +271,7 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
                   toaster.create({
                     type: 'info',
                     title: 'Notation Changed',
-                    description: `Track "${track.name}" ${!showNumbered ? 'enabled' : 'disabled'} numbers`
+                    description: `Track "${track.name}" ${!showNumbered ? 'enabled' : 'disabled'} numbers`,
                   });
                 }}
               >
@@ -226,7 +282,9 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
         </VStack>
 
         <HStack align="center" gap={2} w="full">
-          <Text w="20px" textAlign="center" flexShrink={0}>🔊</Text>
+          <Text w="20px" textAlign="center" flexShrink={0}>
+            🔊
+          </Text>
           <Slider.Root
             min={0}
             max={16}
@@ -253,7 +311,9 @@ export const TrackItem: React.FC<TrackItemProps> = ({ api, track, isSelected, is
             <Editable.Preview fontSize="xs" w="30px" textAlign="right" />
             <Editable.Input fontSize="xs" w="30px" textAlign="right" />
           </Editable.Root>
-          <Text fontSize="xs" flexShrink={0} w="8px">%</Text>
+          <Text fontSize="xs" flexShrink={0} w="8px">
+            %
+          </Text>
           <IconButton
             aria-label="Reset volume"
             size="xs"

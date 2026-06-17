@@ -14,6 +14,21 @@ const eslintConfig = [
     ignores: ["node_modules/", ".next/", "build/", "dist/", "out/"],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // Treat identifiers prefixed with `_` as intentionally unused (e.g.
+      // placeholder callback args), matching the convention already used in
+      // the codebase.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

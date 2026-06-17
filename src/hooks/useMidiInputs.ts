@@ -26,8 +26,8 @@ interface UseMidiInputsOptions {
 }
 
 export function useMidiInputs(options: UseMidiInputsOptions = {}) {
-  const { onMidiMessage, enableLogging = false, autoConnect = true } = options;
-  
+  const { onMidiMessage, enableLogging = false } = options;
+
   const [devices, setDevices] = useState<MidiInputDevice[]>([]);
   const [connectedDevices, setConnectedDevices] = useState<Set<string>>(new Set());
   const [isSupported, setIsSupported] = useState(false);
@@ -42,7 +42,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
     const channel = status & 0x0f;
 
     let type: MidiMessage['type'] = 'unknown';
-    
+
     switch (command) {
       case 0x80: // Note off
         type = 'noteOff';
@@ -61,34 +61,37 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
       note,
       velocity,
       type,
-      channel
+      channel,
     };
   }, []);
 
   // Handle MIDI message
-  const handleMidiMessage = useCallback((event: MIDIMessageEvent, deviceId: string) => {
-    if (!event.data) return;
-    const message = parseMidiMessage(event.data, event.timeStamp);
-    
-    if (enableLogging) {
-      debugLog.log(`MIDI Input [${deviceId}]:`, {
-        type: message.type,
-        note: message.note,
-        velocity: message.velocity,
-        channel: message.channel,
-        timestamp: message.timestamp
-      });
-    }
+  const handleMidiMessage = useCallback(
+    (event: MIDIMessageEvent, deviceId: string) => {
+      if (!event.data) return;
+      const message = parseMidiMessage(event.data, event.timeStamp);
 
-    onMidiMessage?.(message, deviceId);
-  }, [parseMidiMessage, onMidiMessage, enableLogging]);
+      if (enableLogging) {
+        debugLog.log(`MIDI Input [${deviceId}]:`, {
+          type: message.type,
+          note: message.note,
+          velocity: message.velocity,
+          channel: message.channel,
+          timestamp: message.timestamp,
+        });
+      }
+
+      onMidiMessage?.(message, deviceId);
+    },
+    [parseMidiMessage, onMidiMessage, enableLogging],
+  );
 
   // Refresh devices list
   const refreshDevices = useCallback(() => {
     if (!midiAccess) return;
 
     const deviceList: MidiInputDevice[] = [];
-    
+
     midiAccess.inputs.forEach((input) => {
       deviceList.push({
         id: input.id,
@@ -96,7 +99,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
         manufacturer: input.manufacturer || 'Unknown',
         state: input.state,
         connection: input.connection,
-        input
+        input,
       });
     });
 
@@ -104,56 +107,62 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
   }, [midiAccess]);
 
   // Connect to a device
-  const connectDevice = useCallback((deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId);
-    if (!device) return false;
+  const connectDevice = useCallback(
+    (deviceId: string) => {
+      const device = devices.find((d) => d.id === deviceId);
+      if (!device) return false;
 
-    try {
-      device.input.onmidimessage = (event: MIDIMessageEvent) => {
-        handleMidiMessage(event, deviceId);
-      };
+      try {
+        device.input.onmidimessage = (event: MIDIMessageEvent) => {
+          handleMidiMessage(event, deviceId);
+        };
 
-      setConnectedDevices(prev => new Set(prev).add(deviceId));
-      
-      if (enableLogging) {
-        console.log(`Connected to MIDI device: ${device.name}`);
+        setConnectedDevices((prev) => new Set(prev).add(deviceId));
+
+        if (enableLogging) {
+          console.log(`Connected to MIDI device: ${device.name}`);
+        }
+
+        return true;
+      } catch (err) {
+        console.error('Failed to connect to MIDI device:', err);
+        return false;
       }
-      
-      return true;
-    } catch (err) {
-      console.error('Failed to connect to MIDI device:', err);
-      return false;
-    }
-  }, [devices, handleMidiMessage, enableLogging]);
+    },
+    [devices, handleMidiMessage, enableLogging],
+  );
 
   // Disconnect from a device
-  const disconnectDevice = useCallback((deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId);
-    if (!device) return false;
+  const disconnectDevice = useCallback(
+    (deviceId: string) => {
+      const device = devices.find((d) => d.id === deviceId);
+      if (!device) return false;
 
-    try {
-      device.input.onmidimessage = null;
-      setConnectedDevices(prev => {
-        const next = new Set(prev);
-        next.delete(deviceId);
-        return next;
-      });
-      
-      if (enableLogging) {
-        console.log(`Disconnected from MIDI device: ${device.name}`);
+      try {
+        device.input.onmidimessage = null;
+        setConnectedDevices((prev) => {
+          const next = new Set(prev);
+          next.delete(deviceId);
+          return next;
+        });
+
+        if (enableLogging) {
+          console.log(`Disconnected from MIDI device: ${device.name}`);
+        }
+
+        return true;
+      } catch (err) {
+        console.error('Failed to disconnect from MIDI device:', err);
+        return false;
       }
-      
-      return true;
-    } catch (err) {
-      console.error('Failed to disconnect from MIDI device:', err);
-      return false;
-    }
-  }, [devices, enableLogging]);
+    },
+    [devices, enableLogging],
+  );
 
   // Disconnect all devices
   const disconnectAll = useCallback(() => {
     if (midiAccess) {
-      midiAccess.inputs.forEach(input => {
+      midiAccess.inputs.forEach((input) => {
         input.onmidimessage = null;
       });
     }
@@ -180,7 +189,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
 
         const refreshDevicesInternal = () => {
           const deviceList: MidiInputDevice[] = [];
-          
+
           access.inputs.forEach((input) => {
             deviceList.push({
               id: input.id,
@@ -188,7 +197,7 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
               manufacturer: input.manufacturer || 'Unknown',
               state: input.state,
               connection: input.connection,
-              input
+              input,
             });
           });
 
@@ -201,20 +210,20 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
           refreshDevicesInternal();
 
           // Clean up connected devices that have been physically removed
-          setConnectedDevices(prevConnected => {
+          setConnectedDevices((prevConnected) => {
             const currentInputIds = new Set();
-            access.inputs.forEach(input => currentInputIds.add(input.id));
-            
+            access.inputs.forEach((input) => currentInputIds.add(input.id));
+
             const nextConnected = new Set(prevConnected);
             let wasChanged = false;
-            
+
             for (const deviceId of nextConnected) {
               if (!currentInputIds.has(deviceId)) {
                 nextConnected.delete(deviceId);
                 wasChanged = true;
               }
             }
-            
+
             return wasChanged ? nextConnected : prevConnected;
           });
         };
@@ -225,22 +234,30 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to initialize MIDI';
         setError(errorMessage);
         setIsSupported(false);
-        console.error('MIDI initialization failed:', err);
+        // A denied/blocked Web MIDI permission (NotAllowedError) or a browser
+        // without Web MIDI support is an expected condition, not a failure — log
+        // it quietly instead of surfacing a red error on every page load.
+        const isExpected =
+          (err instanceof Error && err.name === 'NotAllowedError') ||
+          errorMessage.includes('not supported');
+        if (isExpected) {
+          console.warn('Web MIDI inputs unavailable:', errorMessage);
+        } else {
+          console.error('MIDI initialization failed:', err);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     initMidi();
-    
+
     return () => {
       if (midiAccess) {
         midiAccess.onstatechange = null;
       }
-    }
+    };
   }, []);
-
-
 
   // Auto-connect logic is now handled by MidiContext to avoid circular dependencies
   // and allow for more complex logic based on user settings.
@@ -261,6 +278,6 @@ export function useMidiInputs(options: UseMidiInputsOptions = {}) {
     connectDevice,
     disconnectDevice,
     disconnectAll,
-    refreshDevices
+    refreshDevices,
   };
 }

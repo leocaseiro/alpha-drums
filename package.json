@@ -44,6 +44,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@coderline/alphatab-webpack": "1.8.3",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/eslintrc": "^3",

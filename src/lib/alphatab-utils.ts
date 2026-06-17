@@ -13,17 +13,37 @@ const resolvePublicUrl = (relativePath: string): string => {
   return `${normalizedBase}${normalizedRel}`;
 };
 
-// Ensure AlphaTab resolves worker and font over HTTP (prevents file:// in dev)
+// Register our own AlphaTab worker/worklet factory.
+//
+// AlphaTab's built-in bootstrap constructs the worker as
+// `new Worker(new URL('./alphaTab.worker.mjs', import.meta.url))` *inside its
+// own pre-bundled module*. Next bakes that `import.meta.url` to a build-time
+// file:// path (e.g. file:///vercel/path0/.../alphaTab.worker.mjs), which the
+// browser refuses to load ("Not allowed to load local resource"). The official
+// @coderline/alphatab-webpack plugin can't rewrite that indirect construction
+// under Next either. By calling the *direct* `new Worker(new URL(...))` form
+// from our own module, Next/webpack recognizes it and emits a real, hashed
+// worker chunk under /_next/ — so the worker loads over HTTP on Vercel and,
+// via webpack's public path, under the basePath on GitHub Pages.
 if (typeof window !== 'undefined') {
   try {
-    (
-      alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }
-    ).Environment!.scriptFile = resolvePublicUrl('/alphaTab.worker.mjs');
-    (
-      alphaTab as unknown as { Environment?: { scriptFile: string; fontDirectory: string } }
-    ).Environment!.fontDirectory = resolvePublicUrl('/font/');
-  } catch {
-    // ignore if not writable in this build
+    alphaTab.Environment.initializeMain(
+      // Worker: let webpack bundle our worker entry into a hashed /_next/ chunk.
+      // The `new Worker(new URL('./relative', import.meta.url))` form is the
+      // pattern Next/webpack recognizes and rewrites to a real served URL.
+      () =>
+        new Worker(new URL('./alphatab.worker.ts', import.meta.url), {
+          type: 'module',
+        }),
+      // Audio worklet: this app forces PlayerOutputMode.WebAudioScriptProcessor
+      // (below + in the player config), so this factory is not exercised. We
+      // point it at the ESM worklet shipped in public/ as a best-effort for any
+      // future AudioWorklet output mode; webpack cannot bundle worklets the way
+      // it bundles workers, so a served URL is the correct shape here.
+      (context) => context.audioWorklet.addModule(resolvePublicUrl('/alphaTab.worklet.mjs')),
+    );
+  } catch (e) {
+    console.error('Failed to register AlphaTab worker factory:', e);
   }
 }
 

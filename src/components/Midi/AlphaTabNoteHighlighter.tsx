@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import * as alphaTab from '@coderline/alphatab';
 import { useMidi } from '@/context/MidiContext';
 
@@ -17,13 +17,17 @@ interface AlphaTabNoteHighlighterProps {
   gameMode?: boolean;
 }
 
-export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: AlphaTabNoteHighlighterProps) {
+export function AlphaTabNoteHighlighter({
+  api,
+  enabled,
+  gameMode = false,
+}: AlphaTabNoteHighlighterProps) {
   const { history } = useMidi();
   const activeHighlights = useRef<Map<string, NoteHighlight>>(new Map());
   const lastProcessedMessageRef = useRef<string>('');
 
   // Find note elements in the DOM that correspond to MIDI notes
-  const findNoteElement = useCallback((midiNote: number): HTMLElement | null => {
+  const findNoteElement = useCallback((_midiNote: number): HTMLElement | null => {
     try {
       // Access the DOM container element directly from the page
       const container = document.querySelector('.at-viewport, .at-surface, [data-alphatab]');
@@ -37,7 +41,7 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
         '.at-percussion-note',
         '[data-note]',
         '.at-beat .at-note-head',
-        '.at-staff .at-note-head'
+        '.at-staff .at-note-head',
       ];
 
       for (const selector of selectors) {
@@ -75,7 +79,7 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
 
     // Apply highlight based on type
     element.style.transition = 'all 0.2s ease';
-    
+
     switch (type) {
       case 'hit':
       case 'perfect':
@@ -132,7 +136,7 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
 
       // Remove any miss markers
       const missMarkers = element.querySelectorAll('.midi-miss-marker');
-      missMarkers.forEach(marker => marker.remove());
+      missMarkers.forEach((marker) => marker.remove());
     } catch (error) {
       console.warn('Error removing highlight:', error);
     }
@@ -143,14 +147,14 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
     if (!enabled || !api || history.length === 0) return;
 
     const latestMessage = history[0];
-    
+
     // Avoid processing the same message twice
     if (latestMessage.id === lastProcessedMessageRef.current) return;
     lastProcessedMessageRef.current = latestMessage.id;
 
     if (latestMessage.message.type === 'noteOn' && latestMessage.message.note !== undefined) {
       const noteElement = findNoteElement(latestMessage.message.note);
-      
+
       if (noteElement) {
         const highlightType = gameMode ? 'hit' : 'hit'; // In game mode, this would be determined by timing accuracy
         const highlight: NoteHighlight = {
@@ -165,10 +169,13 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
         activeHighlights.current.set(latestMessage.id, highlight);
 
         // Remove highlight after a delay
-        setTimeout(() => {
-          unhighlightNote(noteElement);
-          activeHighlights.current.delete(latestMessage.id);
-        }, gameMode ? 1000 : 500); // Longer highlight in game mode
+        setTimeout(
+          () => {
+            unhighlightNote(noteElement);
+            activeHighlights.current.delete(latestMessage.id);
+          },
+          gameMode ? 1000 : 500,
+        ); // Longer highlight in game mode
       }
     }
   }, [history, enabled, api, gameMode, findNoteElement, highlightNote, unhighlightNote]);
@@ -177,7 +184,7 @@ export function AlphaTabNoteHighlighter({ api, enabled, gameMode = false }: Alph
   useEffect(() => {
     return () => {
       // Clear all active highlights
-      activeHighlights.current.forEach(highlight => {
+      activeHighlights.current.forEach((highlight) => {
         unhighlightNote(highlight.noteElement);
       });
       activeHighlights.current.clear();

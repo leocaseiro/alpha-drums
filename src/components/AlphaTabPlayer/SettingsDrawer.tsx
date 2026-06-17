@@ -25,19 +25,22 @@ export interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
-  const [settingsUpdated, setSettingsUpdated] = React.useState(0);
-  
-  const context: SettingsContextProps = React.useMemo(() => ({
-    api: api!,
-    onSettingsUpdated: () => setSettingsUpdated(prev => prev + 1)
-  }), [api]);
+  const [, setSettingsUpdated] = React.useState(0);
+
+  const context: SettingsContextProps = React.useMemo(
+    () => ({
+      api: api!,
+      onSettingsUpdated: () => setSettingsUpdated((prev) => prev + 1),
+    }),
+    [api],
+  );
 
   const settingsGroups = React.useMemo(() => buildSettingsGroups(), []);
 
   // Group settings by category
   const categoryGroups = React.useMemo(() => {
     const groups: Record<string, typeof settingsGroups> = {};
-    settingsGroups.forEach(group => {
+    settingsGroups.forEach((group) => {
       const category = group.title.split(' ▸ ')[0];
       if (!groups[category]) groups[category] = [];
       groups[category].push(group);
@@ -47,13 +50,13 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
 
   const resetToDefaults = () => {
     if (!api) return;
-    
+
     // Reset to default settings
     const defaultSettings = new alphaTab.Settings();
     Object.assign(api.settings, defaultSettings);
     api.updateSettings();
     api.render();
-    setSettingsUpdated(prev => prev + 1);
+    setSettingsUpdated((prev) => prev + 1);
   };
 
   if (!api) {
@@ -114,11 +117,17 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
                       <Tabs.Content key={category} value={category}>
                         <VStack align="stretch" gap={4}>
                           {groups.map((group) => (
-                            <Accordion.Root key={group.title} collapsible defaultValue={[group.title]}>
+                            <Accordion.Root
+                              key={group.title}
+                              collapsible
+                              defaultValue={[group.title]}
+                            >
                               <Accordion.Item value={group.title}>
                                 <Accordion.ItemTrigger>
                                   <Text fontWeight="semibold" fontSize="md">
-                                    {group.title.includes(' ▸ ') ? group.title.split(' ▸ ')[1] : group.title}
+                                    {group.title.includes(' ▸ ')
+                                      ? group.title.split(' ▸ ')[1]
+                                      : group.title}
                                   </Text>
                                   <Accordion.ItemIndicator />
                                 </Accordion.ItemTrigger>
@@ -145,7 +154,9 @@ export function SettingsDrawer({ isOpen, onClose, api }: SettingsDrawerProps) {
             </Drawer.Body>
             <Drawer.Footer>
               <HStack>
-                <Button variant="outline" onClick={onClose}>Close</Button>
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
                 <Button onClick={resetToDefaults}>Reset All</Button>
               </HStack>
             </Drawer.Footer>
